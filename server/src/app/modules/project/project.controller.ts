@@ -16,7 +16,7 @@ const createProject = catchAsync(async (req, res) => {
 });
 
 const updateProject = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const userId = req.user.userId;
   const result = await ProjectServices.updateProject(id, req.body, userId);
 
@@ -29,7 +29,7 @@ const updateProject = catchAsync(async (req, res) => {
 });
 
 const deleteProject = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const userId = req.user.userId;
   const result = await ProjectServices.deleteProject(id, userId);
 
@@ -42,7 +42,7 @@ const deleteProject = catchAsync(async (req, res) => {
 });
 
 const getProjectById = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await ProjectServices.getProjectById(id);
 
   sendResponse(res, {

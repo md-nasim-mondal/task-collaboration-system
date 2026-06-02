@@ -3,7 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { ActivityLogServices } from "./activityLog.service";
 
-const getAllActivityLogs = catchAsync(async (req, res) => {
+const getAllActivityLogs = catchAsync(async (_req, res) => {
   const result = await ActivityLogServices.getAllActivityLogs();
 
   sendResponse(res, {

@@ -16,7 +16,7 @@ const createTask = catchAsync(async (req, res) => {
 });
 
 const updateTask = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const userId = req.user.userId;
   const role = req.user.role;
   const result = await TaskServices.updateTask(id, req.body, userId, role);
@@ -30,7 +30,7 @@ const updateTask = catchAsync(async (req, res) => {
 });
 
 const deleteTask = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const userId = req.user.userId;
   const result = await TaskServices.deleteTask(id, userId);
 
@@ -43,7 +43,7 @@ const deleteTask = catchAsync(async (req, res) => {
 });
 
 const getTaskById = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await TaskServices.getTaskById(id);
 
   sendResponse(res, {
@@ -69,7 +69,7 @@ const getAllTasks = catchAsync(async (req, res) => {
 });
 
 const addComment = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const userId = req.user.userId;
   const { text } = req.body;
   const result = await TaskServices.addComment(id, userId, text);
@@ -83,7 +83,7 @@ const addComment = catchAsync(async (req, res) => {
 });
 
 const addAttachment = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const userId = req.user.userId;
   const { name, url } = req.body;
   const result = await TaskServices.addAttachment(id, userId, name, url);

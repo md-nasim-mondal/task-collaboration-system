@@ -1,6 +1,5 @@
 import httpStatus from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
-import { QueryBuilder } from "../../utils/QueryBuilder";
 import { logActivity } from "../../utils/activityLogger";
 import { sendNotification } from "../../utils/notifier";
 import { Project } from "../project/project.model";

@@ -1,6 +1,5 @@
 import { Project } from "../project/project.model";
 import { Task } from "../task/task.model";
-import { User } from "../user/user.model";
 import { TaskStatus } from "../task/task.interface";
 import { Role } from "../user/user.interface";
 
