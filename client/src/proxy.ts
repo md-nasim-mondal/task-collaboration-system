@@ -6,12 +6,12 @@ const PROTECTED_ROUTES = ["/dashboard", "/projects", "/tasks", "/notifications"]
 // Routes that authenticated users should be redirected away from
 const AUTH_ROUTES = ["/login", "/signup"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("accessToken")?.value;
 
-  const isProtected = PROTECTED_ROUTES.some((route) =>
-    pathname === route || pathname.startsWith(`${route}/`)
+  const isProtected = PROTECTED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname === route);
 
