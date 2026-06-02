@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "View all team assignments, filter tasks by priority or project board, upload attachments, and comment on active work discussion threads.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function TasksPage() {
   let initialTasks = [];
   let initialProjects = [];

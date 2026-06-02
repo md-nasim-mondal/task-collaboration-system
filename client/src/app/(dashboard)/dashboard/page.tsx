@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "View real-time workspace metrics, team workload charts, system warning alerts, and active project pipelines.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   let initialKpis = null;
   let initialProgress = [];

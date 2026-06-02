@@ -8,7 +8,10 @@ import {
   FolderKanban,
   CheckSquare,
   LogOut,
+  Moon,
+  Sun,
 } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -16,6 +19,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -29,14 +33,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
   };
 
   const navLinks = [
-    { name: "Dashboard", href: "/dashboard", icon: <LayoutDashboard size={20} /> },
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutDashboard size={20} />,
+    },
     { name: "Projects", href: "/projects", icon: <FolderKanban size={20} /> },
     { name: "Tasks Center", href: "/tasks", icon: <CheckSquare size={20} /> },
   ];
 
   return (
     <aside
-      className="glass-panel"
+      className='glass-panel'
       style={{
         width: sidebarOpen ? "260px" : "80px",
         display: "flex",
@@ -47,8 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
         zIndex: 100,
         transition: "width var(--transition-normal)",
         backgroundColor: "hsl(var(--bg-secondary))",
-      }}
-    >
+      }}>
       {/* Sidebar Header Logo */}
       <div
         style={{
@@ -57,10 +64,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
           alignItems: "center",
           gap: "12px",
           borderBottom: "1px solid hsl(var(--border-color))",
-        }}
-      >
+        }}>
         <div
-          className="gradient-bg"
+          className='gradient-bg'
           style={{
             width: "36px",
             height: "36px",
@@ -72,19 +78,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
             fontSize: "1.25rem",
             color: "#fff",
             flexShrink: 0,
-          }}
-        >
+          }}>
           C
         </div>
         {sidebarOpen && (
           <span
-            className="gradient-text"
+            className='gradient-text'
             style={{
               fontSize: "1.25rem",
               fontWeight: 800,
               letterSpacing: "-0.5px",
-            }}
-          >
+            }}>
             CollabSphere
           </span>
         )}
@@ -98,10 +102,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
           flexDirection: "column",
           gap: "8px",
           flexGrow: 1,
-        }}
-      >
+        }}>
         {navLinks.map((link) => {
-          const active = pathname === link.href || pathname.startsWith(link.href + "/");
+          const active =
+            pathname === link.href || pathname.startsWith(link.href + "/");
           return (
             <button
               key={link.href}
@@ -114,20 +118,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
                 borderRadius: "10px",
                 cursor: "pointer",
                 width: "100%",
-                color: active ? "hsl(var(--primary))" : "hsl(var(--text-secondary))",
-                backgroundColor: active ? "hsl(var(--primary) / 0.08)" : "transparent",
+                color: active
+                  ? "hsl(var(--primary))"
+                  : "hsl(var(--text-secondary))",
+                backgroundColor: active
+                  ? "hsl(var(--primary) / 0.08)"
+                  : "transparent",
                 fontWeight: active ? 600 : 500,
                 border: "none",
                 textAlign: "left",
-                transition: "background var(--transition-fast), color var(--transition-fast)",
+                transition:
+                  "background var(--transition-fast), color var(--transition-fast)",
               }}
-              className={!active ? "nav-link-hover" : ""}
-            >
+              className={!active ? "nav-link-hover" : ""}>
               {link.icon}
               {sidebarOpen && <span>{link.name}</span>}
             </button>
           );
         })}
+
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            padding: "12px 16px",
+            borderRadius: "10px",
+            cursor: "pointer",
+            width: "100%",
+            color: "hsl(var(--text-secondary))",
+            backgroundColor: "transparent",
+            fontWeight: 500,
+            border: "none",
+            textAlign: "left",
+            transition:
+              "background var(--transition-fast), color var(--transition-fast)",
+            marginTop: "auto",
+          }}
+          className='nav-link-hover'>
+          {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+          {sidebarOpen && (
+            <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
+          )}
+        </button>
       </nav>
 
       {/* Sidebar Footer User Profile Summary */}
@@ -139,11 +174,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
           alignItems: "center",
           justifyContent: sidebarOpen ? "space-between" : "center",
           gap: "10px",
-        }}
-      >
+        }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div
-            className="gradient-bg"
+            className='gradient-bg'
             style={{
               width: "40px",
               height: "40px",
@@ -154,8 +188,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
               fontWeight: 600,
               color: "#fff",
               fontSize: "0.875rem",
-            }}
-          >
+            }}>
             {user ? getInitials(user.name) : "U"}
           </div>
           {sidebarOpen && user && (
@@ -168,8 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                }}
-              >
+                }}>
                 {user.name}
               </span>
               <span
@@ -177,8 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
                   fontSize: "0.75rem",
                   color: "hsl(var(--text-muted))",
                   fontWeight: 500,
-                }}
-              >
+                }}>
                 {user.role.replace("_", " ")}
               </span>
             </div>
@@ -195,9 +226,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
               border: "none",
               backgroundColor: "transparent",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--danger) / 0.1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-          >
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor =
+                "hsl(var(--danger) / 0.1)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "transparent")
+            }>
             <LogOut size={18} />
           </button>
         )}

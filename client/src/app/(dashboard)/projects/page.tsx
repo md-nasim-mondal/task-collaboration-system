@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "View all active teams, search or filter through timelines, and spin up new dynamic workspaces.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage() {
   let initialProjects = [];
   let initialMembers = [];

@@ -28,8 +28,15 @@ interface AuthContextType {
   showToast: (message: string, type?: "success" | "error" | "info") => void;
   removeToast: (id: string) => void;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
-  demoLogin: (role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER") => Promise<boolean>;
+  signup: (
+    name: string,
+    email: string,
+    password: string,
+    phone?: string,
+  ) => Promise<boolean>;
+  demoLogin: (
+    role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER",
+  ) => Promise<boolean>;
   logout: () => void;
   apiFetch: (endpoint: string, options?: RequestInit) => Promise<any>;
   notifications: any[];
@@ -41,9 +48,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -53,7 +63,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
 
   // Toast Helpers
-  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+  const showToast = (
+    message: string,
+    type: "success" | "error" | "info" = "success",
+  ) => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
@@ -81,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (token) {
       fetchNotifications();
-      const interval = setInterval(fetchNotifications, 10000); // poll every 10s
+      const interval = setInterval(fetchNotifications, 30000); // poll every 30s
       return () => clearInterval(interval);
     }
   }, [token]);
@@ -90,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     const activeToken = token || localStorage.getItem("token");
     const headers = new Headers(options.headers || {});
-    
+
     if (activeToken) {
       headers.set("Authorization", `Bearer ${activeToken}`);
     }
@@ -103,9 +116,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers,
     });
 
-    const data = await res.json();
+    let data;
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      try {
+        data = await res.json();
+      } catch (e) {
+        const text = await res.text();
+        data = { message: text || `HTTP Error ${res.status}` };
+      }
+    } else {
+      const text = await res.text();
+      data = { message: text || `HTTP Error ${res.status}` };
+    }
+
     if (!res.ok) {
-      throw new Error(data.message || "Something went wrong");
+      // Handle the case where the message might be the error string itself
+      let errorMessage =
+        typeof data === "string"
+          ? data
+          : data.message || data.error || "Something went wrong";
+
+      // If it's a Zod Error, try to extract more details
+      if (data.message === "Zod Error" && Array.isArray(data.errorSources)) {
+        errorMessage = data.errorSources
+          .map((err: any) => `${err.path}: ${err.message}`)
+          .join(", ");
+      }
+
+      throw new Error(errorMessage);
     }
     return data;
   };
@@ -127,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await apiFetch(`/notifications/${id}/read`, { method: "PATCH" });
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
       showToast("Notification marked as read", "success");
@@ -170,10 +209,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         localStorage.setItem("token", accessToken);
         localStorage.setItem("user", JSON.stringify(loggedUser));
-        
+
         // Set cookie for Next.js Server Components and Server Actions
         document.cookie = `accessToken=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
-        
+
         setToken(accessToken);
         setUser(loggedUser);
 
@@ -194,7 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     name: string,
     email: string,
     password: string,
-    phone?: string
+    phone?: string,
   ): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -217,7 +256,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const demoLogin = async (role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER"): Promise<boolean> => {
+  const demoLogin = async (
+    role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER",
+  ): Promise<boolean> => {
     let email = "admin@example.com";
     if (role === "PROJECT_MANAGER") email = "pm@example.com";
     if (role === "TEAM_MEMBER") email = "member@example.com";
@@ -229,10 +270,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    
+
     // Clear cookie
-    document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
     setToken(null);
     setUser(null);
     setNotifications([]);
@@ -261,8 +303,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetchNotifications,
         markAllNotificationsRead,
         markNotificationRead,
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );

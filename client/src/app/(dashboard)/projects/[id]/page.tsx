@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Manage project details, view Kanban task columns, assign priorities, invite workspace collaborators, and track milestones.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectDetailPage({
   params,
 }: {

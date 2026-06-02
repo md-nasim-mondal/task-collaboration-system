@@ -6,7 +6,7 @@ export async function serverFetch(endpoint: string, options: RequestInit = {}) {
   let token: string | undefined;
 
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     token = cookieStore.get("accessToken")?.value;
   } catch (err) {
     // If called outside request context (e.g. build time static paths), cookies() will fail.
