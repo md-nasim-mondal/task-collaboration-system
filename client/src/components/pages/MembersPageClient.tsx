@@ -33,8 +33,14 @@ export default function MembersPageClient({
   initialMembers: Member[];
   initialWorkload: Workload[];
 }) {
-  const { apiFetch, showToast } = useAuth();
+  const { user, apiFetch, showToast } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (user && user.role === "TEAM_MEMBER") {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
 
   const [members, setMembers] = useState<Member[]>(initialMembers || []);
   const [workloads, setWorkloads] = useState<Workload[]>(initialWorkload || []);

@@ -34,11 +34,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       name: "Dashboard",
       href: "/dashboard",
       icon: <LayoutDashboard size={20} />,
+      roles: ["ADMIN", "PROJECT_MANAGER", "TEAM_MEMBER"],
     },
-    { name: "Projects", href: "/projects", icon: <FolderKanban size={20} /> },
-    { name: "Tasks Center", href: "/tasks", icon: <CheckSquare size={20} /> },
-    { name: "Team Members", href: "/members", icon: <Users size={20} /> },
+    {
+      name: "Projects",
+      href: "/projects",
+      icon: <FolderKanban size={20} />,
+      roles: ["ADMIN", "PROJECT_MANAGER", "TEAM_MEMBER"],
+    },
+    {
+      name: "Tasks Center",
+      href: "/tasks",
+      icon: <CheckSquare size={20} />,
+      roles: ["ADMIN", "PROJECT_MANAGER", "TEAM_MEMBER"],
+    },
+    {
+      name: "Team Members",
+      href: "/members",
+      icon: <Users size={20} />,
+      roles: ["ADMIN", "PROJECT_MANAGER"],
+    },
   ];
+
+  const filteredLinks = navLinks.filter(
+    (link) => !link.roles || link.roles.includes(user?.role || ""),
+  );
 
   return (
     <aside
@@ -104,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
           padding: "16px",
           flexGrow: 1,
         }}>
-        {navLinks.map((link) => {
+        {filteredLinks.map((link) => {
           const active =
             pathname === link.href || pathname.startsWith(link.href + "/");
           return (
