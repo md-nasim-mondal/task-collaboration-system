@@ -16,6 +16,7 @@ import {
   Clock,
   X,
 } from "lucide-react";
+import Loading from "../Loading";
 
 interface Project {
   _id: string;
@@ -407,24 +408,7 @@ export default function ProjectsPageClient({
 
       {/* Projects Cards Grid */}
       {loading ? (
-        <div
-          style={{
-            display: "flex",
-            height: "40vh",
-            alignItems: "center",
-            justifyContent: "center",
-          }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              border: "3px solid hsl(var(--primary) / 0.1)",
-              borderTop: "3px solid hsl(var(--primary))",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-        </div>
+        <Loading text='Loading projects...' />
       ) : projects.length > 0 ? (
         <div
           style={{

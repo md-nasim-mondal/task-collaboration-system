@@ -1,9 +1,9 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Search, Mail, Shield, ChevronRight, X, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Loading from "../Loading";
 
 interface Member {
   _id: string;
@@ -215,7 +215,9 @@ export default function MembersPageClient({
         </div>
       </div>
 
-      {filteredMembers.length > 0 ? (
+      {loading ? (
+        <Loading text='Fetching team members...' />
+      ) : filteredMembers.length > 0 ? (
         <div
           style={{
             display: "grid",

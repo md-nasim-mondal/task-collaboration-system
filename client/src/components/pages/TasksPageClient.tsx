@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import Loading from "../Loading";
 
 interface Member {
   _id: string;
@@ -673,25 +674,8 @@ export default function TasksPageClient({
 
       {/* TASKS TABLE GRID */}
       {loading ? (
-        <div
-          style={{
-            display: "flex",
-            height: "30vh",
-            alignItems: "center",
-            justifyContent: "center",
-          }}>
-          <div
-            style={{
-              width: "32px",
-              height: "32px",
-              border: "3px solid hsl(var(--primary) / 0.1)",
-              borderTop: "3px solid hsl(var(--primary))",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-        </div>
-      ) : tasks.length === 0 ? (
+        <Loading text='Loading tasks...' />
+      ) : tasks.length > 0 ? (
         <div
           className='glass-panel'
           style={{
