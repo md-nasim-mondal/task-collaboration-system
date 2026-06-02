@@ -44,194 +44,64 @@ export default function LoginPageClient() {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden",
-        backgroundColor: "hsl(var(--bg-primary))",
-        padding: "24px",
-      }}
-    >
+    <div className="flex min-h-screen items-center justify-center relative overflow-hidden bg-background p-6">
       {/* Background visual art blobs for premium aesthetic */}
-      <div
-        style={{
-          position: "absolute",
-          width: "400px",
-          height: "400px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)",
-          top: "-100px",
-          left: "-100px",
-          filter: "blur(40px)",
-          zIndex: 0,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          width: "400px",
-          height: "400px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, hsl(var(--accent) / 0.15) 0%, transparent 70%)",
-          bottom: "-100px",
-          right: "-100px",
-          filter: "blur(40px)",
-          zIndex: 0,
-        }}
-      />
+      <div className="absolute w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.15)_0%,transparent_70%)] -top-[100px] -left-[100px] blur-[40px] z-0" />
+      <div className="absolute w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,hsl(var(--accent)/0.15)_0%,transparent_70%)] -bottom-[100px] -right-[100px] blur-[40px] z-0" />
 
-      <div
-        className="glass-panel"
-        style={{
-          maxWidth: "480px",
-          width: "100%",
-          padding: "48px",
-          zIndex: 1,
-          boxShadow: "var(--shadow-lg), 0 24px 80px rgba(99, 102, 241, 0.05)",
-          border: "1px solid var(--glass-border)",
-          animation: "fadeIn 0.5s ease forwards",
-        }}
-      >
+      <div className="glass-panel max-w-[480px] w-full p-12 z-10 shadow-lg shadow-[rgba(99,102,241,0.05)] border border-white/5 animate-[fadeIn_0.5s_ease_forwards]">
         {/* Brand Logo & Intro */}
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <div
-            className="gradient-bg"
-            style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-              color: "#fff",
-              boxShadow: "0 8px 24px hsl(var(--primary) / 0.25)",
-            }}
-          >
+        <div className="text-center mb-10">
+          <div className="gradient-bg w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-[0_8px_24px_hsl(var(--primary)/0.25)]">
             <Shield size={24} />
           </div>
-          <h1
-            className="gradient-text"
-            style={{
-              fontSize: "2rem",
-              fontWeight: 800,
-              letterSpacing: "-0.5px",
-              marginBottom: "8px",
-            }}
-          >
+          <h1 className="gradient-text text-3xl font-extrabold tracking-tight mb-2">
             CollabSphere
           </h1>
-          <p style={{ color: "hsl(var(--text-secondary))", fontSize: "0.925rem" }}>
+          <p className="text-secondary text-[0.925rem]">
             Smart Project & Task Collaboration Workspace
           </p>
         </div>
 
         {/* Credentials Form */}
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-secondary">
               Email Address
             </label>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "0 14px",
-                height: "48px",
-                borderRadius: "10px",
-                border: "1px solid hsl(var(--border-color))",
-                backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
-                transition: "border-color 0.2s, box-shadow 0.2s",
-              }}
-              onFocusCapture={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--primary))";
-                e.currentTarget.style.boxShadow = "0 0 0 3px hsl(var(--primary) / 0.1)";
-              }}
-              onBlurCapture={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--border-color))";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              <Mail size={18} style={{ color: "hsl(var(--text-muted))", flexShrink: 0 }} />
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+              <Mail size={18} className="text-muted shrink-0" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                style={{
-                  width: "100%",
-                  padding: "12px 0",
-                  backgroundColor: "transparent",
-                  border: "none",
-                  outline: "none",
-                  color: "hsl(var(--text-primary))",
-                }}
+                className="w-full h-full py-3 bg-transparent border-none outline-none text-foreground"
               />
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between">
+              <label className="text-sm font-semibold text-secondary">
                 Password
               </label>
             </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "0 14px",
-                height: "48px",
-                borderRadius: "10px",
-                border: "1px solid hsl(var(--border-color))",
-                backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
-                transition: "border-color 0.2s, box-shadow 0.2s",
-              }}
-              onFocusCapture={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--primary))";
-                e.currentTarget.style.boxShadow = "0 0 0 3px hsl(var(--primary) / 0.1)";
-              }}
-              onBlurCapture={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--border-color))";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              <Lock size={18} style={{ color: "hsl(var(--text-muted))", flexShrink: 0 }} />
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+              <Lock size={18} className="text-muted shrink-0" />
               <input
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                style={{
-                  width: "100%",
-                  padding: "12px 0",
-                  backgroundColor: "transparent",
-                  border: "none",
-                  outline: "none",
-                  color: "hsl(var(--text-primary))",
-                }}
+                className="w-full h-full py-3 bg-transparent border-none outline-none text-foreground"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "hsl(var(--text-secondary))",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "4px",
-                }}
+                className="bg-transparent border-none cursor-pointer text-secondary flex items-center justify-center p-1"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -241,26 +111,7 @@ export default function LoginPageClient() {
           <button
             type="submit"
             disabled={localLoading || isLoading}
-            className="gradient-bg"
-            style={{
-              padding: "14px",
-              borderRadius: "10px",
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              boxShadow: "0 4px 12px hsl(var(--primary) / 0.2)",
-              transition: "transform 0.2s, opacity 0.2s",
-              opacity: localLoading || isLoading ? 0.7 : 1,
-            }}
-            onMouseEnter={(e) => {
-              if (!localLoading) e.currentTarget.style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              if (!localLoading) e.currentTarget.style.transform = "translateY(0)";
-            }}
+            className="gradient-bg py-3.5 rounded-[10px] font-semibold cursor-pointer flex items-center justify-center gap-2 shadow-[0_4px_12px_hsl(var(--primary)/0.2)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:pointer-events-none disabled:transform-none"
           >
             <LogIn size={18} />
             {localLoading ? "Signing in..." : "Sign In"}
@@ -268,123 +119,55 @@ export default function LoginPageClient() {
         </form>
 
         {/* Divider */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            margin: "32px 0 24px",
-            color: "hsl(var(--text-muted))",
-            fontSize: "0.8rem",
-          }}
-        >
-          <div style={{ flexGrow: 1, height: "1px", backgroundColor: "hsl(var(--border-color))" }} />
-          <span style={{ padding: "0 12px", fontWeight: 500 }}>DEMO SANDBOX LOGIN</span>
-          <div style={{ flexGrow: 1, height: "1px", backgroundColor: "hsl(var(--border-color))" }} />
+        <div className="flex items-center my-8 text-muted text-[0.8rem]">
+          <div className="grow h-[1px] bg-border" />
+          <span className="px-3 font-medium">DEMO SANDBOX LOGIN</span>
+          <div className="grow h-[1px] bg-border" />
         </div>
 
         {/* Instant Role Seeding Buttons */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div className="flex flex-col gap-2.5">
           <button
             onClick={() => handleDemoClick("ADMIN")}
             disabled={localLoading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "10px 16px",
-              borderRadius: "8px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-secondary))",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: 600,
-              transition: "border-color 0.2s, background 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--primary))";
-              e.currentTarget.style.backgroundColor = "hsl(var(--primary) / 0.04)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--border-color))";
-              e.currentTarget.style.backgroundColor = "hsl(var(--bg-secondary))";
-            }}
+            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <UserCheck size={16} style={{ color: "hsl(var(--primary))" }} />
+            <div className="flex items-center gap-2.5">
+              <UserCheck size={16} className="text-primary" />
               <span>Login as Demo Admin</span>
             </div>
-            <span style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))" }}>Full access</span>
+            <span className="text-xs text-muted">Full access</span>
           </button>
 
           <button
             onClick={() => handleDemoClick("PROJECT_MANAGER")}
             disabled={localLoading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "10px 16px",
-              borderRadius: "8px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-secondary))",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: 600,
-              transition: "border-color 0.2s, background 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--primary))";
-              e.currentTarget.style.backgroundColor = "hsl(var(--primary) / 0.04)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--border-color))";
-              e.currentTarget.style.backgroundColor = "hsl(var(--bg-secondary))";
-            }}
+            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <UserCheck size={16} style={{ color: "hsl(var(--primary))" }} />
+            <div className="flex items-center gap-2.5">
+              <UserCheck size={16} className="text-primary" />
               <span>Login as Demo Project Manager</span>
             </div>
-            <span style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))" }}>PM role</span>
+            <span className="text-xs text-muted">PM role</span>
           </button>
 
           <button
             onClick={() => handleDemoClick("TEAM_MEMBER")}
             disabled={localLoading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "10px 16px",
-              borderRadius: "8px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-secondary))",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: 600,
-              transition: "border-color 0.2s, background 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--primary))";
-              e.currentTarget.style.backgroundColor = "hsl(var(--primary) / 0.04)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--border-color))";
-              e.currentTarget.style.backgroundColor = "hsl(var(--bg-secondary))";
-            }}
+            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <UserCheck size={16} style={{ color: "hsl(var(--primary))" }} />
+            <div className="flex items-center gap-2.5">
+              <UserCheck size={16} className="text-primary" />
               <span>Login as Demo Team Member</span>
             </div>
-            <span style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))" }}>Member role</span>
+            <span className="text-xs text-muted">Member role</span>
           </button>
         </div>
 
         {/* Footer */}
-        <p style={{ textAlign: "center", marginTop: "32px", fontSize: "0.875rem", color: "hsl(var(--text-secondary))" }}>
+        <p className="text-center mt-8 text-sm text-secondary">
           Don't have an account?{" "}
-          <Link href="/signup" style={{ color: "hsl(var(--primary))", fontWeight: 600 }}>
+          <Link href="/signup" className="text-primary font-semibold hover:underline">
             Sign Up
           </Link>
         </p>
