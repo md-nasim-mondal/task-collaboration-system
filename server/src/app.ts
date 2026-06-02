@@ -11,6 +11,26 @@ import { router } from "./app/routes";
 
 const app = express();
 
+// Vercel Serverless Database Connection and Seeding Middleware
+let isDbConnected = false;
+app.use(async (_req, _res, next) => {
+  if (process.env.VERCEL && !isDbConnected) {
+    try {
+      const mongoose = await import("mongoose");
+      const { seedSuperAdmin } = await import("./app/utils/seedSuperAdmin");
+      await mongoose.default.connect(envVars.DB_URL, {
+        dbName: "task-collaboration-db",
+      });
+      isDbConnected = true;
+      console.log("✅ Vercel DB Connection Established");
+      await seedSuperAdmin();
+    } catch (error) {
+      console.error("❌ Vercel DB Connection Failed:", error);
+    }
+  }
+  next();
+});
+
 // Security Middlewares
 app.use(helmet());
 app.use(
