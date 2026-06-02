@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Shield, Mail, Lock, User, UserPlus, Phone } from "lucide-react";
+import { Shield, Mail, Lock, User, UserPlus, Phone, Eye, EyeOff } from "lucide-react";
 
 export default function SignupPageClient() {
   const { signup, isAuthenticated, isLoading } = useAuth();
@@ -13,6 +13,7 @@ export default function SignupPageClient() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("");
   const [localLoading, setLocalLoading] = useState(false);
 
@@ -134,6 +135,7 @@ export default function SignupPageClient() {
                 alignItems: "center",
                 gap: "12px",
                 padding: "0 14px",
+                height: "48px",
                 borderRadius: "10px",
                 border: "1px solid hsl(var(--border-color))",
                 backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
@@ -177,6 +179,7 @@ export default function SignupPageClient() {
                 alignItems: "center",
                 gap: "12px",
                 padding: "0 14px",
+                height: "48px",
                 borderRadius: "10px",
                 border: "1px solid hsl(var(--border-color))",
                 backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
@@ -220,6 +223,7 @@ export default function SignupPageClient() {
                 alignItems: "center",
                 gap: "12px",
                 padding: "0 14px",
+                height: "48px",
                 borderRadius: "10px",
                 border: "1px solid hsl(var(--border-color))",
                 backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
@@ -262,6 +266,7 @@ export default function SignupPageClient() {
                 alignItems: "center",
                 gap: "12px",
                 padding: "0 14px",
+                height: "48px",
                 borderRadius: "10px",
                 border: "1px solid hsl(var(--border-color))",
                 backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
@@ -278,7 +283,7 @@ export default function SignupPageClient() {
             >
               <Lock size={18} style={{ color: "hsl(var(--text-muted))", flexShrink: 0 }} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -292,6 +297,22 @@ export default function SignupPageClient() {
                   color: "hsl(var(--text-primary))",
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "hsl(var(--text-secondary))",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "4px",
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
