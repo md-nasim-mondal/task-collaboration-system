@@ -57,7 +57,7 @@ const getTaskById = catchAsync(async (req, res) => {
 const getAllTasks = catchAsync(async (req, res) => {
   const userId = req.user.userId;
   const role = req.user.role;
-  const result = await TaskServices.getAllTasks(req.query as any, userId, role);
+  const result = await TaskServices.getAllTasks(req.query as Record<string, string>, userId, role);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

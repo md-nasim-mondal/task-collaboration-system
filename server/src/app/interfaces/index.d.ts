@@ -1,7 +1,10 @@
 declare namespace Express {
   interface Request {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    user: any;
+    user: {
+      userId: string;
+      email: string;
+      role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER";
+    };
   }
 }
 

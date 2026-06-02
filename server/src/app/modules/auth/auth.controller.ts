@@ -8,9 +8,9 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { setAuthCookie } from "../../utils/setCookie";
 import { createUserTokens } from "../../utils/userTokens";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { AuthServices } from "./auth.service";
-import { IUser } from "../user/user.interface";
+import { IUser, Role } from "../user/user.interface";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -188,7 +188,11 @@ const googleCallbackController = catchAsync(
       throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
     }
 
-    const tokenInfo = createUserTokens(user);
+    const tokenInfo = createUserTokens({
+      _id: new Types.ObjectId(user.userId),
+      email: user.email,
+      role: user.role as Role,
+    });
 
     setAuthCookie(res, tokenInfo);
 

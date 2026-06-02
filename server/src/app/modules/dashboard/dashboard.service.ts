@@ -1,11 +1,14 @@
+import { FilterQuery } from "mongoose";
 import { Project } from "../project/project.model";
 import { Task } from "../task/task.model";
 import { TaskStatus } from "../task/task.interface";
-import { Role } from "../user/user.interface";
+import { Role, IUser } from "../user/user.interface";
+import { IProject } from "../project/project.interface";
+import { ITask } from "../task/task.interface";
 
 // Utility to get project filter based on user role
 const getProjectFilterForUser = async (userId: string, role: string) => {
-  const filter: Record<string, any> = {};
+  const filter: FilterQuery<IProject> = {};
   if (role !== Role.ADMIN) {
     filter.members = userId;
   }
@@ -23,7 +26,7 @@ const getDashboardKPIs = async (userId: string, role: string) => {
   const projectIds = projects.map((p) => p._id);
 
   // Task filter based on accessible projects
-  const taskFilter: Record<string, any> = { project: { $in: projectIds } };
+  const taskFilter: FilterQuery<ITask> = { project: { $in: projectIds } };
 
   // 2. Total Tasks
   const totalTasks = await Task.countDocuments(taskFilter);
@@ -96,11 +99,13 @@ const getTeamWorkloadSummary = async (userId: string, role: string) => {
   const projects = await Project.find(projectFilter).populate("members", "name email role picture");
   
   // Collect unique users that are members in the user's projects
-  const uniqueUsersMap = new Map<string, any>();
+  const uniqueUsersMap = new Map<string, IUser>();
   
   for (const proj of projects) {
-    for (const member of proj.members as any[]) {
-      uniqueUsersMap.set(member._id.toString(), member);
+    for (const member of (proj.members as unknown as IUser[])) {
+      if (member._id) {
+        uniqueUsersMap.set(member._id.toString(), member);
+      }
     }
   }
 

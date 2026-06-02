@@ -1,3 +1,4 @@
+import { FilterQuery } from "mongoose";
 import httpStatus from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
 import { IProject } from "./project.interface";
@@ -106,8 +107,8 @@ const getProjectById = async (projectId: string) => {
   return project;
 };
 
-const getAllProjects = async (userId: string, role: string, query: Record<string, any>) => {
-  const filter: Record<string, any> = {};
+const getAllProjects = async (userId: string, role: string, query: Record<string, string>) => {
+  const filter: FilterQuery<IProject> = {};
 
   // If not Admin, user can only see projects they are members of
   if (role !== "ADMIN") {

@@ -1,3 +1,4 @@
+import { FilterQuery, Types } from "mongoose";
 import httpStatus from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
 import { logActivity } from "../../utils/activityLogger";
@@ -71,7 +72,7 @@ const updateTask = async (
     throw new AppError(httpStatus.NOT_FOUND, "Task not found");
   }
 
-  const projectName = (task.project as any)?.name || "Project";
+  const projectName = (task.project as unknown as { name: string })?.name || "Project";
 
   // Role permissions: Team Member can only update task status (if assigned to them)
   if (role === Role.TEAM_MEMBER) {
@@ -128,7 +129,7 @@ const updateTask = async (
     await logActivity(
       `Task "${task.title}" assigned to member`,
       userId,
-      task.project as any,
+      task.project as unknown as Types.ObjectId,
       task._id
     );
   }
@@ -138,7 +139,7 @@ const updateTask = async (
     await logActivity(
       `Task "${task.title}" marked as ${payload.status}`,
       userId,
-      task.project as any,
+      task.project as unknown as Types.ObjectId,
       task._id
     );
   }
@@ -181,7 +182,7 @@ const getTaskById = async (taskId: string) => {
 };
 
 const getAllTasks = async (query: Record<string, string>, userId: string, role: string) => {
-  const filter: Record<string, any> = {};
+  const filter: FilterQuery<ITask> = {};
 
   // If the user is a Team Member, they can only see tasks of projects they are members of
   if (role === Role.TEAM_MEMBER) {
