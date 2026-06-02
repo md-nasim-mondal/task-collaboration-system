@@ -32,7 +32,6 @@ export default async function ProjectDetailPage({
     console.error("Project details SSR prefetch failed:", err);
   }
 
-  // Cast to any to bypass stale Next.js App Router typings cache
   const ClientComponent = ProjectDetailPageClient as any;
 
   return (

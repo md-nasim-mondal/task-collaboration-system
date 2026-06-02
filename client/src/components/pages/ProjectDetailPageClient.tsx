@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
+
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -225,25 +225,22 @@ export default function ProjectDetailPageClient({
 
   if (loading || !project) {
     return (
-      <DashboardLayout>
-        <div style={{ display: "flex", height: "60vh", alignItems: "center", justifyContent: "center" }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              border: "3px solid hsl(var(--primary) / 0.1)",
-              borderTop: "3px solid hsl(var(--primary))",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-        </div>
-      </DashboardLayout>
+      <div style={{ display: "flex", height: "60vh", alignItems: "center", justifyContent: "center" }}>
+        <div
+          style={{
+            width: "36px",
+            height: "36px",
+            border: "3px solid hsl(var(--primary) / 0.1)",
+            borderTop: "3px solid hsl(var(--primary))",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+      </div>
     );
   }
 
   return (
-    <DashboardLayout>
       <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
         {/* Back Link */}
         <Link
@@ -861,7 +858,6 @@ export default function ProjectDetailPageClient({
           </div>
         )}
       </div>
-    </DashboardLayout>
   );
 }
 

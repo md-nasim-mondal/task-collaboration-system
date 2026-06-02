@@ -1,5 +1,4 @@
 import React from "react";
-// Import optimized Projects Page Client component
 import ProjectsPageClient from "@/components/pages/ProjectsPageClient";
 import { serverFetch } from "@/utils/serverFetch";
 import { Metadata } from "next";
@@ -25,7 +24,6 @@ export default async function ProjectsPage() {
     console.error("Projects server-side prefetch failed:", err);
   }
 
-  // Cast to any to bypass stale Next.js App Router type cache
   const ClientComponent = ProjectsPageClient as any;
 
   return (

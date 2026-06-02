@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
+
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import {
@@ -164,7 +164,6 @@ export default function ProjectsPageClient({
   };
 
   return (
-    <DashboardLayout>
       <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
         {/* Header Section */}
         <div
@@ -618,6 +617,5 @@ export default function ProjectsPageClient({
           </div>
         )}
       </div>
-    </DashboardLayout>
   );
 }

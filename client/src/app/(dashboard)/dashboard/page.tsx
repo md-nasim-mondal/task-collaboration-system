@@ -33,7 +33,6 @@ export default async function DashboardPage() {
     console.error("Dashboard server-side prefetch failed:", err);
   }
 
-  // Cast to any to bypass stale Next.js App Router type cache
   const ClientComponent = DashboardPageClient as any;
 
   return (

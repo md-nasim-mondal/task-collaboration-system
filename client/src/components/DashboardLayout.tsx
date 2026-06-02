@@ -35,12 +35,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-  // Authentication Route Guard
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
-    }
-  }, [isLoading, isAuthenticated, router]);
+
 
   if (isLoading) {
     return (

@@ -1,5 +1,4 @@
 import React from "react";
-// Import optimized Tasks Page Client component
 import TasksPageClient from "@/components/pages/TasksPageClient";
 import { serverFetch } from "@/utils/serverFetch";
 import { Metadata } from "next";
@@ -28,7 +27,6 @@ export default async function TasksPage() {
     console.error("Tasks server-side prefetch failed:", err);
   }
 
-  // Cast to any to bypass stale Next.js App Router type cache
   const ClientComponent = TasksPageClient as any;
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
+
 import { useAuth } from "@/context/AuthContext";
 import {
   Search,
@@ -281,7 +281,6 @@ export default function TasksPageClient({
   const canModifyStatus = isManager || isAssignedToCurrentUser;
 
   return (
-    <DashboardLayout>
       <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
         {/* Header Section */}
         <div style={{ marginBottom: "32px" }}>
@@ -964,6 +963,5 @@ export default function TasksPageClient({
           </div>
         )}
       </div>
-    </DashboardLayout>
   );
 }
