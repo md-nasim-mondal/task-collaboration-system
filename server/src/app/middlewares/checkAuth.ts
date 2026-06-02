@@ -26,7 +26,7 @@ export const checkAuth =
       let userPayload: JwtPayload;
       try {
         userPayload = verifyToken(token, envVars.JWT_ACCESS_SECRET) as JwtPayload;
-      } catch (err) {
+      } catch (_err) {
         throw new AppError(httpStatus.UNAUTHORIZED, "Invalid or expired token");
       }
 

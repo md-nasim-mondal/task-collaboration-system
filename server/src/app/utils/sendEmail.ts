@@ -3,15 +3,30 @@ import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
 import { emailTemplates, TEmailTemplateName } from "./emailTemplates";
 
-const transporter = nodemailer.createTransport({
-  host: envVars.EMAIL_SENDER.SMTP_HOST,
-  port: Number(envVars.EMAIL_SENDER.SMTP_PORT),
-  secure: true,
-  auth: {
-    user: envVars.EMAIL_SENDER.SMTP_USER,
-    pass: envVars.EMAIL_SENDER.SMTP_PASS,
-  },
-});
+let transporter: nodemailer.Transporter | null = null;
+
+const getTransporter = (): nodemailer.Transporter | null => {
+  if (transporter) return transporter;
+  if (
+    envVars.EMAIL_SENDER &&
+    envVars.EMAIL_SENDER.SMTP_HOST &&
+    envVars.EMAIL_SENDER.SMTP_PORT &&
+    envVars.EMAIL_SENDER.SMTP_USER &&
+    envVars.EMAIL_SENDER.SMTP_PASS
+  ) {
+    transporter = nodemailer.createTransport({
+      host: envVars.EMAIL_SENDER.SMTP_HOST,
+      port: Number(envVars.EMAIL_SENDER.SMTP_PORT),
+      secure: envVars.EMAIL_SENDER.SMTP_PORT === "465",
+      auth: {
+        user: envVars.EMAIL_SENDER.SMTP_USER,
+        pass: envVars.EMAIL_SENDER.SMTP_PASS,
+      },
+    });
+    return transporter;
+  }
+  return null;
+};
 
 interface SendEmailOptions {
   to: string;
@@ -31,7 +46,7 @@ export const sendEmail = async ({
   templateName,
   templateData,
   attachments,
-}: SendEmailOptions) => {
+}: SendEmailOptions): Promise<void> => {
   try {
     const templateFn = emailTemplates[templateName];
     if (!templateFn) {
@@ -66,8 +81,23 @@ export const sendEmail = async ({
       html = (templateFn as () => string)();
     }
 
-    const info = await transporter.sendMail({
-      from: envVars.EMAIL_SENDER.SMTP_FORM,
+    const activeTransporter = getTransporter();
+    if (!activeTransporter) {
+      console.log(`\n📧 ======== [CONSOLE EMAIL FALLBACK] ========`);
+      console.log(`To: ${to}`);
+      console.log(`Subject: ${subject}`);
+      if (templateData && templateData.code) {
+        console.log(`OTP Code: ${templateData.code}`);
+      }
+      if (templateData && templateData.otp) {
+        console.log(`OTP Code: ${templateData.otp}`);
+      }
+      console.log(`===========================================\n`);
+      return;
+    }
+
+    const info = await activeTransporter.sendMail({
+      from: envVars.EMAIL_SENDER?.SMTP_FORM || `"CollabSphere" <no-reply@collabsphere.com>`,
       to: to,
       subject: subject,
       html: html,
@@ -77,7 +107,7 @@ export const sendEmail = async ({
         contentType: attachment.contentType,
       })),
     });
-    console.log(`\u2709\uFE0F Email sent to ${to}: ${info.messageId}`);
+    console.log(`✉️ Email sent to ${to}: ${info.messageId}`);
   } catch (error: unknown) {
     const err = error as Error;
     console.log("email sending error: ", err.message);
