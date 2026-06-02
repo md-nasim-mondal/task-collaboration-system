@@ -1,8 +1,12 @@
+import dns from "dns";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Request, Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+
+// Manually configure Node.js dns module to resolve using Google DNS (prevents Atlas querySrv resolution failures on local/serverless environments)
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 import rateLimit from "express-rate-limit";
 import { envVars } from "./app/config/env";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";

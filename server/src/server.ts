@@ -1,8 +1,12 @@
+import dns from "dns";
 import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
 import { envVars } from "./app/config/env";
 import { seedSuperAdmin } from "./app/utils/seedSuperAdmin";
+
+// Manually configure Node.js dns module to resolve using Google DNS (prevents Atlas querySrv resolution failures on local ISPs)
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 let server: Server;
 
