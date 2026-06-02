@@ -1,11 +1,13 @@
-declare namespace Express {
-  interface Request {
-    user: {
-      userId: string;
-      email: string;
-      role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER";
-    };
+import { JwtPayload } from "jsonwebtoken";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: JwtPayload & {
+        userId: string;
+        email: string;
+        role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER";
+      };
+    }
   }
 }
-
-
