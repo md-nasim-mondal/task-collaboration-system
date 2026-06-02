@@ -16,11 +16,6 @@ interface EnvConfig {
   SUPER_ADMIN_EMAIL: string;
   SUPER_ADMIN_PASSWORD: string;
   FRONTEND_URL: string;
-  CLOUDINARY: {
-    CLOUDINARY_CLOUD_NAME: string;
-    CLOUDINARY_API_KEY: string;
-    CLOUDINARY_API_SECRET: string;
-  };
   EMAIL_SENDER: {
     SMTP_HOST: string;
     SMTP_PORT: string;
@@ -28,10 +23,6 @@ interface EnvConfig {
     SMTP_PASS: string;
     SMTP_FORM: string;
   };
-  REDIS_HOST: string;
-  REDIS_PORT: string;
-  REDIS_USERNAME: string;
-  REDIS_PASSWORD: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -40,14 +31,14 @@ const loadEnvVariables = (): EnvConfig => {
     "DB_URL",
     "NODE_ENV",
     "BCRYPT_SALT_ROUND",
-    "JWT_ACCESS_EXPIRES",
     "JWT_ACCESS_SECRET",
-    "SUPER_ADMIN_EMAIL",
-    "SUPER_ADMIN_PASSWORD",
+    "JWT_ACCESS_EXPIRES",
     "JWT_REFRESH_SECRET",
     "JWT_REFRESH_EXPIRES",
     "OTP_EXPIRES",
     "RESET_PASS_EXPIRES",
+    "SUPER_ADMIN_EMAIL",
+    "SUPER_ADMIN_PASSWORD",
     "FRONTEND_URL",
   ];
 
@@ -71,11 +62,6 @@ const loadEnvVariables = (): EnvConfig => {
     SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
     SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
     FRONTEND_URL: process.env.FRONTEND_URL as string,
-    CLOUDINARY: {
-      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
-      CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
-      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
-    },
     EMAIL_SENDER: {
       SMTP_HOST: process.env.SMTP_HOST as string,
       SMTP_PORT: process.env.SMTP_PORT as string,
@@ -83,10 +69,6 @@ const loadEnvVariables = (): EnvConfig => {
       SMTP_PASS: process.env.SMTP_PASS as string,
       SMTP_FORM: process.env.SMTP_FORM as string,
     },
-    REDIS_HOST: process.env.REDIS_HOST as string,
-    REDIS_PORT: process.env.REDIS_PORT as string,
-    REDIS_USERNAME: process.env.REDIS_USERNAME as string,
-    REDIS_PASSWORD: process.env.REDIS_PASSWORD as string,
   };
 };
 
