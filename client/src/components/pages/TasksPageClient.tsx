@@ -16,6 +16,7 @@ import {
   Plus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 interface Member {
   _id: string;
@@ -106,6 +107,14 @@ export default function TasksPageClient({
   const [newPriority, setNewPriority] = useState("Medium");
   const [newDueDate, setNewDueDate] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const isManager = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
 
@@ -372,11 +381,21 @@ export default function TasksPageClient({
   };
 
   const handleDeleteTask = async () => {
-    if (
-      !selectedTask ||
-      !window.confirm("Are you sure you want to delete this task?")
-    )
-      return;
+    if (!selectedTask) return;
+
+    const result = await Swal.fire({
+      title: "Delete Task?",
+      text: "Are you sure you want to remove this task from the workspace?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(var(--danger))",
+      cancelButtonColor: "hsl(var(--border-color))",
+      confirmButtonText: "Delete Task",
+      background: "hsl(var(--bg-secondary))",
+      color: "hsl(var(--text-primary))",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       setModalLoading(true);
@@ -410,7 +429,7 @@ export default function TasksPageClient({
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "16px",
+          gap: "20px",
           marginBottom: "32px",
         }}>
         <div>
@@ -451,7 +470,7 @@ export default function TasksPageClient({
       <div
         className='glass-panel'
         style={{
-          padding: "24px",
+          padding: isMobile ? "16px" : "24px",
           marginBottom: "32px",
           display: "flex",
           flexDirection: "column",
@@ -651,6 +670,7 @@ export default function TasksPageClient({
             <table
               style={{
                 width: "100%",
+                minWidth: isMobile ? "600px" : "100%",
                 borderCollapse: "collapse",
                 textAlign: "left",
               }}>

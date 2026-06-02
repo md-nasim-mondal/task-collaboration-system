@@ -11,6 +11,8 @@ import {
   TrendingUp,
   Activity,
   Calendar,
+  CheckSquare,
+  BarChart3,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -79,6 +81,14 @@ export default function DashboardPageClient({
   );
   const [activities, setActivities] = useState<any[]>(initialActivities || []);
   const [loading, setLoading] = useState(!initialKpis);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     if (initialKpis) {
@@ -147,16 +157,21 @@ export default function DashboardPageClient({
   return (
     <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
       {/* Header Title */}
-      <div style={{ marginBottom: "32px" }}>
+      <div style={{ marginBottom: "32px", padding: isMobile ? "0 4px" : "0" }}>
         <h1
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "2rem",
+            fontSize: isMobile ? "1.5rem" : "2rem",
             fontWeight: 800,
           }}>
           Workspace Dashboard
         </h1>
-        <p style={{ color: "hsl(var(--text-secondary))", marginTop: "4px" }}>
+        <p
+          style={{
+            color: "hsl(var(--text-secondary))",
+            marginTop: "4px",
+            fontSize: isMobile ? "0.85rem" : "1rem",
+          }}>
           Real-time project analytics, team workloads, and pending alerts.
         </p>
       </div>
@@ -211,7 +226,14 @@ export default function DashboardPageClient({
       )}
 
       {/* KPI CARDS GRID */}
-      <div className='dashboard-grid' style={{ marginBottom: "32px" }}>
+      <div
+        className='dashboard-grid'
+        style={{
+          marginBottom: "32px",
+          gridTemplateColumns: isMobile
+            ? "repeat(auto-fit, minmax(200px, 1fr))"
+            : "repeat(auto-fit, minmax(240px, 1fr))",
+        }}>
         {/* Card 1 */}
         <div
           className='glass-panel glass-panel-hover'
@@ -472,21 +494,25 @@ export default function DashboardPageClient({
                     )}
                   </div>
 
-                  <div style={{ marginBottom: "12px" }}>
+                  <div style={{ marginBottom: "16px" }}>
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        fontSize: "0.8rem",
-                        marginBottom: "6px",
+                        fontSize: "0.85rem",
+                        marginBottom: "8px",
                       }}>
-                      <span style={{ color: "hsl(var(--text-secondary))" }}>
+                      <span
+                        style={{
+                          color: "hsl(var(--text-primary))",
+                          fontWeight: 600,
+                        }}>
                         {proj.completedTasks}/{proj.totalTasks} Tasks (
                         {proj.completionRate}%)
                       </span>
                       <span
                         style={{
-                          fontWeight: 600,
+                          fontWeight: 700,
                           color: "hsl(var(--primary))",
                         }}>
                         {pending} Pending
@@ -494,20 +520,23 @@ export default function DashboardPageClient({
                     </div>
                     <div
                       style={{
-                        height: "6px",
-                        backgroundColor: "hsl(var(--border-color))",
-                        borderRadius: "3px",
+                        height: "10px",
+                        backgroundColor: "hsl(var(--border-color) / 0.3)",
+                        borderRadius: "5px",
                         overflow: "hidden",
+                        border: "1px solid hsl(var(--border-color) / 0.1)",
                       }}>
                       <div
                         style={{
                           height: "100%",
                           width: `${proj.completionRate}%`,
-                          backgroundColor:
+                          background:
                             proj.completionRate === 100
-                              ? "hsl(var(--success))"
-                              : "hsl(var(--primary))",
-                          borderRadius: "3px",
+                              ? "linear-gradient(90deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.8) 100%)"
+                              : "linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%)",
+                          borderRadius: "5px",
+                          boxShadow: "0 0 10px hsl(var(--primary) / 0.3)",
+                          transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
                         }}
                       />
                     </div>
@@ -535,7 +564,9 @@ export default function DashboardPageClient({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "repeat(auto-fit, minmax(400px, 1fr))",
           gap: "32px",
           marginBottom: "32px",
         }}>
@@ -550,13 +581,32 @@ export default function DashboardPageClient({
             Task Status Distribution
           </h3>
           {statusDistribution.length === 0 ? (
-            <p
+            <div
               style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "200px",
+                gap: "12px",
                 color: "hsl(var(--text-muted))",
-                fontSize: "0.875rem",
               }}>
-              No task state data available yet.
-            </p>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
+                  backgroundColor: "hsl(var(--bg-secondary))",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                <CheckSquare size={24} />
+              </div>
+              <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+                No task state data available yet.
+              </p>
+            </div>
           ) : (
             <div
               style={{
@@ -632,13 +682,32 @@ export default function DashboardPageClient({
             Task Priority Breakdown
           </h3>
           {priorityDistribution.length === 0 ? (
-            <p
+            <div
               style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "200px",
+                gap: "12px",
                 color: "hsl(var(--text-muted))",
-                fontSize: "0.875rem",
               }}>
-              No task priority data available yet.
-            </p>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
+                  backgroundColor: "hsl(var(--bg-secondary))",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                <BarChart3 size={24} />
+              </div>
+              <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+                No task priority data available yet.
+              </p>
+            </div>
           ) : (
             <div
               style={{
@@ -711,7 +780,9 @@ export default function DashboardPageClient({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "repeat(auto-fit, minmax(400px, 1fr))",
           gap: "32px",
         }}>
         {/* Member Workload Summary */}

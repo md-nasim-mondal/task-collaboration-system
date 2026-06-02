@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Calendar, Users, Plus, ArrowLeft, Clock, X } from "lucide-react";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 interface Member {
   _id: string;
@@ -81,6 +82,14 @@ export default function ProjectDetailPageClient({
   // Invite Member States
   const [inviteUserId, setInviteUserId] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const isManager = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
 
@@ -127,7 +136,7 @@ export default function ProjectDetailPageClient({
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!taskTitle || !taskDueDate) return;
+    if (!taskTitle || !taskDueDate || !taskAssignee) return;
 
     // Strict Date Validation
     const now = new Date();
@@ -145,7 +154,7 @@ export default function ProjectDetailPageClient({
         project: id,
         dueDate: taskDueDate,
         priority: taskPriority,
-        assignedMember: taskAssignee || undefined,
+        assignedMember: taskAssignee,
       };
 
       const res = await apiFetch("/tasks", {
@@ -174,23 +183,13 @@ export default function ProjectDetailPageClient({
 
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteUserId || !project) return;
-
-    // Check if user is already a member
-    if (project.members.some((m) => m._id === inviteUserId)) {
-      showToast("User is already a member of this project.", "error");
-      return;
-    }
+    if (!inviteUserId) return;
 
     try {
       setInviteLoading(true);
-      const updatedMembers = [
-        ...project.members.map((m) => m._id),
-        inviteUserId,
-      ];
-      const res = await apiFetch(`/projects/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ members: updatedMembers }),
+      const res = await apiFetch(`/projects/${id}/members`, {
+        method: "POST",
+        body: JSON.stringify({ userId: inviteUserId }),
       });
 
       if (res.success) {
@@ -204,6 +203,118 @@ export default function ProjectDetailPageClient({
       showToast(err.message || "Failed to invite member", "error");
     } finally {
       setInviteLoading(false);
+    }
+  };
+
+  const handleUpdateProjectStatus = async (newStatus: string) => {
+    try {
+      const res = await apiFetch(`/projects/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.success) {
+        showToast("Project status updated", "success");
+        fetchProjectDetails();
+        router.refresh();
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to update project status", "error");
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (memberId === project?.createdBy?._id) {
+      showToast("Cannot remove the project owner.", "error");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Remove Member?",
+      text: "This member will no longer have access to this project.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(var(--danger))",
+      cancelButtonColor: "hsl(var(--border-color))",
+      confirmButtonText: "Remove Member",
+      background: "hsl(var(--bg-secondary))",
+      color: "hsl(var(--text-primary))",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await apiFetch(`/projects/${id}/members/${memberId}`, {
+        method: "DELETE",
+      });
+
+      if (res.success) {
+        showToast("Member removed from project", "success");
+        fetchProjectDetails();
+        router.refresh();
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to remove member", "error");
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    const result = await Swal.fire({
+      title: "Delete Task?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(var(--danger))",
+      cancelButtonColor: "hsl(var(--border-color))",
+      confirmButtonText: "Yes, delete",
+      background: "hsl(var(--bg-secondary))",
+      color: "hsl(var(--text-primary))",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await apiFetch(`/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+
+      if (res.success) {
+        showToast("Task deleted successfully", "success");
+        fetchProjectDetails();
+        router.refresh();
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to delete task", "error");
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    const result = await Swal.fire({
+      title: "Delete Entire Project?",
+      text: "This will permanently remove this project and all its tasks. This action is irreversible!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(var(--danger))",
+      cancelButtonColor: "hsl(var(--border-color))",
+      confirmButtonText: "Yes, delete project",
+      background: "hsl(var(--bg-secondary))",
+      color: "hsl(var(--text-primary))",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await apiFetch(`/projects/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.success) {
+        showToast("Project deleted successfully", "success");
+        router.push("/projects");
+        router.refresh();
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to delete project", "error");
     }
   };
 
@@ -269,7 +380,7 @@ export default function ProjectDetailPageClient({
       <div
         className='glass-panel'
         style={{
-          padding: "32px",
+          padding: isMobile ? "20px" : "32px",
           marginBottom: "32px",
           display: "flex",
           flexDirection: "column",
@@ -303,17 +414,50 @@ export default function ProjectDetailPageClient({
           </div>
 
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-            <span
-              className={`badge badge-${
-                project.status === "Active"
-                  ? "progress"
-                  : project.status === "Completed"
-                    ? "completed"
-                    : "todo"
-              }`}
-              style={{ fontSize: "0.85rem", padding: "6px 12px" }}>
-              {project.status}
-            </span>
+            <select
+              value={project.status}
+              onChange={(e) => handleUpdateProjectStatus(e.target.value)}
+              disabled={!isManager}
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid hsl(var(--border-color))",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                cursor: isManager ? "pointer" : "default",
+                backgroundColor:
+                  project.status === "Completed"
+                    ? "hsl(var(--success) / 0.1)"
+                    : project.status === "Active"
+                      ? "hsl(var(--primary) / 0.1)"
+                      : "hsl(var(--bg-secondary))",
+                color:
+                  project.status === "Completed"
+                    ? "hsl(var(--success))"
+                    : project.status === "Active"
+                      ? "hsl(var(--primary))"
+                      : "inherit",
+              }}>
+              <option value='Active'>Active</option>
+              <option value='Completed'>Completed</option>
+              <option value='On Hold'>On Hold</option>
+            </select>
+
+            {isManager && (
+              <button
+                onClick={handleDeleteProject}
+                style={{
+                  padding: "8px",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: "hsl(var(--danger) / 0.1)",
+                  color: "hsl(var(--danger))",
+                  cursor: "pointer",
+                }}
+                title='Delete Project'>
+                <X size={18} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -328,7 +472,13 @@ export default function ProjectDetailPageClient({
             borderTop: "1px solid hsl(var(--border-color) / 0.5)",
             paddingTop: "24px",
           }}>
-          <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "24px",
+              flexWrap: "wrap",
+              width: isMobile ? "100%" : "auto",
+            }}>
             {/* Deadline */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <Calendar
@@ -517,7 +667,7 @@ export default function ProjectDetailPageClient({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
           gap: "24px",
           alignItems: "start",
         }}>

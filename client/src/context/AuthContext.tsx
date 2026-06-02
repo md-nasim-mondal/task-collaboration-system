@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export interface User {
   id: string;
@@ -67,15 +68,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     message: string,
     type: "success" | "error" | "info" = "success",
   ) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      removeToast(id);
-    }, 4000);
+    if (type === "success") {
+      toast.success(message);
+    } else if (type === "error") {
+      toast.error(message);
+    } else {
+      toast(message);
+    }
   };
 
   const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    // Legacy support, react-hot-toast handles auto-remove
   };
 
   // Fetch token and user on startup

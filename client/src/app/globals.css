@@ -3,7 +3,7 @@
    ============================================================ */
 
 /* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
 
 /* Tailwind v4: single import replaces @tailwind base/components/utilities */
 @import "tailwindcss";
@@ -15,30 +15,32 @@
    ============================================================ */
 @theme {
   /* Font families */
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  --font-sans:
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-display: "Outfit", sans-serif;
 
   /* Brand colours — Light Mode defaults (HSL raw values for /alpha support) */
-  --color-background:    hsl(0 0% 97%);
-  --color-foreground:    hsl(224 71% 4%);
+  --color-background: hsl(0 0% 97%);
+  --color-foreground: hsl(224 71% 4%);
 
-  --color-border:        hsl(220 13% 91%);
-  --color-secondary-bg:  hsl(0 0% 100%);
-  --color-secondary:     hsl(220 9% 46%);
-  --color-muted:         hsl(220 9% 70%);
+  --color-border: hsl(220 13% 91%);
+  --color-secondary-bg: hsl(0 0% 100%);
+  --color-secondary: hsl(220 9% 46%);
+  --color-muted: hsl(220 9% 70%);
 
-  --color-primary:       hsl(250 89% 65%);
+  --color-primary: hsl(250 89% 65%);
   --color-primary-hover: hsl(250 89% 58%);
-  --color-accent:        hsl(262 89% 65%);
+  --color-accent: hsl(262 89% 65%);
 
-  --color-success:       hsl(142 71% 45%);
-  --color-warning:       hsl(38 92% 50%);
-  --color-danger:        hsl(0 84% 60%);
+  --color-success: hsl(142 71% 45%);
+  --color-warning: hsl(38 92% 50%);
+  --color-danger: hsl(0 84% 60%);
 
   /* Border radii */
-  --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 }
 
@@ -49,70 +51,72 @@
    ============================================================ */
 :root {
   /* HSL raw channel values (used as hsl(var(--x)) for /alpha) */
-  --bg-primary:    0 0% 97%;
-  --bg-secondary:  0 0% 100%;
-  --bg-tertiary:   220 14% 96%;
-  --border-color:  220 13% 91%;
+  --bg-primary: 0 0% 97%;
+  --bg-secondary: 0 0% 100%;
+  --bg-tertiary: 220 14% 96%;
+  --border-color: 220 13% 91%;
 
-  --text-primary:   224 71% 4%;
+  --text-primary: 224 71% 4%;
   --text-secondary: 220 9% 46%;
-  --text-muted:     220 9% 70%;
+  --text-muted: 220 9% 70%;
 
-  --primary:            250 89% 65%;
-  --primary-hover:      250 89% 58%;
+  --primary: 250 89% 65%;
+  --primary-hover: 250 89% 58%;
   --primary-foreground: 0 0% 100%;
 
   --accent: 262 89% 65%;
 
-  --success:            142 71% 45%;
+  --success: 142 71% 45%;
   --success-foreground: 0 0% 100%;
-  --warning:            38 92% 50%;
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
-  --danger:             0 84% 60%;
-  --danger-foreground:  0 0% 100%;
+  --danger: 0 84% 60%;
+  --danger-foreground: 0 0% 100%;
 
   /* Shadows */
-  --shadow-sm:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:    0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
-  --shadow-lg:    0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
   --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
 
   /* Glassmorphism */
-  --glass-bg:     rgba(255, 255, 255, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.4);
 
   /* Transition Curves */
-  --transition-fast:   0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow:   0.4s  cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Dark Mode Overrides */
 [data-theme="dark"] {
-  --bg-primary:   224 71% 4%;
+  --bg-primary: 224 71% 4%;
   --bg-secondary: 222 47% 7%;
-  --bg-tertiary:  217 33% 12%;
+  --bg-tertiary: 217 33% 12%;
   --border-color: 217 33% 15%;
 
-  --text-primary:   210 40% 98%;
+  --text-primary: 210 40% 98%;
   --text-secondary: 215 20% 75%;
-  --text-muted:     215 16% 47%;
+  --text-muted: 215 16% 47%;
 
-  --primary:       250 89% 65%;
+  --primary: 250 89% 65%;
   --primary-hover: 250 89% 70%;
 
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 
-  --glass-bg:     rgba(15, 23, 42, 0.65);
+  --glass-bg: rgba(15, 23, 42, 0.65);
   --glass-border: rgba(255, 255, 255, 0.05);
 
   /* Sync Tailwind @theme colour tokens to dark mode values */
-  --color-background:   hsl(224 71% 4%);
-  --color-foreground:   hsl(210 40% 98%);
-  --color-border:       hsl(217 33% 15%);
+  --color-background: hsl(224 71% 4%);
+  --color-foreground: hsl(210 40% 98%);
+  --color-border: hsl(217 33% 15%);
   --color-secondary-bg: hsl(222 47% 7%);
-  --color-secondary:    hsl(215 20% 75%);
-  --color-muted:        hsl(215 16% 47%);
+  --color-secondary: hsl(215 20% 75%);
+  --color-muted: hsl(215 16% 47%);
 
   --calendar-icon-invert: 1;
 }
@@ -121,14 +125,17 @@
    BASE LAYER
    ============================================================ */
 @layer base {
-  html, body {
+  html,
+  body {
     font-family: var(--font-sans);
     background-color: hsl(var(--bg-primary));
     color: hsl(var(--text-primary));
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color var(--transition-normal), color var(--transition-normal);
+    transition:
+      background-color var(--transition-normal),
+      color var(--transition-normal);
   }
 
   /* Native <select>/<option> dark-mode fix — OS paints its own bg */
@@ -146,33 +153,93 @@
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(var(--calendar-icon-invert, 0));
   }
+
+  /* Responsive Adjustments (Mobile-first) */
+  @media (max-width: 768px) {
+    .glass-panel {
+      padding: 16px !important;
+    }
+    h1 {
+      font-size: 1.5rem !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .glass-panel {
+      border-radius: var(--radius-md);
+    }
+  }
+}
+
+/* ============================================================
+   RESPONSIVE GRID UTILITIES
+   ============================================================ */
+.container-responsive {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (max-width: 640px) {
+  .container-responsive {
+    padding: 0 12px;
+  }
 }
 
 /* ============================================================
    PREMIUM SCROLLBARS
    ============================================================ */
-::-webkit-scrollbar        { width: 8px; height: 8px; }
-::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: hsl(var(--border-color)); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--text-muted)); }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-color));
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--text-muted));
+}
 
 /* ============================================================
    ANIMATIONS
    ============================================================ */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulseBorder {
-  0%   { box-shadow: 0 0 0 0   rgba(99, 102, 241, 0.4); }
-  70%  { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
-  100% { box-shadow: 0 0 0 0   rgba(99, 102, 241, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* ============================================================
@@ -186,7 +253,10 @@
   -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--shadow-glass);
   border-radius: var(--radius-lg);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border var(--transition-fast);
 }
 
 .glass-panel-hover:hover {
@@ -232,12 +302,30 @@
   text-transform: capitalize;
 }
 
-.badge-todo      { background: hsl(var(--border-color));      color: hsl(var(--text-secondary)); }
-.badge-progress  { background: hsl(var(--primary) / 0.1);     color: hsl(var(--primary)); }
-.badge-completed { background: hsl(var(--success) / 0.1);     color: hsl(var(--success)); }
-.badge-high      { background: hsl(var(--danger)  / 0.1);     color: hsl(var(--danger)); }
-.badge-medium    { background: hsl(var(--warning) / 0.1);     color: hsl(var(--warning)); }
-.badge-low       { background: hsl(var(--success) / 0.1);     color: hsl(var(--success)); }
+.badge-todo {
+  background: hsl(var(--border-color));
+  color: hsl(var(--text-secondary));
+}
+.badge-progress {
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+.badge-completed {
+  background: hsl(var(--success) / 0.1);
+  color: hsl(var(--success));
+}
+.badge-high {
+  background: hsl(var(--danger) / 0.1);
+  color: hsl(var(--danger));
+}
+.badge-medium {
+  background: hsl(var(--warning) / 0.1);
+  color: hsl(var(--warning));
+}
+.badge-low {
+  background: hsl(var(--success) / 0.1);
+  color: hsl(var(--success));
+}
 
 /* ============================================================
    AUTOFILL OVERRIDE

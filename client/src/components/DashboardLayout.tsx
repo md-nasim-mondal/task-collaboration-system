@@ -17,7 +17,9 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const {
     user,
     isAuthenticated,
@@ -31,11 +33,21 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Default to closed on mobile
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      setSidebarOpen(!mobile);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   if (isLoading) {
     return (
@@ -49,8 +61,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           color: "hsl(var(--primary))",
           fontSize: "1.25rem",
           fontWeight: 600,
-        }}
-      >
+        }}>
         <div style={{ textAlign: "center" }}>
           <div
             style={{
@@ -94,10 +105,36 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         overflow: "hidden",
         backgroundColor: "hsl(var(--bg-primary))",
         transition: "background-color var(--transition-normal)",
-      }}
-    >
+        position: "relative",
+      }}>
+      {/* SIDEBAR OVERLAY FOR MOBILE */}
+      {isMobile && sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            zIndex: 95,
+            backdropFilter: "blur(2px)",
+          }}
+        />
+      )}
+
       {/* SIDEBAR */}
-      <Sidebar sidebarOpen={sidebarOpen} />
+      <div
+        style={{
+          position: isMobile ? "fixed" : "sticky",
+          top: 0,
+          height: "100vh",
+          zIndex: 100,
+          left: 0,
+          transition: "transform 0.3s ease",
+          transform:
+            isMobile && !sidebarOpen ? "translateX(-100%)" : "translateX(0)",
+        }}>
+        <Sidebar sidebarOpen={sidebarOpen || !isMobile} />
+      </div>
 
       {/* MAIN VIEWPORT */}
       <div
@@ -106,35 +143,37 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           flexDirection: "column",
           flexGrow: 1,
           overflow: "hidden",
-        }}
-      >
+        }}>
         {/* HEADER NAVBAR */}
         <header
-          className="glass-panel"
           style={{
-            height: "70px",
-            borderRadius: 0,
-            borderWidth: "0 0 1px 0",
-            margin: 0,
+            height: "72px",
+            padding: isMobile ? "0 16px" : "0 32px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "0 24px",
-            backgroundColor: "hsl(var(--bg-secondary))",
+            borderBottom: "1px solid hsl(var(--border-color))",
+            backgroundColor: "hsl(var(--bg-primary) / 0.8)",
+            backdropFilter: "blur(12px)",
+            position: "sticky",
+            top: 0,
             zIndex: 90,
-          }}
-        >
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            style={{
-              cursor: "pointer",
-              padding: "8px",
-              borderRadius: "8px",
-              color: "hsl(var(--text-secondary))",
-            }}
-          >
-            <Menu size={20} />
-          </button>
+          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              style={{
+                cursor: "pointer",
+                padding: "8px",
+                borderRadius: "8px",
+                color: "hsl(var(--text-secondary))",
+                backgroundColor: "transparent",
+                border: "none",
+              }}
+              className='nav-link-hover'>
+              <Menu size={22} />
+            </button>
+          </div>
 
           {/* Action Row */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -150,9 +189,18 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 alignItems: "center",
                 justifyContent: "center",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--border-color))")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-            >
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  "hsl(var(--border-color))")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "transparent")
+              }
+              title={
+                theme === "light"
+                  ? "Switch to Dark Mode"
+                  : "Switch to Light Mode"
+              }>
               {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
             </button>
 
@@ -170,9 +218,13 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                   justifyContent: "center",
                   position: "relative",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--border-color))")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-              >
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor =
+                    "hsl(var(--border-color))")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }>
                 <Bell size={20} />
                 {unreadNotificationsCount > 0 && (
                   <span
@@ -190,8 +242,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                    }}
-                  >
+                    }}>
                     {unreadNotificationsCount}
                   </span>
                 )}
@@ -207,10 +258,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                }}
-              >
+                }}>
                 <div
-                  className="gradient-bg"
+                  className='gradient-bg'
                   style={{
                     width: "36px",
                     height: "36px",
@@ -221,15 +271,14 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                     fontWeight: 600,
                     color: "#fff",
                     fontSize: "0.875rem",
-                  }}
-                >
+                  }}>
                   {user ? getInitials(user.name) : "U"}
                 </div>
               </button>
 
               {profileDropdownOpen && (
                 <div
-                  className="glass-panel"
+                  className='glass-panel'
                   style={{
                     position: "absolute",
                     top: "48px",
@@ -239,11 +288,22 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                     boxShadow: "var(--shadow-lg)",
                     backgroundColor: "hsl(var(--bg-secondary))",
                     animation: "fadeIn 0.2s ease forwards",
-                  }}
-                >
-                  <div style={{ padding: "12px", borderBottom: "1px solid hsl(var(--border-color))" }}>
-                    <p style={{ fontWeight: 600, fontSize: "0.875rem" }}>{user?.name}</p>
-                    <p style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))" }}>{user?.email}</p>
+                  }}>
+                  <div
+                    style={{
+                      padding: "12px",
+                      borderBottom: "1px solid hsl(var(--border-color))",
+                    }}>
+                    <p style={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                      {user?.name}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "hsl(var(--text-muted))",
+                      }}>
+                      {user?.email}
+                    </p>
                   </div>
                   <button
                     onClick={() => {
@@ -261,8 +321,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                       fontSize: "0.875rem",
                       textAlign: "left",
                     }}
-                    className="profile-menu-item"
-                  >
+                    className='profile-menu-item'>
                     <UserIcon size={16} /> My Assignments
                   </button>
                   <button
@@ -282,8 +341,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                       color: "hsl(var(--danger))",
                       textAlign: "left",
                     }}
-                    className="profile-menu-item"
-                  >
+                    className='profile-menu-item'>
                     <LogOut size={16} /> Logout
                   </button>
                 </div>
@@ -295,24 +353,24 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         {/* COLLAPSIBLE NOTIFICATION DRAWER */}
         {notificationOpen && (
           <div
-            className="glass-panel"
+            className='glass-panel'
             style={{
               position: "fixed",
               top: 0,
               right: 0,
               height: "100vh",
-              width: "360px",
+              width: isMobile ? "100%" : "360px",
               borderRadius: 0,
               margin: 0,
-              borderWidth: "0 0 0 1px",
+              borderWidth: isMobile ? "0" : "0 0 0 1px",
               boxShadow: "0 0 40px rgba(0, 0, 0, 0.2)",
               zIndex: 1000,
               backgroundColor: "hsl(var(--bg-secondary))",
               display: "flex",
               flexDirection: "column",
-              animation: "slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-            }}
-          >
+              animation:
+                "slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            }}>
             <div
               style={{
                 padding: "20px 24px",
@@ -320,10 +378,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-              }}
-            >
-              <h3 style={{ fontSize: "1.125rem", fontWeight: 700 }}>Notifications</h3>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: 700 }}>
+                Notifications
+              </h3>
+              <div
+                style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                 {unreadNotificationsCount > 0 && (
                   <button
                     onClick={markAllNotificationsRead}
@@ -332,8 +392,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                       color: "hsl(var(--primary))",
                       fontWeight: 600,
                       cursor: "pointer",
-                    }}
-                  >
+                    }}>
                     Mark all read
                   </button>
                 )}
@@ -344,8 +403,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                     borderRadius: "50%",
                     cursor: "pointer",
                     color: "hsl(var(--text-secondary))",
-                  }}
-                >
+                  }}>
                   <X size={20} />
                 </button>
               </div>
@@ -353,8 +411,16 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
             <div style={{ flexGrow: 1, overflowY: "auto", padding: "16px" }}>
               {notifications.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px 0", color: "hsl(var(--text-muted))" }}>
-                  <Bell size={40} style={{ strokeWidth: 1, marginBottom: "12px" }} />
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px 0",
+                    color: "hsl(var(--text-muted))",
+                  }}>
+                  <Bell
+                    size={40}
+                    style={{ strokeWidth: 1, marginBottom: "12px" }}
+                  />
                   <p>All caught up! No notifications.</p>
                 </div>
               ) : (
@@ -364,7 +430,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                     style={{
                       padding: "14px",
                       borderRadius: "10px",
-                      backgroundColor: notif.isRead ? "transparent" : "hsl(var(--bg-primary))",
+                      backgroundColor: notif.isRead
+                        ? "transparent"
+                        : "hsl(var(--bg-primary))",
                       border: "1px solid hsl(var(--border-color))",
                       marginBottom: "12px",
                       display: "flex",
@@ -372,13 +440,25 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                       gap: "6px",
                       position: "relative",
                       transition: "background var(--transition-fast)",
-                    }}
-                  >
-                    <p style={{ fontSize: "0.875rem", fontWeight: notif.isRead ? 400 : 600 }}>
+                    }}>
+                    <p
+                      style={{
+                        fontSize: "0.875rem",
+                        fontWeight: notif.isRead ? 400 : 600,
+                      }}>
                       {notif.message}
                     </p>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}>
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "hsl(var(--text-muted))",
+                        }}>
                         {new Date(notif.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -395,8 +475,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                             gap: "4px",
                             fontSize: "0.75rem",
                             fontWeight: 600,
-                          }}
-                        >
+                          }}>
                           <CheckCircle size={14} /> Mark read
                         </button>
                       )}
@@ -413,9 +492,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           style={{
             flexGrow: 1,
             overflowY: "auto",
-            padding: "32px",
-          }}
-        >
+            padding: isMobile ? "20px 16px" : "32px",
+            minWidth: "280px",
+          }}>
           {children}
         </main>
       </div>

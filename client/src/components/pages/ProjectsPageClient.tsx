@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import {
   FolderKanban,
   Search,
@@ -64,6 +65,14 @@ export default function ProjectsPageClient({
   const [status, setStatus] = useState("Active");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [formLoading, setFormLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const isEligibleToCreate =
     user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
@@ -190,12 +199,19 @@ export default function ProjectsPageClient({
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this project? This will delete all associated tasks.",
-      )
-    )
-      return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This will delete all associated tasks and cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(var(--danger))",
+      cancelButtonColor: "hsl(var(--border-color))",
+      confirmButtonText: "Yes, delete it!",
+      background: "hsl(var(--bg-secondary))",
+      color: "hsl(var(--text-primary))",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const res = await apiFetch(`/projects/${projectId}`, {
@@ -205,6 +221,7 @@ export default function ProjectsPageClient({
       if (res.success) {
         showToast("Project deleted successfully", "success");
         fetchProjects();
+        router.refresh();
       }
     } catch (err: any) {
       showToast(err.message || "Failed to delete project", "error");
@@ -228,14 +245,14 @@ export default function ProjectsPageClient({
 
   return (
     <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
-      {/* Header Section */}
+      {/* Header Row */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "16px",
+          gap: "20px",
           marginBottom: "32px",
         }}>
         <div>
@@ -283,7 +300,7 @@ export default function ProjectsPageClient({
       <div
         className='glass-panel'
         style={{
-          padding: "16px 24px",
+          padding: isMobile ? "16px" : "16px 24px",
           marginBottom: "32px",
           display: "flex",
           alignItems: "center",

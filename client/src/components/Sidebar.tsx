@@ -9,10 +9,7 @@ import {
   CheckSquare,
   Users,
   LogOut,
-  Moon,
-  Sun,
 } from "lucide-react";
-import { useTheme } from "@/context/ThemeContext";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -20,7 +17,6 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -49,6 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       className='glass-panel'
       style={{
         width: sidebarOpen ? "260px" : "80px",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         borderRadius: 0,
@@ -58,51 +55,53 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
         transition: "width var(--transition-normal)",
         backgroundColor: "hsl(var(--bg-secondary))",
       }}>
-      {/* Sidebar Header Logo */}
+      {/* Logo and Brand */}
       <div
         style={{
-          padding: "24px",
           display: "flex",
           alignItems: "center",
-          gap: "12px",
+          gap: "14px",
+          padding: "24px 16px",
           borderBottom: "1px solid hsl(var(--border-color))",
         }}>
         <div
           className='gradient-bg'
           style={{
-            width: "36px",
-            height: "36px",
-            borderRadius: "8px",
+            width: "40px",
+            height: "40px",
+            borderRadius: "12px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontWeight: 800,
-            fontSize: "1.25rem",
             color: "#fff",
+            boxShadow: "0 4px 12px hsl(var(--primary) / 0.3)",
             flexShrink: 0,
           }}>
-          C
+          <span style={{ fontSize: "1.4rem", fontWeight: 900 }}>C</span>
         </div>
         {sidebarOpen && (
           <span
-            className='gradient-text'
             style={{
-              fontSize: "1.25rem",
+              fontFamily: "var(--font-display)",
+              fontSize: "1.4rem",
               fontWeight: 800,
               letterSpacing: "-0.5px",
+              background: "linear-gradient(135deg, #fff 0%, #a5b4fc 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}>
             CollabSphere
           </span>
         )}
       </div>
 
-      {/* Sidebar Navigation Links */}
+      {/* Navigation Links */}
       <nav
         style={{
-          padding: "24px 12px",
           display: "flex",
           flexDirection: "column",
           gap: "8px",
+          padding: "16px",
           flexGrow: 1,
         }}>
         {navLinks.map((link) => {
@@ -138,106 +137,84 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
             </button>
           );
         })}
+      </nav>
 
-        {/* Theme Toggle Button */}
-        <button
-          onClick={toggleTheme}
+      {/* User Profile Footer */}
+      <div
+        style={{
+          padding: "16px",
+          borderTop: "1px solid hsl(var(--border-color))",
+          marginTop: "auto",
+        }}>
+        <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "14px",
-            padding: "12px 16px",
-            borderRadius: "10px",
-            cursor: "pointer",
-            width: "100%",
-            color: "hsl(var(--text-secondary))",
-            backgroundColor: "transparent",
-            fontWeight: 500,
-            border: "none",
-            textAlign: "left",
-            transition:
-              "background var(--transition-fast), color var(--transition-fast)",
-            marginTop: "auto",
-          }}
-          className='nav-link-hover'>
-          {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
-          {sidebarOpen && (
-            <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
-          )}
-        </button>
-      </nav>
-
-      {/* Sidebar Footer User Profile Summary */}
-      <div
-        style={{
-          padding: "20px 16px",
-          borderTop: "1px solid hsl(var(--border-color))",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: sidebarOpen ? "space-between" : "center",
-          gap: "10px",
-        }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            className='gradient-bg'
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 600,
-              color: "#fff",
-              fontSize: "0.875rem",
-            }}>
-            {user ? getInitials(user.name) : "U"}
-          </div>
-          {sidebarOpen && user && (
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span
-                style={{
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                  maxWidth: "120px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}>
-                {user.name}
-              </span>
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  color: "hsl(var(--text-muted))",
-                  fontWeight: 500,
-                }}>
-                {user.role.replace("_", " ")}
-              </span>
+            justifyContent: sidebarOpen ? "space-between" : "center",
+            gap: "12px",
+            padding: "8px",
+            borderRadius: "12px",
+            backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div
+              className='gradient-bg'
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "0.85rem",
+              }}>
+              {getInitials(user?.name || "User")}
             </div>
+            {sidebarOpen && (
+              <div style={{ overflow: "hidden" }}>
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    fontWeight: 700,
+                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                  }}>
+                  {user?.name}
+                </p>
+                <p
+                  style={{
+                    fontSize: "0.7rem",
+                    color: "hsl(var(--text-muted))",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    fontWeight: 600,
+                  }}>
+                  {user?.role?.replace("_", " ")}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {sidebarOpen && (
+            <button
+              onClick={logout}
+              style={{
+                padding: "8px",
+                borderRadius: "8px",
+                color: "hsl(var(--danger))",
+                cursor: "pointer",
+                border: "none",
+                backgroundColor: "transparent",
+                transition: "background var(--transition-fast)",
+              }}
+              className='nav-link-hover'
+              title='Logout'>
+              <LogOut size={18} />
+            </button>
           )}
         </div>
-        {sidebarOpen && (
-          <button
-            onClick={logout}
-            style={{
-              cursor: "pointer",
-              padding: "8px",
-              borderRadius: "8px",
-              color: "hsl(var(--danger))",
-              border: "none",
-              backgroundColor: "transparent",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor =
-                "hsl(var(--danger) / 0.1)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "transparent")
-            }>
-            <LogOut size={18} />
-          </button>
-        )}
       </div>
     </aside>
   );
