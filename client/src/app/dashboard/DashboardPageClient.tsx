@@ -1,0 +1,565 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { useAuth } from "@/context/AuthContext";
+import {
+  FolderKanban,
+  CheckCircle2,
+  Clock,
+  AlertOctagon,
+  TrendingUp,
+  Activity,
+  Calendar,
+} from "lucide-react";
+
+interface KPIs {
+  totalProjects: number;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  overdueTasks: number;
+}
+
+interface ProjectProgress {
+  projectId: string;
+  name: string;
+  deadline: string;
+  status: string;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  completionRate: number;
+}
+
+interface Workload {
+  member: {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+    picture?: string;
+  };
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+}
+
+interface ChartData {
+  tasksByPriority: { priority: string; count: number }[];
+  taskStatusDistribution: { status: string; count: number }[];
+}
+
+export default function DashboardPageClient() {
+  const { apiFetch, showToast } = useAuth();
+
+  const [kpis, setKpis] = useState<KPIs | null>(null);
+  const [progress, setProgress] = useState<ProjectProgress[]>([]);
+  const [workloads, setWorkloads] = useState<Workload[]>([]);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [kpiRes, progRes, workRes, chartRes, actRes] = await Promise.all([
+          apiFetch("/dashboard/kpis"),
+          apiFetch("/dashboard/project-progress"),
+          apiFetch("/dashboard/workload"),
+          apiFetch("/dashboard/charts"),
+          apiFetch("/activity-logs"),
+        ]);
+
+        if (kpiRes.success) setKpis(kpiRes.data);
+        if (progRes.success) setProgress(progRes.data);
+        if (workRes.success) setWorkloads(workRes.data);
+        if (chartRes.success) setChartData(chartRes.data);
+        if (actRes.success) setActivities(actRes.data);
+      } catch (err: any) {
+        showToast(err.message || "Failed to load dashboard statistics", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div style={{ display: "flex", height: "60vh", alignItems: "center", justifyContent: "center" }}>
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "3px solid hsl(var(--primary) / 0.1)",
+              borderTop: "3px solid hsl(var(--primary))",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <span style={{ marginLeft: "12px", fontWeight: 600 }}>Analyzing workspace data...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Fallback defaults if charts are empty
+  const priorityDistribution = chartData?.tasksByPriority || [];
+  const statusDistribution = chartData?.taskStatusDistribution || [];
+
+  return (
+    <DashboardLayout>
+      <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
+        {/* Header Title */}
+        <div style={{ marginBottom: "32px" }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 800 }}>
+            Workspace Dashboard
+          </h1>
+          <p style={{ color: "hsl(var(--text-secondary))", marginTop: "4px" }}>
+            Real-time project analytics, team workloads, and pending alerts.
+          </p>
+        </div>
+
+        {/* OVERDUE ALERT CARD BANNER */}
+        {kpis && kpis.overdueTasks > 0 && (
+          <div
+            className="glass-panel"
+            style={{
+              backgroundColor: "hsl(var(--danger) / 0.04)",
+              borderColor: "hsl(var(--danger) / 0.3)",
+              padding: "16px 24px",
+              marginBottom: "32px",
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+            }}
+          >
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                backgroundColor: "hsl(var(--danger) / 0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "hsl(var(--danger))",
+              }}
+            >
+              <AlertOctagon size={22} />
+            </div>
+            <div>
+              <h4 style={{ fontWeight: 700, color: "hsl(var(--text-primary))", fontSize: "0.95rem" }}>
+                System Warning: {kpis.overdueTasks} Overdue Task{kpis.overdueTasks > 1 ? "s" : ""} Detected!
+              </h4>
+              <p style={{ color: "hsl(var(--text-secondary))", fontSize: "0.85rem", marginTop: "2px" }}>
+                Some active tasks have passed their scheduled due dates. Please review assignments and adjust priorities.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* KPI CARDS GRID */}
+        <div className="dashboard-grid" style={{ marginBottom: "32px" }}>
+          {/* Card 1 */}
+          <div className="glass-panel glass-panel-hover" style={{ padding: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
+                Active Projects
+              </span>
+              <div
+                style={{
+                  padding: "8px",
+                  borderRadius: "10px",
+                  backgroundColor: "hsl(var(--primary) / 0.1)",
+                  color: "hsl(var(--primary))",
+                }}
+              >
+                <FolderKanban size={20} />
+              </div>
+            </div>
+            <h2 style={{ fontSize: "2rem", fontWeight: 800, marginTop: "16px" }}>
+              {kpis?.totalProjects || 0}
+            </h2>
+            <p style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))", marginTop: "6px" }}>
+              Projects tracked in pipeline
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div className="glass-panel glass-panel-hover" style={{ padding: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
+                Total Task Count
+              </span>
+              <div
+                style={{
+                  padding: "8px",
+                  borderRadius: "10px",
+                  backgroundColor: "hsl(var(--accent) / 0.1)",
+                  color: "hsl(var(--accent))",
+                }}
+              >
+                <TrendingUp size={20} />
+              </div>
+            </div>
+            <h2 style={{ fontSize: "2rem", fontWeight: 800, marginTop: "16px" }}>
+              {kpis?.totalTasks || 0}
+            </h2>
+            <p style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))", marginTop: "6px" }}>
+              Across all project boards
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="glass-panel glass-panel-hover" style={{ padding: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
+                Completed Tasks
+              </span>
+              <div
+                style={{
+                  padding: "8px",
+                  borderRadius: "10px",
+                  backgroundColor: "hsl(var(--success) / 0.1)",
+                  color: "hsl(var(--success))",
+                }}
+              >
+                <CheckCircle2 size={20} />
+              </div>
+            </div>
+            <h2 style={{ fontSize: "2rem", fontWeight: 800, marginTop: "16px" }}>
+              {kpis?.completedTasks || 0}
+            </h2>
+            <p style={{ fontSize: "0.75rem", color: "hsl(var(--success))", fontWeight: 600, marginTop: "6px" }}>
+              {kpis?.totalTasks && kpis.totalTasks > 0
+                ? Math.round((kpis.completedTasks / kpis.totalTasks) * 100)
+                : 0}
+              % Completion Rate
+            </p>
+          </div>
+
+          {/* Card 4 */}
+          <div
+            className="glass-panel glass-panel-hover"
+            style={{
+              padding: "24px",
+              border: kpis && kpis.overdueTasks > 0 ? "1px solid hsl(var(--danger) / 0.3)" : undefined,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
+                Overdue Warning
+              </span>
+              <div
+                style={{
+                  padding: "8px",
+                  borderRadius: "10px",
+                  backgroundColor: kpis && kpis.overdueTasks > 0 ? "hsl(var(--danger) / 0.15)" : "hsl(var(--border-color))",
+                  color: kpis && kpis.overdueTasks > 0 ? "hsl(var(--danger))" : "hsl(var(--text-secondary))",
+                }}
+              >
+                <Clock size={20} />
+              </div>
+            </div>
+            <h2
+              style={{
+                fontSize: "2rem",
+                fontWeight: 800,
+                marginTop: "16px",
+                color: kpis && kpis.overdueTasks > 0 ? "hsl(var(--danger))" : "inherit",
+              }}
+            >
+              {kpis?.overdueTasks || 0}
+            </h2>
+            <p style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))", marginTop: "6px" }}>
+              Tasks requiring attention
+            </p>
+          </div>
+        </div>
+
+        {/* TWO-COLUMN GRAPH & CHARTS ROW */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+            gap: "32px",
+            marginBottom: "32px",
+          }}
+        >
+          {/* Status Distribution Custom SVG Chart */}
+          <div className="glass-panel" style={{ padding: "30px" }}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: 700, marginBottom: "24px" }}>
+              Task Status Distribution
+            </h3>
+            {statusDistribution.length === 0 ? (
+              <p style={{ color: "hsl(var(--text-muted))", fontSize: "0.875rem" }}>
+                No task state data available yet.
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                {statusDistribution.map((item) => {
+                  const maxCount = Math.max(...statusDistribution.map((i) => i.count)) || 1;
+                  const percent = Math.round((item.count / maxCount) * 100);
+                  let barColor = "hsl(var(--primary))";
+                  if (item.status === "Completed") barColor = "hsl(var(--success))";
+                  if (item.status === "Todo") barColor = "hsl(var(--text-muted))";
+
+                  return (
+                    <div key={item.status} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem" }}>
+                        <span style={{ fontWeight: 600 }}>{item.status}</span>
+                        <span style={{ color: "hsl(var(--text-secondary))", fontWeight: 700 }}>
+                          {item.count} task{item.count !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: "10px",
+                          width: "100%",
+                          borderRadius: "5px",
+                          backgroundColor: "hsl(var(--border-color))",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${percent}%`,
+                            borderRadius: "5px",
+                            backgroundColor: barColor,
+                            transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Priority Distribution Custom SVG Chart */}
+          <div className="glass-panel" style={{ padding: "30px" }}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: 700, marginBottom: "24px" }}>
+              Task Priority Breakdown
+            </h3>
+            {priorityDistribution.length === 0 ? (
+              <p style={{ color: "hsl(var(--text-muted))", fontSize: "0.875rem" }}>
+                No task priority data available yet.
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                {priorityDistribution.map((item) => {
+                  const maxCount = Math.max(...priorityDistribution.map((i) => i.count)) || 1;
+                  const percent = Math.round((item.count / maxCount) * 100);
+                  let barColor = "hsl(var(--primary))";
+                  if (item.priority === "High") barColor = "hsl(var(--danger))";
+                  if (item.priority === "Medium") barColor = "hsl(var(--warning))";
+                  if (item.priority === "Low") barColor = "hsl(var(--success))";
+
+                  return (
+                    <div key={item.priority} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem" }}>
+                        <span style={{ fontWeight: 600 }}>{item.priority} Priority</span>
+                        <span style={{ color: "hsl(var(--text-secondary))", fontWeight: 700 }}>
+                          {item.count} task{item.count !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: "10px",
+                          width: "100%",
+                          borderRadius: "5px",
+                          backgroundColor: "hsl(var(--border-color))",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${percent}%`,
+                            borderRadius: "5px",
+                            backgroundColor: barColor,
+                            transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* WORKLOAD & ACTIVITIES ROW */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+            gap: "32px",
+          }}
+        >
+          {/* Member Workload Summary */}
+          <div className="glass-panel" style={{ padding: "30px" }}>
+            <h3 style={{ fontSize: "1.125rem", fontWeight: 700, marginBottom: "24px" }}>
+              Member Workload Balance
+            </h3>
+            {workloads.length === 0 ? (
+              <p style={{ color: "hsl(var(--text-muted))", fontSize: "0.875rem" }}>
+                No active team members with assigned tasks.
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                {workloads.map((item) => {
+                  const rate =
+                    item.totalTasks > 0 ? Math.round((item.completedTasks / item.totalTasks) * 100) : 0;
+                  return (
+                    <div
+                      key={item.member._id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                        paddingBottom: "14px",
+                        borderBottom: "1px solid hsl(var(--border-color) / 0.5)",
+                      }}
+                    >
+                      <div
+                        className="gradient-bg"
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: "0.8rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {item.member.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                      </div>
+                      <div style={{ flexGrow: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <div>
+                            <p style={{ fontSize: "0.875rem", fontWeight: 700 }}>{item.member.name}</p>
+                            <p style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))" }}>
+                              {item.member.role.replace("_", " ")}
+                            </p>
+                          </div>
+                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
+                            {item.completedTasks}/{item.totalTasks} Tasks ({rate}%)
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            height: "6px",
+                            backgroundColor: "hsl(var(--border-color))",
+                            borderRadius: "3px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div
+                            style={{
+                              height: "100%",
+                              width: `${rate}%`,
+                              backgroundColor: "hsl(var(--success))",
+                              borderRadius: "3px",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Recent System Activity Logs */}
+          <div className="glass-panel" style={{ padding: "30px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
+              <Activity size={20} style={{ color: "hsl(var(--primary))" }} />
+              <h3 style={{ fontSize: "1.125rem", fontWeight: 700 }}>Timeline Activity Logs</h3>
+            </div>
+            {activities.length === 0 ? (
+              <p style={{ color: "hsl(var(--text-muted))", fontSize: "0.875rem" }}>
+                No recent activity recorded in workspace.
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                {activities.map((act) => (
+                  <div
+                    key={act._id}
+                    style={{
+                      display: "flex",
+                      gap: "14px",
+                      position: "relative",
+                      paddingBottom: "4px",
+                    }}
+                  >
+                    {/* Circle icon */}
+                    <div
+                      style={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: "hsl(var(--primary))",
+                        marginTop: "5px",
+                        flexShrink: 0,
+                        boxShadow: "0 0 0 4px hsl(var(--primary) / 0.1)",
+                      }}
+                    />
+                    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                      <p style={{ fontSize: "0.85rem", color: "hsl(var(--text-primary))", fontWeight: 550 }}>
+                        {act.action}
+                      </p>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))", fontWeight: 500 }}>
+                          By {act.user?.name || "System"}
+                        </span>
+                        <span style={{ fontSize: "0.75rem", color: "hsl(var(--text-muted))" }}>•</span>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            color: "hsl(var(--text-muted))",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          <Calendar size={12} />
+                          {new Date(act.createdAt).toLocaleDateString([], {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
