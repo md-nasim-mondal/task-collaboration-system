@@ -52,13 +52,21 @@ interface Task {
   comments: Comment[];
 }
 
-export default function TasksPageClient() {
+export default function TasksPageClient({
+  initialTasks,
+  initialProjects,
+  initialTeamMembers,
+}: {
+  initialTasks: Task[];
+  initialProjects: Project[];
+  initialTeamMembers: Member[];
+}) {
   const { apiFetch, showToast, user } = useAuth();
 
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [teamMembers, setTeamMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
+  const [projects, setProjects] = useState<Project[]>(initialProjects || []);
+  const [teamMembers, setTeamMembers] = useState<Member[]>(initialTeamMembers || []);
+  const [loading, setLoading] = useState(false);
 
   // Filter and Sort States
   const [searchTerm, setSearchTerm] = useState("");
@@ -124,6 +132,18 @@ export default function TasksPageClient() {
   };
 
   useEffect(() => {
+    if (
+      initialTasks &&
+      !searchTerm &&
+      !statusFilter &&
+      !priorityFilter &&
+      !projectFilter &&
+      !assigneeFilter &&
+      !deadlineStatusFilter &&
+      sortOption === "-createdAt"
+    ) {
+      return;
+    }
     fetchTasks();
   }, [
     searchTerm,
@@ -136,7 +156,9 @@ export default function TasksPageClient() {
   ]);
 
   useEffect(() => {
-    fetchMetaOptions();
+    if (projects.length === 0 || teamMembers.length === 0) {
+      fetchMetaOptions();
+    }
   }, []);
 
   const handleOpenTask = async (task: Task) => {

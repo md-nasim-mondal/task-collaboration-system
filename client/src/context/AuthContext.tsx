@@ -171,6 +171,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("token", accessToken);
         localStorage.setItem("user", JSON.stringify(loggedUser));
         
+        // Set cookie for Next.js Server Components and Server Actions
+        document.cookie = `accessToken=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
+        
         setToken(accessToken);
         setUser(loggedUser);
 
@@ -226,6 +229,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    
+    // Clear cookie
+    document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    
     setToken(null);
     setUser(null);
     setNotifications([]);

@@ -50,17 +50,33 @@ interface ChartData {
   taskStatusDistribution: { status: string; count: number }[];
 }
 
-export default function DashboardPageClient() {
+export default function DashboardPageClient({
+  initialKpis,
+  initialProgress,
+  initialWorkloads,
+  initialChartData,
+  initialActivities,
+}: {
+  initialKpis: KPIs | null;
+  initialProgress: ProjectProgress[];
+  initialWorkloads: Workload[];
+  initialChartData: ChartData | null;
+  initialActivities: any[];
+}) {
   const { apiFetch, showToast } = useAuth();
 
-  const [kpis, setKpis] = useState<KPIs | null>(null);
-  const [progress, setProgress] = useState<ProjectProgress[]>([]);
-  const [workloads, setWorkloads] = useState<Workload[]>([]);
-  const [chartData, setChartData] = useState<ChartData | null>(null);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [kpis, setKpis] = useState<KPIs | null>(initialKpis);
+  const [progress, setProgress] = useState<ProjectProgress[]>(initialProgress || []);
+  const [workloads, setWorkloads] = useState<Workload[]>(initialWorkloads || []);
+  const [chartData, setChartData] = useState<ChartData | null>(initialChartData);
+  const [activities, setActivities] = useState<any[]>(initialActivities || []);
+  const [loading, setLoading] = useState(!initialKpis);
 
   useEffect(() => {
+    if (initialKpis) {
+      return;
+    }
+
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
@@ -88,7 +104,7 @@ export default function DashboardPageClient() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [initialKpis]);
 
   if (loading) {
     return (

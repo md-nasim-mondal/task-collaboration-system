@@ -51,15 +51,25 @@ interface UserOption {
   role: string;
 }
 
-export default function ProjectDetailPageClient() {
-  const { id } = useParams() as { id: string };
+export default function ProjectDetailPageClient({
+  projectId,
+  initialProject,
+  initialTasks,
+  initialUsers,
+}: {
+  projectId: string;
+  initialProject: Project | null;
+  initialTasks: Task[];
+  initialUsers: UserOption[];
+}) {
+  const id = projectId;
   const { apiFetch, showToast, user } = useAuth();
   const router = useRouter();
 
-  const [project, setProject] = useState<Project | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [userOptions, setUserOptions] = useState<UserOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [project, setProject] = useState<Project | null>(initialProject);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
+  const [userOptions, setUserOptions] = useState<UserOption[]>(initialUsers || []);
+  const [loading, setLoading] = useState(!initialProject);
 
   // Modals States
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -109,13 +119,16 @@ export default function ProjectDetailPageClient() {
   };
 
   useEffect(() => {
+    if (initialProject) {
+      return;
+    }
     if (id) {
       fetchProjectDetails();
       if (isManager) {
         fetchInviteOptions();
       }
     }
-  }, [id]);
+  }, [id, initialProject]);
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();

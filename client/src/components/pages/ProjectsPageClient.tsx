@@ -37,13 +37,19 @@ interface MemberOption {
   role: string;
 }
 
-export default function ProjectsPageClient() {
+export default function ProjectsPageClient({
+  initialProjects,
+  initialMembers,
+}: {
+  initialProjects: Project[];
+  initialMembers: MemberOption[];
+}) {
   const { apiFetch, showToast, user } = useAuth();
   const router = useRouter();
 
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [memberOptions, setMemberOptions] = useState<MemberOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>(initialProjects || []);
+  const [memberOptions, setMemberOptions] = useState<MemberOption[]>(initialMembers || []);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -87,11 +93,17 @@ export default function ProjectsPageClient() {
   };
 
   useEffect(() => {
+    if (initialProjects && !searchTerm && !statusFilter) {
+      return;
+    }
     fetchProjects();
-    if (isEligibleToCreate) {
+  }, [searchTerm, statusFilter]);
+
+  useEffect(() => {
+    if (isModalOpen && memberOptions.length === 0 && isEligibleToCreate) {
       fetchMembers();
     }
-  }, [searchTerm, statusFilter]);
+  }, [isModalOpen]);
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
