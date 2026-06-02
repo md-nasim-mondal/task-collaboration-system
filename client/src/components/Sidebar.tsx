@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   CheckSquare,
+  Users,
   LogOut,
   Moon,
   Sun,
@@ -40,6 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
     },
     { name: "Projects", href: "/projects", icon: <FolderKanban size={20} /> },
     { name: "Tasks Center", href: "/tasks", icon: <CheckSquare size={20} /> },
+    { name: "Team Members", href: "/members", icon: <Users size={20} /> },
   ];
 
   return (

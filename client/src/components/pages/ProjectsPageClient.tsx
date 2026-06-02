@@ -98,10 +98,14 @@ export default function ProjectsPageClient({
   };
 
   useEffect(() => {
-    if (initialProjects && !searchTerm && !statusFilter) {
-      return;
-    }
-    fetchProjects();
+    const timer = setTimeout(() => {
+      if (initialProjects && !searchTerm && !statusFilter) {
+        return;
+      }
+      fetchProjects();
+    }, 400); // Debounce search
+
+    return () => clearTimeout(timer);
   }, [searchTerm, statusFilter]);
 
   useEffect(() => {
@@ -172,6 +176,7 @@ export default function ProjectsPageClient({
         );
         setIsModalOpen(false);
         fetchProjects();
+        router.refresh();
       }
     } catch (err: any) {
       showToast(

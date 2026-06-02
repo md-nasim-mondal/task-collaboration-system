@@ -13,7 +13,9 @@ import {
   Folder,
   X,
   Send,
+  Plus,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Member {
   _id: string;
@@ -61,6 +63,7 @@ export default function TasksPageClient({
   initialTeamMembers: Member[];
 }) {
   const { apiFetch, showToast, user } = useAuth();
+  const router = useRouter();
 
   const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
   const [projects, setProjects] = useState<Project[]>(initialProjects || []);
@@ -93,6 +96,16 @@ export default function TasksPageClient({
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [editDueDate, setEditDueDate] = useState("");
+
+  // Create Task Modal States
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+  const [newProject, setNewProject] = useState("");
+  const [newAssignee, setNewAssignee] = useState("");
+  const [newPriority, setNewPriority] = useState("Medium");
+  const [newDueDate, setNewDueDate] = useState("");
+  const [createLoading, setCreateLoading] = useState(false);
 
   const isManager = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
 
@@ -134,19 +147,23 @@ export default function TasksPageClient({
   };
 
   useEffect(() => {
-    if (
-      initialTasks &&
-      !searchTerm &&
-      !statusFilter &&
-      !priorityFilter &&
-      !projectFilter &&
-      !assigneeFilter &&
-      !deadlineStatusFilter &&
-      sortOption === "-createdAt"
-    ) {
-      return;
-    }
-    fetchTasks();
+    const timer = setTimeout(() => {
+      if (
+        initialTasks &&
+        !searchTerm &&
+        !statusFilter &&
+        !priorityFilter &&
+        !projectFilter &&
+        !assigneeFilter &&
+        !deadlineStatusFilter &&
+        sortOption === "-createdAt"
+      ) {
+        return;
+      }
+      fetchTasks();
+    }, 400); // Debounce search
+
+    return () => clearTimeout(timer);
   }, [
     searchTerm,
     statusFilter,
@@ -162,6 +179,74 @@ export default function TasksPageClient({
       fetchMetaOptions();
     }
   }, []);
+
+  const handleQuickStatusUpdate = async (taskId: string, newStatus: string) => {
+    try {
+      const res = await apiFetch(`/tasks/${taskId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.success) {
+        showToast("Status updated", "success");
+        fetchTasks();
+        router.refresh();
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to update status", "error");
+    }
+  };
+
+  const handleCreateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle || !newProject || !newAssignee || !newDueDate) {
+      showToast("Please fill all required fields", "error");
+      return;
+    }
+
+    // Date check
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    if (new Date(newDueDate) < now) {
+      showToast("Please select a valid deadline.", "error");
+      return;
+    }
+
+    try {
+      setCreateLoading(true);
+      const payload = {
+        title: newTitle,
+        description: newDesc,
+        project: newProject,
+        assignedMember: newAssignee,
+        priority: newPriority,
+        dueDate: newDueDate,
+      };
+
+      const res = await apiFetch("/tasks", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      if (res.success) {
+        showToast("Task created successfully!", "success");
+        setIsCreateModalOpen(false);
+        // Reset form
+        setNewTitle("");
+        setNewDesc("");
+        setNewProject("");
+        setNewAssignee("");
+        setNewPriority("Medium");
+        setNewDueDate("");
+        fetchTasks();
+        router.refresh();
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to create task", "error");
+    } finally {
+      setCreateLoading(false);
+    }
+  };
 
   const handleOpenTask = async (task: Task) => {
     try {
@@ -233,6 +318,7 @@ export default function TasksPageClient({
         showToast("Task updated successfully!", "success");
         setIsTaskModalOpen(false);
         fetchTasks();
+        router.refresh();
       }
     } catch (err: any) {
       showToast(err.message || "Failed to update task", "error");
@@ -302,6 +388,7 @@ export default function TasksPageClient({
         showToast("Task deleted successfully", "success");
         setIsTaskModalOpen(false);
         fetchTasks();
+        router.refresh();
       }
     } catch (err: any) {
       showToast(err.message || "Failed to delete task", "error");
@@ -317,18 +404,47 @@ export default function TasksPageClient({
   return (
     <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
       {/* Header Section */}
-      <div style={{ marginBottom: "32px" }}>
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "2rem",
-            fontWeight: 800,
-          }}>
-          Tasks Center
-        </h1>
-        <p style={{ color: "hsl(var(--text-secondary))", marginTop: "4px" }}>
-          Search task lists, filter parameters, and collaborate on assignments.
-        </p>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "16px",
+          marginBottom: "32px",
+        }}>
+        <div>
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "2rem",
+              fontWeight: 800,
+            }}>
+            Tasks Center
+          </h1>
+          <p style={{ color: "hsl(var(--text-secondary))", marginTop: "4px" }}>
+            Search task lists, filter parameters, and collaborate on
+            assignments.
+          </p>
+        </div>
+        {isManager && (
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className='gradient-bg'
+            style={{
+              padding: "12px 24px",
+              borderRadius: "10px",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+              boxShadow: "0 4px 12px hsl(var(--primary) / 0.25)",
+            }}>
+            <Plus size={18} />
+            <span>Create Task</span>
+          </button>
+        )}
       </div>
 
       {/* CONTROLS ROW */}
@@ -708,11 +824,43 @@ export default function TasksPageClient({
                           {overdue && " (Overdue)"}
                         </span>
                       </td>
-                      <td style={{ padding: "16px 20px" }}>
-                        <span
-                          className={`badge badge-${task.status === "Completed" ? "completed" : task.status === "In Progress" ? "progress" : "todo"}`}>
-                          {task.status}
-                        </span>
+                      <td
+                        style={{ padding: "16px 20px" }}
+                        onClick={(e) => e.stopPropagation()}>
+                        <select
+                          disabled={
+                            !(
+                              isManager || task.assignedMember?._id === user?.id
+                            )
+                          }
+                          value={task.status}
+                          onChange={(e) =>
+                            handleQuickStatusUpdate(task._id, e.target.value)
+                          }
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                            border: "1px solid hsl(var(--border-color))",
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            backgroundColor:
+                              task.status === "Completed"
+                                ? "hsl(var(--success) / 0.1)"
+                                : task.status === "In Progress"
+                                  ? "hsl(var(--warning) / 0.1)"
+                                  : "hsl(var(--bg-secondary))",
+                            color:
+                              task.status === "Completed"
+                                ? "hsl(var(--success))"
+                                : task.status === "In Progress"
+                                  ? "hsl(var(--warning-text))"
+                                  : "inherit",
+                          }}>
+                          <option value='Todo'>Todo</option>
+                          <option value='In Progress'>In Progress</option>
+                          <option value='Completed'>Completed</option>
+                        </select>
                       </td>
                     </tr>
                   );
@@ -1457,6 +1605,246 @@ export default function TasksPageClient({
                 </form>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* CREATE TASK MODAL */}
+      {isCreateModalOpen && (
+        <div
+          className='modal-overlay'
+          onClick={() => setIsCreateModalOpen(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+            backdropFilter: "blur(4px)",
+          }}>
+          <div
+            className='glass-panel modal-content'
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: "600px",
+              padding: "32px",
+              position: "relative",
+              animation: "slideUp 0.3s ease-out",
+            }}>
+            <button
+              onClick={() => setIsCreateModalOpen(false)}
+              style={{
+                position: "absolute",
+                top: "20px",
+                right: "20px",
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+                color: "hsl(var(--text-secondary))",
+              }}>
+              <X size={24} />
+            </button>
+
+            <h2
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "1.5rem",
+                fontWeight: 700,
+                marginBottom: "24px",
+              }}>
+              Create New Task
+            </h2>
+
+            <form
+              onSubmit={handleCreateTask}
+              style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                  Task Title *
+                </label>
+                <input
+                  type='text'
+                  required
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder='e.g. Implement API Authentication'
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    border: "1px solid hsl(var(--border-color))",
+                    backgroundColor: "hsl(var(--bg-primary))",
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                  Description
+                </label>
+                <textarea
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  placeholder='Detailed instructions for the task...'
+                  rows={3}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    border: "1px solid hsl(var(--border-color))",
+                    backgroundColor: "hsl(var(--bg-primary))",
+                    resize: "none",
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "16px",
+                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}>
+                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                    Project *
+                  </label>
+                  <select
+                    required
+                    value={newProject}
+                    onChange={(e) => setNewProject(e.target.value)}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid hsl(var(--border-color))",
+                      backgroundColor: "hsl(var(--bg-primary))",
+                    }}>
+                    <option value=''>Select Project</option>
+                    {projects.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}>
+                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                    Assign To *
+                  </label>
+                  <select
+                    required
+                    value={newAssignee}
+                    onChange={(e) => setNewAssignee(e.target.value)}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid hsl(var(--border-color))",
+                      backgroundColor: "hsl(var(--bg-primary))",
+                    }}>
+                    <option value=''>Select Member</option>
+                    {teamMembers.map((m) => (
+                      <option key={m._id} value={m._id}>
+                        {m.name} ({m.role.replace("_", " ")})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "16px",
+                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}>
+                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                    Priority
+                  </label>
+                  <select
+                    value={newPriority}
+                    onChange={(e) => setNewPriority(e.target.value)}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid hsl(var(--border-color))",
+                      backgroundColor: "hsl(var(--bg-primary))",
+                    }}>
+                    <option value='High'>High</option>
+                    <option value='Medium'>Medium</option>
+                    <option value='Low'>Low</option>
+                  </select>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}>
+                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                    Due Date *
+                  </label>
+                  <input
+                    type='date'
+                    required
+                    value={newDueDate}
+                    onChange={(e) => setNewDueDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid hsl(var(--border-color))",
+                      backgroundColor: "hsl(var(--bg-primary))",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type='submit'
+                disabled={createLoading}
+                className='gradient-bg'
+                style={{
+                  marginTop: "12px",
+                  padding: "14px",
+                  borderRadius: "10px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px hsl(var(--primary) / 0.2)",
+                }}>
+                {createLoading ? "Creating..." : "Create Task"}
+              </button>
+            </form>
           </div>
         </div>
       )}
