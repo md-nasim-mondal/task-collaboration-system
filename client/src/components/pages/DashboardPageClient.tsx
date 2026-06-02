@@ -66,8 +66,11 @@ export default function DashboardPageClient({
   initialChartData: ChartData | null;
   initialActivities: any[];
 }) {
-  const { apiFetch, showToast } = useAuth();
+  const { user, apiFetch, showToast } = useAuth();
   const router = useRouter();
+
+  const isAdminOrManager =
+    user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
 
   const [kpis, setKpis] = useState<KPIs | null>(initialKpis);
   const [progress, setProgress] = useState<ProjectProgress[]>(
@@ -164,7 +167,7 @@ export default function DashboardPageClient({
             fontSize: isMobile ? "1.5rem" : "2rem",
             fontWeight: 800,
           }}>
-          Workspace Dashboard
+          Welcome back, {user?.name?.split(" ")[0] || "User"}!
         </h1>
         <p
           style={{
@@ -172,7 +175,9 @@ export default function DashboardPageClient({
             marginTop: "4px",
             fontSize: isMobile ? "0.85rem" : "1rem",
           }}>
-          Real-time project analytics, team workloads, and pending alerts.
+          {isAdminOrManager
+            ? "Real-time project analytics, team workloads, and pending alerts."
+            : "Here's an overview of your assigned tasks and project progress."}
         </p>
       </div>
 
@@ -561,220 +566,223 @@ export default function DashboardPageClient({
       </div>
 
       {/* TWO-COLUMN GRAPH & CHARTS ROW */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile
-            ? "1fr"
-            : "repeat(auto-fit, minmax(400px, 1fr))",
-          gap: "32px",
-          marginBottom: "32px",
-        }}>
-        {/* Status Distribution Custom SVG Chart */}
-        <div className='glass-panel' style={{ padding: "30px" }}>
-          <h3
-            style={{
-              fontSize: "1.125rem",
-              fontWeight: 700,
-              marginBottom: "24px",
-            }}>
-            Task Status Distribution
-          </h3>
-          {statusDistribution.length === 0 ? (
-            <div
+      {isAdminOrManager && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "repeat(auto-fit, minmax(400px, 1fr))",
+            gap: "32px",
+            marginBottom: "32px",
+          }}>
+          {/* Status Distribution Custom SVG Chart */}
+          <div className='glass-panel' style={{ padding: "30px" }}>
+            <h3
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "200px",
-                gap: "12px",
-                color: "hsl(var(--text-muted))",
+                fontSize: "1.125rem",
+                fontWeight: 700,
+                marginBottom: "24px",
               }}>
+              Task Status Distribution
+            </h3>
+            {statusDistribution.length === 0 ? (
               <div
                 style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "12px",
-                  backgroundColor: "hsl(var(--bg-secondary))",
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
+                  height: "200px",
+                  gap: "12px",
+                  color: "hsl(var(--text-muted))",
                 }}>
-                <CheckSquare size={24} />
+                <div
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "12px",
+                    backgroundColor: "hsl(var(--bg-secondary))",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                  <CheckSquare size={24} />
+                </div>
+                <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+                  No task state data available yet.
+                </p>
               </div>
-              <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
-                No task state data available yet.
-              </p>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "18px",
-              }}>
-              {statusDistribution.map((item) => {
-                const maxCount =
-                  Math.max(...statusDistribution.map((i) => i.count)) || 1;
-                const percent = Math.round((item.count / maxCount) * 100);
-                let barColor = "hsl(var(--primary))";
-                if (item.status === "Completed")
-                  barColor = "hsl(var(--success))";
-                if (item.status === "Todo") barColor = "hsl(var(--text-muted))";
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "18px",
+                }}>
+                {statusDistribution.map((item) => {
+                  const maxCount =
+                    Math.max(...statusDistribution.map((i) => i.count)) || 1;
+                  const percent = Math.round((item.count / maxCount) * 100);
+                  let barColor = "hsl(var(--primary))";
+                  if (item.status === "Completed")
+                    barColor = "hsl(var(--success))";
+                  if (item.status === "Todo")
+                    barColor = "hsl(var(--text-muted))";
 
-                return (
-                  <div
-                    key={item.status}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "6px",
-                    }}>
+                  return (
                     <div
+                      key={item.status}
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "0.85rem",
-                      }}>
-                      <span style={{ fontWeight: 600 }}>{item.status}</span>
-                      <span
-                        style={{
-                          color: "hsl(var(--text-secondary))",
-                          fontWeight: 700,
-                        }}>
-                        {item.count} task{item.count !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        height: "10px",
-                        width: "100%",
-                        borderRadius: "5px",
-                        backgroundColor: "hsl(var(--border-color))",
-                        overflow: "hidden",
+                        flexDirection: "column",
+                        gap: "6px",
                       }}>
                       <div
                         style={{
-                          height: "100%",
-                          width: `${percent}%`,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          fontSize: "0.85rem",
+                        }}>
+                        <span style={{ fontWeight: 600 }}>{item.status}</span>
+                        <span
+                          style={{
+                            color: "hsl(var(--text-secondary))",
+                            fontWeight: 700,
+                          }}>
+                          {item.count} task{item.count !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: "10px",
+                          width: "100%",
                           borderRadius: "5px",
-                          backgroundColor: barColor,
-                          transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
-                        }}
-                      />
+                          backgroundColor: "hsl(var(--border-color))",
+                          overflow: "hidden",
+                        }}>
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${percent}%`,
+                            borderRadius: "5px",
+                            backgroundColor: barColor,
+                            transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-        {/* Priority Distribution Custom SVG Chart */}
-        <div className='glass-panel' style={{ padding: "30px" }}>
-          <h3
-            style={{
-              fontSize: "1.125rem",
-              fontWeight: 700,
-              marginBottom: "24px",
-            }}>
-            Task Priority Breakdown
-          </h3>
-          {priorityDistribution.length === 0 ? (
-            <div
+          {/* Priority Distribution Custom SVG Chart */}
+          <div className='glass-panel' style={{ padding: "30px" }}>
+            <h3
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "200px",
-                gap: "12px",
-                color: "hsl(var(--text-muted))",
+                fontSize: "1.125rem",
+                fontWeight: 700,
+                marginBottom: "24px",
               }}>
+              Task Priority Breakdown
+            </h3>
+            {priorityDistribution.length === 0 ? (
               <div
                 style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "12px",
-                  backgroundColor: "hsl(var(--bg-secondary))",
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
+                  height: "200px",
+                  gap: "12px",
+                  color: "hsl(var(--text-muted))",
                 }}>
-                <BarChart3 size={24} />
+                <div
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "12px",
+                    backgroundColor: "hsl(var(--bg-secondary))",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                  <BarChart3 size={24} />
+                </div>
+                <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+                  No task priority data available yet.
+                </p>
               </div>
-              <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
-                No task priority data available yet.
-              </p>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "18px",
-              }}>
-              {priorityDistribution.map((item) => {
-                const maxCount =
-                  Math.max(...priorityDistribution.map((i) => i.count)) || 1;
-                const percent = Math.round((item.count / maxCount) * 100);
-                let barColor = "hsl(var(--primary))";
-                if (item.priority === "High") barColor = "hsl(var(--danger))";
-                if (item.priority === "Medium")
-                  barColor = "hsl(var(--warning))";
-                if (item.priority === "Low") barColor = "hsl(var(--success))";
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "18px",
+                }}>
+                {priorityDistribution.map((item) => {
+                  const maxCount =
+                    Math.max(...priorityDistribution.map((i) => i.count)) || 1;
+                  const percent = Math.round((item.count / maxCount) * 100);
+                  let barColor = "hsl(var(--primary))";
+                  if (item.priority === "High") barColor = "hsl(var(--danger))";
+                  if (item.priority === "Medium")
+                    barColor = "hsl(var(--warning))";
+                  if (item.priority === "Low") barColor = "hsl(var(--success))";
 
-                return (
-                  <div
-                    key={item.priority}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "6px",
-                    }}>
+                  return (
                     <div
+                      key={item.priority}
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "0.85rem",
-                      }}>
-                      <span style={{ fontWeight: 600 }}>
-                        {item.priority} Priority
-                      </span>
-                      <span
-                        style={{
-                          color: "hsl(var(--text-secondary))",
-                          fontWeight: 700,
-                        }}>
-                        {item.count} task{item.count !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        height: "10px",
-                        width: "100%",
-                        borderRadius: "5px",
-                        backgroundColor: "hsl(var(--border-color))",
-                        overflow: "hidden",
+                        flexDirection: "column",
+                        gap: "6px",
                       }}>
                       <div
                         style={{
-                          height: "100%",
-                          width: `${percent}%`,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          fontSize: "0.85rem",
+                        }}>
+                        <span style={{ fontWeight: 600 }}>
+                          {item.priority} Priority
+                        </span>
+                        <span
+                          style={{
+                            color: "hsl(var(--text-secondary))",
+                            fontWeight: 700,
+                          }}>
+                          {item.count} task{item.count !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: "10px",
+                          width: "100%",
                           borderRadius: "5px",
-                          backgroundColor: barColor,
-                          transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
-                        }}
-                      />
+                          backgroundColor: "hsl(var(--border-color))",
+                          overflow: "hidden",
+                        }}>
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${percent}%`,
+                            borderRadius: "5px",
+                            backgroundColor: barColor,
+                            transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* WORKLOAD & ACTIVITIES ROW */}
       <div
@@ -782,123 +790,131 @@ export default function DashboardPageClient({
           display: "grid",
           gridTemplateColumns: isMobile
             ? "1fr"
-            : "repeat(auto-fit, minmax(400px, 1fr))",
+            : isAdminOrManager
+              ? "repeat(auto-fit, minmax(400px, 1fr))"
+              : "1fr",
           gap: "32px",
         }}>
-        {/* Member Workload Summary */}
-        <div className='glass-panel' style={{ padding: "30px" }}>
-          <h3
-            style={{
-              fontSize: "1.125rem",
-              fontWeight: 700,
-              marginBottom: "24px",
-            }}>
-            Member Workload Balance
-          </h3>
-          {workloads.length === 0 ? (
-            <p
+        {/* Member Workload Summary - Only for Admin/Manager */}
+        {isAdminOrManager && (
+          <div className='glass-panel' style={{ padding: "30px" }}>
+            <h3
               style={{
-                color: "hsl(var(--text-muted))",
-                fontSize: "0.875rem",
+                fontSize: "1.125rem",
+                fontWeight: 700,
+                marginBottom: "24px",
               }}>
-              No active team members with assigned tasks.
-            </p>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-              }}>
-              {workloads.map((item) => {
-                const rate =
-                  item.totalTasks > 0
-                    ? Math.round((item.completedTasks / item.totalTasks) * 100)
-                    : 0;
-                return (
-                  <div
-                    key={item.member._id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "16px",
-                      paddingBottom: "14px",
-                      borderBottom: "1px solid hsl(var(--border-color) / 0.5)",
-                    }}>
+              Member Workload Balance
+            </h3>
+            {workloads.length === 0 ? (
+              <p
+                style={{
+                  color: "hsl(var(--text-muted))",
+                  fontSize: "0.875rem",
+                }}>
+                No active team members with assigned tasks.
+              </p>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}>
+                {workloads.map((item) => {
+                  const rate =
+                    item.totalTasks > 0
+                      ? Math.round(
+                          (item.completedTasks / item.totalTasks) * 100,
+                        )
+                      : 0;
+                  return (
                     <div
-                      className='gradient-bg'
+                      key={item.member._id}
                       style={{
-                        width: "36px",
-                        height: "36px",
-                        borderRadius: "50%",
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        color: "#fff",
-                        fontWeight: 700,
-                        fontSize: "0.8rem",
-                        flexShrink: 0,
+                        gap: "16px",
+                        paddingBottom: "14px",
+                        borderBottom:
+                          "1px solid hsl(var(--border-color) / 0.5)",
                       }}>
-                      {item.member.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                        .slice(0, 2)}
-                    </div>
-                    <div style={{ flexGrow: 1 }}>
                       <div
+                        className='gradient-bg'
                         style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
                           display: "flex",
-                          justifyContent: "space-between",
                           alignItems: "center",
-                          marginBottom: "6px",
+                          justifyContent: "center",
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: "0.8rem",
+                          flexShrink: 0,
                         }}>
-                        <div>
-                          <p style={{ fontSize: "0.875rem", fontWeight: 700 }}>
-                            {item.member.name}
-                          </p>
-                          <p
-                            style={{
-                              fontSize: "0.75rem",
-                              color: "hsl(var(--text-muted))",
-                            }}>
-                            {item.member.role.replace("_", " ")}
-                          </p>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            color: "hsl(var(--primary))",
-                          }}>
-                          {item.completedTasks}/{item.totalTasks} Tasks ({rate}
-                          %)
-                        </span>
+                        {item.member.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
                       </div>
-                      <div
-                        style={{
-                          height: "6px",
-                          backgroundColor: "hsl(var(--border-color))",
-                          borderRadius: "3px",
-                          overflow: "hidden",
-                        }}>
+                      <div style={{ flexGrow: 1 }}>
                         <div
                           style={{
-                            height: "100%",
-                            width: `${rate}%`,
-                            backgroundColor: "hsl(var(--success))",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "6px",
+                          }}>
+                          <div>
+                            <p
+                              style={{ fontSize: "0.875rem", fontWeight: 700 }}>
+                              {item.member.name}
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "0.75rem",
+                                color: "hsl(var(--text-muted))",
+                              }}>
+                              {item.member.role.replace("_", " ")}
+                            </p>
+                          </div>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              fontWeight: 700,
+                              color: "hsl(var(--primary))",
+                            }}>
+                            {item.completedTasks}/{item.totalTasks} Tasks (
+                            {rate}%)
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            height: "6px",
+                            backgroundColor: "hsl(var(--border-color))",
                             borderRadius: "3px",
-                          }}
-                        />
+                            overflow: "hidden",
+                          }}>
+                          <div
+                            style={{
+                              height: "100%",
+                              width: `${rate}%`,
+                              backgroundColor: "hsl(var(--success))",
+                              borderRadius: "3px",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Recent System Activity Logs */}
         <div className='glass-panel' style={{ padding: "30px" }}>
