@@ -54,6 +54,7 @@ export default function ProjectsPageClient({
   );
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
 
   // Create/Edit Project Modal States
@@ -108,9 +109,9 @@ export default function ProjectsPageClient({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (initialProjects && !searchTerm && !statusFilter) {
-        return;
-      }
+      // If initialProjects is provided and searchTerm/statusFilter are empty,
+      // we don't necessarily need to fetch unless it's a manual clear.
+      // But to be safe and fix the "clear not showing all" issue, we allow fetch when empty.
       fetchProjects();
     }, 400); // Debounce search
 
@@ -308,15 +309,32 @@ export default function ProjectsPageClient({
           flexWrap: "wrap",
         }}>
         {/* Search Box */}
-        <div style={{ position: "relative", flexGrow: 1, minWidth: "260px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "0 16px",
+            height: "44px",
+            borderRadius: "10px",
+            border: `1px solid ${isSearchFocused ? "hsl(var(--primary))" : "hsl(var(--border-color))"}`,
+            backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+            flexGrow: 1,
+            maxWidth: "450px",
+            minWidth: "260px",
+            transition: "all var(--transition-normal)",
+            boxShadow: isSearchFocused
+              ? "0 0 0 4px hsl(var(--primary) / 0.1)"
+              : "none",
+          }}>
           <Search
-            size={18}
+            size={20}
             style={{
-              position: "absolute",
-              left: "14px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "hsl(var(--text-muted))",
+              color: isSearchFocused
+                ? "hsl(var(--primary))"
+                : "hsl(var(--text-muted))",
+              transition: "color var(--transition-normal)",
+              flexShrink: 0,
             }}
           />
           <input
@@ -324,12 +342,21 @@ export default function ProjectsPageClient({
             placeholder='Search projects by name...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
             style={{
-              width: "100%",
-              padding: "10px 14px 10px 42px",
-              borderRadius: "8px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+              flex: 1,
+              height: "100%",
+              border: "none",
+              backgroundColor: "transparent",
+              color: "hsl(var(--text-primary))",
+              outline: "none",
+              fontSize: "1rem",
+              boxShadow: "none",
+              padding: 0,
+              margin: 0,
+              minWidth: 0,
+              display: "block",
             }}
           />
         </div>

@@ -40,11 +40,15 @@ export default function MembersPageClient({
   const [workloads, setWorkloads] = useState<Workload[]>(initialWorkload || []);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const fetchMembers = async () => {
     try {
       setLoading(true);
-      const res = await apiFetch("/user");
+      const queryParams = new URLSearchParams();
+      if (searchTerm) queryParams.append("searchTerm", searchTerm);
+
+      const res = await apiFetch(`/user?${queryParams.toString()}`);
       if (res.success) {
         setMembers(res.data);
       }
@@ -67,17 +71,16 @@ export default function MembersPageClient({
   };
 
   useEffect(() => {
-    if (!initialMembers) {
+    const timer = setTimeout(() => {
+      // Fetch members whenever searchTerm changes with a debounce
       fetchMembers();
       fetchWorkloads();
-    }
-  }, []);
+    }, 400);
 
-  const filteredMembers = members.filter(
-    (m) =>
-      m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const filteredMembers = members;
 
   const getMemberWorkload = (memberId: string) => {
     return (
@@ -116,32 +119,77 @@ export default function MembersPageClient({
 
       <div
         className='glass-panel'
-        style={{ padding: "24px", marginBottom: "32px" }}>
-        <div style={{ position: "relative", maxWidth: "400px" }}>
+        style={{
+          padding: "24px",
+          marginBottom: "32px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "20px",
+        }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "0 16px",
+            height: "44px",
+            borderRadius: "10px",
+            border: `1px solid ${isSearchFocused ? "hsl(var(--primary))" : "hsl(var(--border-color))"}`,
+            backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+            flexGrow: 1,
+            maxWidth: "450px",
+            minWidth: "280px",
+            transition: "all var(--transition-normal)",
+            boxShadow: isSearchFocused
+              ? "0 0 0 4px hsl(var(--primary) / 0.1)"
+              : "none",
+          }}>
           <Search
-            size={18}
+            size={20}
             style={{
-              position: "absolute",
-              left: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "hsl(var(--text-muted))",
+              color: isSearchFocused
+                ? "hsl(var(--primary))"
+                : "hsl(var(--text-muted))",
+              transition: "color var(--transition-normal)",
+              flexShrink: 0,
             }}
           />
           <input
             type='text'
-            placeholder='Search members by name or email...'
+            placeholder='Search tasks by title or content...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
             style={{
-              width: "100%",
-              padding: "12px 12px 12px 40px",
-              borderRadius: "10px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              fontSize: "0.9rem",
+              flex: 1,
+              height: "100%",
+              border: "none",
+              backgroundColor: "transparent",
+              color: "hsl(var(--text-primary))",
+              outline: "none",
+              fontSize: "1rem",
+              boxShadow: "none",
+              padding: 0,
+              margin: 0,
+              minWidth: 0,
+              display: "block",
             }}
           />
+        </div>
+
+        <div
+          style={{
+            color: "hsl(var(--text-secondary))",
+            fontSize: "0.875rem",
+            fontWeight: 500,
+          }}>
+          Total Members:{" "}
+          <span style={{ color: "hsl(var(--primary))", fontWeight: 700 }}>
+            {members.length}
+          </span>
         </div>
       </div>
 

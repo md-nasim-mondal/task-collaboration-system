@@ -75,6 +75,7 @@ export default function TasksPageClient({
 
   // Filter and Sort States
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
@@ -157,18 +158,7 @@ export default function TasksPageClient({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (
-        initialTasks &&
-        !searchTerm &&
-        !statusFilter &&
-        !priorityFilter &&
-        !projectFilter &&
-        !assigneeFilter &&
-        !deadlineStatusFilter &&
-        sortOption === "-createdAt"
-      ) {
-        return;
-      }
+      // Always fetch when dependencies change to ensure data stays in sync with filters
       fetchTasks();
     }, 400); // Debounce search
 
@@ -479,15 +469,32 @@ export default function TasksPageClient({
         {/* Row 1: Search & Sort */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
           {/* Search */}
-          <div style={{ position: "relative", flexGrow: 1, minWidth: "280px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "0 16px",
+              height: "44px",
+              borderRadius: "10px",
+              border: `1px solid ${isSearchFocused ? "hsl(var(--primary))" : "hsl(var(--border-color))"}`,
+              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+              flexGrow: 1,
+              maxWidth: "450px",
+              minWidth: "280px",
+              transition: "all var(--transition-normal)",
+              boxShadow: isSearchFocused
+                ? "0 0 0 4px hsl(var(--primary) / 0.1)"
+                : "none",
+            }}>
             <Search
-              size={18}
+              size={20}
               style={{
-                position: "absolute",
-                left: "14px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "hsl(var(--text-muted))",
+                color: isSearchFocused
+                  ? "hsl(var(--primary))"
+                  : "hsl(var(--text-muted))",
+                transition: "color var(--transition-normal)",
+                flexShrink: 0,
               }}
             />
             <input
@@ -495,12 +502,21 @@ export default function TasksPageClient({
               placeholder='Search tasks by title or content...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               style={{
-                width: "100%",
-                padding: "10px 14px 10px 42px",
-                borderRadius: "8px",
-                border: "1px solid hsl(var(--border-color))",
-                backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                flex: 1,
+                height: "100%",
+                border: "none",
+                backgroundColor: "transparent",
+                color: "hsl(var(--text-primary))",
+                outline: "none",
+                fontSize: "1rem",
+                boxShadow: "none",
+                padding: 0,
+                margin: 0,
+                minWidth: 0,
+                display: "block",
               }}
             />
           </div>
