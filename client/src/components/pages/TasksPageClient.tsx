@@ -14,6 +14,7 @@ import {
   X,
   Send,
   Plus,
+  ClipboardList,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -519,6 +520,28 @@ export default function TasksPageClient({
                 display: "block",
               }}
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "hsl(var(--text-muted))",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "hsl(var(--danger))")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "hsl(var(--text-muted))")
+                }>
+                <X size={16} />
+              </button>
+            )}
           </div>
 
           {/* Sort */}
@@ -672,11 +695,59 @@ export default function TasksPageClient({
         <div
           className='glass-panel'
           style={{
-            padding: "40px",
+            padding: "80px 24px",
             textAlign: "center",
-            color: "hsl(var(--text-muted))",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "20px",
           }}>
-          No tasks found matching your filters.
+          <div
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              backgroundColor: "hsl(var(--primary) / 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "hsl(var(--primary))",
+              marginBottom: "12px",
+            }}>
+            <ClipboardList size={40} />
+          </div>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
+            No tasks found
+          </h2>
+          <p
+            style={{
+              color: "hsl(var(--text-secondary))",
+              maxWidth: "400px",
+              lineHeight: 1.6,
+            }}>
+            We couldn't find any tasks matching your current filters. Try
+            adjusting your search or using different filters.
+          </p>
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setStatusFilter("");
+              setPriorityFilter("");
+              setProjectFilter("");
+              setAssigneeFilter("");
+              setDeadlineStatusFilter("");
+            }}
+            className='gradient-bg'
+            style={{
+              padding: "12px 24px",
+              borderRadius: "10px",
+              fontWeight: 600,
+              cursor: "pointer",
+              border: "none",
+              marginTop: "8px",
+            }}>
+            Reset All Filters
+          </button>
         </div>
       ) : (
         <div className='glass-panel' style={{ overflow: "hidden" }}>

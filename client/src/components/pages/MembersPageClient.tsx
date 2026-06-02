@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Search, Mail, Shield, ChevronRight } from "lucide-react";
+import { Search, Mail, Shield, ChevronRight, X, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Member {
@@ -158,7 +158,7 @@ export default function MembersPageClient({
           />
           <input
             type='text'
-            placeholder='Search tasks by title or content...'
+            placeholder='Search members by name or email...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
@@ -178,6 +178,28 @@ export default function MembersPageClient({
               display: "block",
             }}
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "hsl(var(--text-muted))",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "hsl(var(--danger))")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "hsl(var(--text-muted))")
+              }>
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         <div
@@ -193,241 +215,228 @@ export default function MembersPageClient({
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-          gap: "24px",
-        }}>
-        {filteredMembers.map((member) => {
-          const workload = getMemberWorkload(member._id);
-          const progress =
-            workload.totalTasks > 0
-              ? Math.round(
-                  (workload.completedTasks / workload.totalTasks) * 100,
-                )
-              : 0;
+      {filteredMembers.length > 0 ? (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "24px",
+          }}>
+          {filteredMembers.map((member) => {
+            const workload = getMemberWorkload(member._id);
+            const progress =
+              workload.totalTasks > 0
+                ? Math.round(
+                    (workload.completedTasks / workload.totalTasks) * 100,
+                  )
+                : 0;
 
-          return (
-            <div
-              key={member._id}
-              className='glass-panel'
-              style={{
-                padding: "24px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-                transition: "transform var(--transition-fast)",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "translateY(-4px)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "translateY(0)")
-              }
-              onClick={() =>
-                router.push(`/tasks?assignedMember=${member._id}`)
-              }>
+            return (
               <div
-                style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                key={member._id}
+                className='glass-panel'
+                style={{
+                  padding: "24px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                  transition: "transform var(--transition-fast)",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.transform = "translateY(-4px)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.transform = "translateY(0)")
+                }
+                onClick={() =>
+                  router.push(`/tasks?assignedMember=${member._id}`)
+                }>
                 <div
-                  className='gradient-bg'
                   style={{
-                    width: "56px",
-                    height: "56px",
-                    borderRadius: "16px",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    color: "#fff",
-                    fontSize: "1.2rem",
-                    fontWeight: 800,
+                    gap: "16px",
                   }}>
-                  {getInitials(member.name)}
+                  <div
+                    className='gradient-bg'
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "1.25rem",
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}>
+                    {getInitials(member.name)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3
+                      style={{
+                        fontWeight: 700,
+                        fontSize: "1.125rem",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}>
+                      {member.name}
+                    </h3>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        color: "hsl(var(--text-secondary))",
+                        fontSize: "0.875rem",
+                        marginTop: "2px",
+                      }}>
+                      <Mail size={14} />
+                      <span
+                        style={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}>
+                        {member.email}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 style={{ fontSize: "1.1rem", fontWeight: 700 }}>
-                    {member.name}
-                  </h3>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    backgroundColor: "hsl(var(--bg-tertiary))",
+                  }}>
+                  <Shield size={16} style={{ color: "hsl(var(--primary))" }} />
+                  <span
+                    style={{
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      textTransform: "capitalize",
+                    }}>
+                    {member.role.replace("_", " ").toLowerCase()}
+                  </span>
+                </div>
+
+                <div style={{ marginTop: "4px" }}>
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      color: "hsl(var(--text-secondary))",
-                      fontSize: "0.85rem",
-                      marginTop: "4px",
+                      justifyContent: "space-between",
+                      fontSize: "0.875rem",
+                      marginBottom: "8px",
                     }}>
-                    <Mail size={14} />
-                    <span>{member.email}</span>
+                    <span
+                      style={{
+                        color: "hsl(var(--text-secondary))",
+                        fontWeight: 500,
+                      }}>
+                      Active Tasks
+                    </span>
+                    <span
+                      style={{
+                        color: "hsl(var(--text-primary))",
+                        fontWeight: 700,
+                      }}>
+                      {workload.pendingTasks} / {workload.totalTasks}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      height: "8px",
+                      backgroundColor: "hsl(var(--border-color))",
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                    }}>
+                    <div
+                      className='gradient-bg'
+                      style={{
+                        height: "100%",
+                        width: `${progress}%`,
+                        transition: "width 1s ease-in-out",
+                      }}
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div style={{ display: "flex", gap: "12px" }}>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "4px 10px",
-                    borderRadius: "6px",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    backgroundColor: "hsl(var(--primary) / 0.1)",
-                    color: "hsl(var(--primary))",
-                  }}>
-                  <Shield size={12} />
-                  {member.role.replace("_", " ")}
-                </span>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "4px 10px",
-                    borderRadius: "6px",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    backgroundColor:
-                      member.status === "ACTIVE"
-                        ? "hsl(var(--success) / 0.1)"
-                        : "hsl(var(--danger) / 0.1)",
-                    color:
-                      member.status === "ACTIVE"
-                        ? "hsl(var(--success))"
-                        : "hsl(var(--danger))",
-                  }}>
-                  {member.status}
-                </span>
-              </div>
-
-              <div style={{ marginTop: "8px" }}>
                 <div
                   style={{
+                    marginTop: "8px",
+                    paddingTop: "16px",
+                    borderTop: "1px solid hsl(var(--border-color))",
                     display: "flex",
+                    alignItems: "center",
                     justifyContent: "space-between",
-                    marginBottom: "8px",
-                    fontSize: "0.85rem",
+                    color: "hsl(var(--primary))",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
                   }}>
-                  <span style={{ fontWeight: 600 }}>Task Progress</span>
-                  <span style={{ color: "hsl(var(--text-secondary))" }}>
-                    {progress}% Completed
-                  </span>
-                </div>
-                <div
-                  style={{
-                    height: "8px",
-                    backgroundColor: "hsl(var(--border-color) / 0.3)",
-                    borderRadius: "4px",
-                    overflow: "hidden",
-                  }}>
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${progress}%`,
-                      backgroundColor: "hsl(var(--primary))",
-                      transition: "width 0.5s ease-out",
-                    }}
-                  />
+                  <span>View Workload</span>
+                  <ChevronRight size={18} />
                 </div>
               </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: "12px",
-                  padding: "16px",
-                  backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
-                  borderRadius: "12px",
-                }}>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 800 }}>
-                    {workload.totalTasks}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "hsl(var(--text-muted))",
-                      textTransform: "uppercase",
-                    }}>
-                    Total
-                  </div>
-                </div>
-                <div
-                  style={{
-                    textAlign: "center",
-                    borderLeft: "1px solid hsl(var(--border-color) / 0.5)",
-                    borderRight: "1px solid hsl(var(--border-color) / 0.5)",
-                  }}>
-                  <div
-                    style={{
-                      fontSize: "1.1rem",
-                      fontWeight: 800,
-                      color: "hsl(var(--success))",
-                    }}>
-                    {workload.completedTasks}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "hsl(var(--text-muted))",
-                      textTransform: "uppercase",
-                    }}>
-                    Done
-                  </div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      fontSize: "1.1rem",
-                      fontWeight: 800,
-                      color: "hsl(var(--warning-text))",
-                    }}>
-                    {workload.pendingTasks}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "hsl(var(--text-muted))",
-                      textTransform: "uppercase",
-                    }}>
-                    Pending
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginTop: "auto",
-                  paddingTop: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "4px",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  color: "hsl(var(--primary))",
-                }}>
-                <span>View Assigned Tasks</span>
-                <ChevronRight size={16} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {filteredMembers.length === 0 && (
+            );
+          })}
+        </div>
+      ) : (
         <div
           className='glass-panel'
           style={{
-            padding: "40px",
+            padding: "80px 24px",
             textAlign: "center",
-            color: "hsl(var(--text-muted))",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "20px",
           }}>
-          No members found matching your search.
+          <div
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              backgroundColor: "hsl(var(--primary) / 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "hsl(var(--primary))",
+              marginBottom: "12px",
+            }}>
+            <Users size={40} />
+          </div>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
+            No members found
+          </h2>
+          <p
+            style={{
+              color: "hsl(var(--text-secondary))",
+              maxWidth: "400px",
+              lineHeight: 1.6,
+            }}>
+            We couldn't find any team members matching "
+            <strong>{searchTerm}</strong>". Check your spelling or try searching
+            for something else.
+          </p>
+          <button
+            onClick={() => setSearchTerm("")}
+            className='gradient-bg'
+            style={{
+              padding: "12px 24px",
+              borderRadius: "10px",
+              fontWeight: 600,
+              cursor: "pointer",
+              border: "none",
+              marginTop: "8px",
+            }}>
+            Clear Search
+          </button>
         </div>
       )}
     </div>

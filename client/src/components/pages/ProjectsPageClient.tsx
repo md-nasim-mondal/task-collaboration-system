@@ -7,13 +7,13 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import {
   FolderKanban,
+  FolderOpen,
   Search,
   Filter,
   Plus,
   Calendar,
   Users,
   Clock,
-  ArrowUpRight,
   X,
 } from "lucide-react";
 
@@ -359,6 +359,28 @@ export default function ProjectsPageClient({
               display: "block",
             }}
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "hsl(var(--text-muted))",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "hsl(var(--danger))")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "hsl(var(--text-muted))")
+              }>
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         {/* Status Dropdown Filter */}
@@ -403,31 +425,7 @@ export default function ProjectsPageClient({
             }}
           />
         </div>
-      ) : projects.length === 0 ? (
-        <div
-          className='glass-panel'
-          style={{
-            padding: "60px 40px",
-            textAlign: "center",
-            color: "hsl(var(--text-muted))",
-          }}>
-          <FolderKanban
-            size={48}
-            style={{ margin: "0 auto 16px", opacity: 0.5 }}
-          />
-          <h3
-            style={{
-              fontSize: "1.125rem",
-              fontWeight: 700,
-              color: "hsl(var(--text-primary))",
-            }}>
-            No Projects Found
-          </h3>
-          <p style={{ marginTop: "4px" }}>
-            You don't have any projects matches. Create a project to begin!
-          </p>
-        </div>
-      ) : (
+      ) : projects.length > 0 ? (
         <div
           style={{
             display: "grid",
@@ -475,137 +473,204 @@ export default function ProjectsPageClient({
                       <span
                         className='badge badge-high'
                         style={{
+                          fontSize: "0.7rem",
                           display: "flex",
                           alignItems: "center",
                           gap: "4px",
                         }}>
-                        <Clock size={12} /> Overdue
+                        <Clock size={12} />
+                        Overdue
                       </span>
                     )}
                   </div>
 
                   <h3
                     style={{
-                      fontSize: "1.125rem",
+                      fontSize: "1.25rem",
                       fontWeight: 700,
                       marginBottom: "8px",
+                      color: "hsl(var(--text-primary))",
                     }}>
                     {proj.name}
                   </h3>
                   <p
                     style={{
-                      fontSize: "0.85rem",
                       color: "hsl(var(--text-secondary))",
-                      marginBottom: "20px",
-                      lineHeight: 1.5,
+                      fontSize: "0.9rem",
+                      lineHeight: "1.5",
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",
                       overflow: "hidden",
-                      textOverflow: "ellipsis",
+                      marginBottom: "16px",
                     }}>
                     {proj.description || "No description provided."}
                   </p>
                 </div>
 
-                {/* Metadata Row */}
                 <div
                   style={{
-                    borderTop: "1px solid hsl(var(--border-color) / 0.5)",
-                    paddingTop: "16px",
                     display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    flexDirection: "column",
+                    gap: "12px",
                   }}>
                   <div
                     style={{
                       display: "flex",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      gap: "14px",
+                      fontSize: "0.85rem",
+                      color: "hsl(var(--text-muted))",
                     }}>
-                    <span
+                    <div
                       style={{
-                        fontSize: "0.8rem",
-                        color: "hsl(var(--text-secondary))",
                         display: "flex",
                         alignItems: "center",
-                        gap: "4px",
+                        gap: "6px",
                       }}>
                       <Calendar size={14} />
-                      {new Date(proj.deadline).toLocaleDateString([], {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                    <span
+                      <span>
+                        {new Date(proj.deadline).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <div
                       style={{
-                        fontSize: "0.8rem",
-                        color: "hsl(var(--text-secondary))",
                         display: "flex",
                         alignItems: "center",
-                        gap: "4px",
+                        gap: "6px",
                       }}>
                       <Users size={14} />
-                      {proj.members?.length || 0}
-                    </span>
+                      <span>{proj.members.length} Members</span>
+                    </div>
                   </div>
 
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
+                      gap: "10px",
+                      paddingTop: "16px",
+                      borderTop: "1px solid hsl(var(--border-color) / 0.5)",
                     }}>
                     <button
                       onClick={() => router.push(`/projects/${proj._id}`)}
                       style={{
+                        flex: 1,
+                        padding: "8px",
+                        borderRadius: "8px",
+                        backgroundColor: "hsl(var(--primary) / 0.1)",
+                        color: "hsl(var(--primary))",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
-                        gap: "4px",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        color: "hsl(var(--primary))",
-                        backgroundColor: "transparent",
-                        border: "none",
-                      }}>
-                      <span>Open</span>
-                      <ArrowUpRight size={14} />
+                        justifyContent: "center",
+                        gap: "6px",
+                        transition: "background 0.2s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          "hsl(var(--primary) / 0.15)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          "hsl(var(--primary) / 0.1)")
+                      }>
+                      <FolderKanban size={16} />
+                      Board
                     </button>
 
                     {isEligibleToCreate && (
-                      <>
-                        <button
-                          onClick={() => handleOpenEditModal(proj)}
-                          style={{
-                            cursor: "pointer",
-                            fontSize: "0.8rem",
-                            fontWeight: 600,
-                            color: "hsl(var(--text-secondary))",
-                            backgroundColor: "transparent",
-                            border: "none",
-                          }}>
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProject(proj._id)}
-                          style={{
-                            cursor: "pointer",
-                            fontSize: "0.8rem",
-                            fontWeight: 600,
-                            color: "hsl(var(--danger))",
-                            backgroundColor: "transparent",
-                            border: "none",
-                          }}>
-                          Delete
-                        </button>
-                      </>
+                      <button
+                        onClick={() => handleOpenEditModal(proj)}
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          backgroundColor: "hsl(var(--bg-tertiary))",
+                          color: "hsl(var(--text-secondary))",
+                          fontSize: "0.85rem",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor =
+                            "hsl(var(--border-color))";
+                          e.currentTarget.style.color =
+                            "hsl(var(--text-primary))";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor =
+                            "hsl(var(--bg-tertiary))";
+                          e.currentTarget.style.color =
+                            "hsl(var(--text-secondary))";
+                        }}>
+                        Edit
+                      </button>
                     )}
                   </div>
                 </div>
               </div>
             );
           })}
+        </div>
+      ) : (
+        <div
+          className='glass-panel'
+          style={{
+            padding: "80px 24px",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "20px",
+          }}>
+          <div
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              backgroundColor: "hsl(var(--primary) / 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "hsl(var(--primary))",
+              marginBottom: "12px",
+            }}>
+            <FolderOpen size={40} />
+          </div>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
+            No projects found
+          </h2>
+          <p
+            style={{
+              color: "hsl(var(--text-secondary))",
+              maxWidth: "400px",
+              lineHeight: 1.6,
+            }}>
+            We couldn't find any projects matching your current filters. Try
+            adjusting your search or status filter.
+          </p>
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setStatusFilter("");
+            }}
+            className='gradient-bg'
+            style={{
+              padding: "12px 24px",
+              borderRadius: "10px",
+              fontWeight: 600,
+              cursor: "pointer",
+              border: "none",
+              marginTop: "8px",
+            }}>
+            Reset All Filters
+          </button>
         </div>
       )}
 
