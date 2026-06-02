@@ -91,7 +91,42 @@
     -moz-osx-font-smoothing: grayscale;
     transition: background-color var(--transition-normal), color var(--transition-normal);
   }
+
+  /* ── Select / Option dark-mode fix ──────────────────────────
+     Native <select> and <option> elements render with the OS
+     system colour scheme, not the app theme. This means in dark
+     mode you get invisible white-on-white text.
+     Setting explicit bg + text colours here fixes all selects
+     across the entire app without touching any component files.
+  ──────────────────────────────────────────────────────────── */
+  select {
+    background-color: hsl(var(--bg-secondary));
+    color: hsl(var(--text-primary));
+  }
+
+  option {
+    background-color: hsl(var(--bg-secondary));
+    color: hsl(var(--text-primary));
+  }
+
+  /* Inputs and textareas also need an explicit colour so they
+     never inherit a system-theme foreground that clashes.     */
+  input,
+  textarea {
+    color: hsl(var(--text-primary));
+  }
+
+  /* Date picker calendar icon colour in dark mode */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(var(--calendar-icon-invert, 0));
+  }
 }
+
+/* Dark-mode calendar icon inversion */
+[data-theme="dark"] {
+  --calendar-icon-invert: 1;
+}
+
 
 /* ============================================================
    PREMIUM SCROLLBARS
