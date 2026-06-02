@@ -19,7 +19,7 @@ const startServer = async () => {
 
     server = app.listen(envVars.PORT, () => {
       console.log(`🚀 Server is listening at http://localhost:${envVars.PORT}`);
-      console.log(`🔑 Authentication System: ${envVars.AUTH_SYSTEM.toUpperCase()}`);
+      console.log(`🔑 Authentication System: CUSTOM JWT`);
     });
   } catch (error) {
     console.error("❌ Failed to connect to Database:", error);

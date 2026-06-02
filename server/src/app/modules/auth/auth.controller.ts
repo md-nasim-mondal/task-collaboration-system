@@ -1,61 +1,28 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
-import passport from "passport";
 import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { setAuthCookie } from "../../utils/setCookie";
-import { createUserTokens } from "../../utils/userTokens";
-import { HydratedDocument, Types } from "mongoose";
 import { AuthServices } from "./auth.service";
-import { IUser, Role } from "../user/user.interface";
 
 const credentialsLogin = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    if (envVars.AUTH_SYSTEM === "passport") {
-      passport.authenticate("local", async (err: Error | null, user: IUser, info: { message: string }) => {
-        if (err) {
-          return next(new AppError(httpStatus.UNAUTHORIZED, err.message));
-        }
+  async (req: Request, res: Response) => {
+    const result = await AuthServices.credentialsLogin(req.body);
 
-        if (!user) {
-          return next(new AppError(httpStatus.UNAUTHORIZED, info?.message || "Authentication failed"));
-        }
+    setAuthCookie(res, {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    });
 
-        const userTokens = createUserTokens(user);
-        const { password: _password, ...rest } = (user as HydratedDocument<IUser>).toObject();
-
-        setAuthCookie(res, userTokens);
-
-        sendResponse(res, {
-          success: true,
-          statusCode: httpStatus.OK,
-          message: "User Logged In Successfully (Passport)!",
-          data: {
-            accessToken: userTokens.accessToken,
-            refreshToken: userTokens.refreshToken,
-            user: rest,
-          },
-        });
-      })(req, res, next);
-    } else {
-      // Custom JWT Authentication
-      const result = await AuthServices.credentialsLogin(req.body);
-
-      setAuthCookie(res, {
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-      });
-
-      sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: "User Logged In Successfully (Custom JWT)!",
-        data: result,
-      });
-    }
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User Logged In Successfully (Custom JWT)!",
+      data: result,
+    });
   }
 );
 
@@ -174,32 +141,6 @@ const forgotPassword = catchAsync(
   }
 );
 
-const googleCallbackController = catchAsync(
-  async (req: Request, res: Response) => {
-    let redirectTo = req.query.state ? (req.query.state as string) : "";
-
-    if (redirectTo.startsWith("/")) {
-      redirectTo = redirectTo.slice(1);
-    }
-
-    const user = req.user;
-
-    if (!user) {
-      throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
-    }
-
-    const tokenInfo = createUserTokens({
-      _id: new Types.ObjectId(user.userId),
-      email: user.email,
-      role: user.role as Role,
-    });
-
-    setAuthCookie(res, tokenInfo);
-
-    res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
-  }
-);
-
 export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
@@ -208,5 +149,4 @@ export const AuthControllers = {
   resetPassword,
   setPassword,
   forgotPassword,
-  googleCallbackController,
 };

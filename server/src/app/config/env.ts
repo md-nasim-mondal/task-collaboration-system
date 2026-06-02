@@ -15,25 +15,7 @@ interface EnvConfig {
   RESET_PASS_EXPIRES: string;
   SUPER_ADMIN_EMAIL: string;
   SUPER_ADMIN_PASSWORD: string;
-  GOOGLE_CLIENT_SECRET: string;
-  GOOGLE_CLIENT_ID: string;
-  GOOGLE_CALLBACK_URL: string;
-  EXPRESS_SESSION_SECRET: string;
   FRONTEND_URL: string;
-  AUTH_SYSTEM: "passport" | "custom";
-  SSL: {
-    STORE_ID: string;
-    STORE_PASS: string;
-    SSL_PAYMENT_API: string;
-    SSL_VALIDATION_API: string;
-    SSL_SUCCESS_FRONTEND_URL: string;
-    SSL_FAIL_FRONTEND_URL: string;
-    SSL_CANCEL_FRONTEND_URL: string;
-    SSL_SUCCESS_BACKEND_URL: string;
-    SSL_FAIL_BACKEND_URL: string;
-    SSL_CANCEL_BACKEND_URL: string;
-    SSL_IPN_URL: string;
-  };
   CLOUDINARY: {
     CLOUDINARY_CLOUD_NAME: string;
     CLOUDINARY_API_KEY: string;
@@ -66,8 +48,6 @@ const loadEnvVariables = (): EnvConfig => {
     "JWT_REFRESH_EXPIRES",
     "OTP_EXPIRES",
     "RESET_PASS_EXPIRES",
-    "AUTH_SYSTEM",
-    "EXPRESS_SESSION_SECRET",
     "FRONTEND_URL",
   ];
 
@@ -90,26 +70,7 @@ const loadEnvVariables = (): EnvConfig => {
     RESET_PASS_EXPIRES: process.env.RESET_PASS_EXPIRES as string,
     SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
     SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
-    EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET as string,
     FRONTEND_URL: process.env.FRONTEND_URL as string,
-    AUTH_SYSTEM: process.env.AUTH_SYSTEM as "passport" | "custom",
-    // ssl
-    SSL: {
-      STORE_ID: process.env.SSL_STORE_ID as string,
-      STORE_PASS: process.env.SSL_STORE_PASS as string,
-      SSL_PAYMENT_API: process.env.SSL_PAYMENT_API as string,
-      SSL_VALIDATION_API: process.env.SSL_VALIDATION_API as string,
-      SSL_SUCCESS_FRONTEND_URL: process.env.SSL_SUCCESS_FRONTEND_URL as string,
-      SSL_IPN_URL: process.env.SSL_IPN_URL as string,
-      SSL_FAIL_FRONTEND_URL: process.env.SSL_FAIL_FRONTEND_URL as string,
-      SSL_CANCEL_FRONTEND_URL: process.env.SSL_CANCEL_FRONTEND_URL as string,
-      SSL_SUCCESS_BACKEND_URL: process.env.SSL_SUCCESS_BACKEND_URL as string,
-      SSL_FAIL_BACKEND_URL: process.env.SSL_FAIL_BACKEND_URL as string,
-      SSL_CANCEL_BACKEND_URL: process.env.SSL_CANCEL_BACKEND_URL as string,
-    },
     CLOUDINARY: {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
       CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
