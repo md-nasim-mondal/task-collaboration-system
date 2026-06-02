@@ -62,7 +62,7 @@ export default function SignupPageClient() {
             <label className="text-sm font-semibold text-secondary">
               Full Name
             </label>
-            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary-bg/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
               <User size={18} className="text-muted shrink-0" />
               <input
                 type="text"
@@ -79,7 +79,7 @@ export default function SignupPageClient() {
             <label className="text-sm font-semibold text-secondary">
               Email Address
             </label>
-            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary-bg/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
               <Mail size={18} className="text-muted shrink-0" />
               <input
                 type="email"
@@ -96,7 +96,7 @@ export default function SignupPageClient() {
             <label className="text-sm font-semibold text-secondary">
               Phone Number (Optional)
             </label>
-            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary-bg/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
               <Phone size={18} className="text-muted shrink-0" />
               <input
                 type="tel"
@@ -112,7 +112,7 @@ export default function SignupPageClient() {
             <label className="text-sm font-semibold text-secondary">
               Password
             </label>
-            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary-bg/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
               <Lock size={18} className="text-muted shrink-0" />
               <input
                 type={showPassword ? "text" : "password"}

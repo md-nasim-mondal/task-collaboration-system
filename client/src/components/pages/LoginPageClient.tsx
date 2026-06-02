@@ -69,7 +69,7 @@ export default function LoginPageClient() {
             <label className="text-sm font-semibold text-secondary">
               Email Address
             </label>
-            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary-bg/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
               <Mail size={18} className="text-muted shrink-0" />
               <input
                 type="email"
@@ -88,7 +88,7 @@ export default function LoginPageClient() {
                 Password
               </label>
             </div>
-            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+            <div className="flex items-center gap-3 px-3.5 h-12 rounded-[10px] border border-border bg-secondary-bg/50 transition-all duration-200 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
               <Lock size={18} className="text-muted shrink-0" />
               <input
                 type={showPassword ? "text" : "password"}
@@ -130,7 +130,7 @@ export default function LoginPageClient() {
           <button
             onClick={() => handleDemoClick("ADMIN")}
             disabled={localLoading}
-            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
+            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary-bg cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
           >
             <div className="flex items-center gap-2.5">
               <UserCheck size={16} className="text-primary" />
@@ -142,7 +142,7 @@ export default function LoginPageClient() {
           <button
             onClick={() => handleDemoClick("PROJECT_MANAGER")}
             disabled={localLoading}
-            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
+            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary-bg cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
           >
             <div className="flex items-center gap-2.5">
               <UserCheck size={16} className="text-primary" />
@@ -154,7 +154,7 @@ export default function LoginPageClient() {
           <button
             onClick={() => handleDemoClick("TEAM_MEMBER")}
             disabled={localLoading}
-            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
+            className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-secondary-bg cursor-pointer text-sm font-semibold text-secondary transition-all duration-200 hover:border-primary hover:bg-primary/[0.04] disabled:opacity-50"
           >
             <div className="flex items-center gap-2.5">
               <UserCheck size={16} className="text-primary" />
