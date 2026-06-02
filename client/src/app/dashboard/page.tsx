@@ -1,10 +1,10 @@
 import React from "react";
-import DashboardPageClient from "./DashboardPageClient";
+import DashboardPageClient from "@/components/pages/DashboardPageClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CollabSphere | Workspace Dashboard",
-  description: "Monitor your team's workload balance, project execution KPIs, and task warnings on the CollabSphere dashboard.",
+  title: "CollabSphere | Analytics Dashboard",
+  description: "View real-time workspace metrics, team workload charts, system warning alerts, and active project pipelines.",
 };
 
 export default function DashboardPage() {

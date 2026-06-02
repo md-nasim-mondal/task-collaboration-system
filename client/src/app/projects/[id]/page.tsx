@@ -1,10 +1,10 @@
 import React from "react";
-import ProjectDetailPageClient from "./ProjectDetailPageClient";
+import ProjectDetailPageClient from "@/components/pages/ProjectDetailPageClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CollabSphere | Project Board Details",
-  description: "Organize project tasks in a Kanban board. Assign tickets to teammates, set deadlines, and monitor completion rates.",
+  title: "CollabSphere | Project Workspace Detail",
+  description: "Manage project details, view Kanban task columns, assign priorities, invite workspace collaborators, and track milestones.",
 };
 
 export default function ProjectDetailPage() {

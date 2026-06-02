@@ -505,13 +505,13 @@ export default function DashboardPageClient() {
               <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
                 {activities.map((act) => (
                   <div
-                    key={act._id}
-                    style={{
-                      display: "flex",
-                      gap: "14px",
-                      position: "relative",
-                      paddingBottom: "4px",
-                    }}
+                     key={act._id}
+                     style={{
+                       display: "flex",
+                       gap: "14px",
+                       position: "relative",
+                       paddingBottom: "4px",
+                     }}
                   >
                     {/* Circle icon */}
                     <div

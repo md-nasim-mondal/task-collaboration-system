@@ -1,10 +1,10 @@
 import React from "react";
-import LandingPageClient from "./LandingPageClient";
+import LandingPageClient from "@/components/pages/LandingPageClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CollabSphere | Smart Project & Task Collaboration Workspace",
-  description: "Empower your team with CollabSphere. Experience glassmorphic dashboards, custom workload balance analytics, and secure task collaboration boards.",
+  title: "CollabSphere | Enterprise Task Collaboration",
+  description: "Secure, role-based, dynamic glassmorphic task workspace featuring real-time validations and team workloads optimization.",
 };
 
 export default function LandingPage() {

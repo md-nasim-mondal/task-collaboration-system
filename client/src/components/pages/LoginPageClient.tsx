@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Shield, Sparkles, Mail, Lock, LogIn, UserCheck } from "lucide-react";
+import { Shield, Mail, Lock, LogIn, UserCheck } from "lucide-react";
 
 export default function LoginPageClient() {
   const { login, demoLogin, isAuthenticated, isLoading } = useAuth();

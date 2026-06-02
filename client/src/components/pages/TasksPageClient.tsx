@@ -161,7 +161,6 @@ export default function TasksPageClient() {
     } catch (err: any) {
       showToast(err.message || "Failed to fetch task details", "error");
     } finally {
-      setLoading(false); // Wait, make sure we use setModalLoading or loading
       setModalLoading(false);
     }
   };
