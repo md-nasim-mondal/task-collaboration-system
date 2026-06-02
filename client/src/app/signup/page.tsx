@@ -128,17 +128,27 @@ export default function SignupPage() {
             <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
               Full Name
             </label>
-            <div style={{ position: "relative" }}>
-              <User
-                size={18}
-                style={{
-                  position: "absolute",
-                  left: "14px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "hsl(var(--text-muted))",
-                }}
-              />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "0 14px",
+                borderRadius: "10px",
+                border: "1px solid hsl(var(--border-color))",
+                backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                transition: "border-color 0.2s, box-shadow 0.2s",
+              }}
+              onFocusCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary))";
+                e.currentTarget.style.boxShadow = "0 0 0 3px hsl(var(--primary) / 0.1)";
+              }}
+              onBlurCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border-color))";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <User size={18} style={{ color: "hsl(var(--text-muted))", flexShrink: 0 }} />
               <input
                 type="text"
                 required
@@ -147,10 +157,11 @@ export default function SignupPage() {
                 placeholder="John Doe"
                 style={{
                   width: "100%",
-                  padding: "12px 14px 12px 42px",
-                  borderRadius: "10px",
-                  border: "1px solid hsl(var(--border-color))",
-                  backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                  padding: "12px 0",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "hsl(var(--text-primary))",
                 }}
               />
             </div>
@@ -160,17 +171,27 @@ export default function SignupPage() {
             <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
               Email Address
             </label>
-            <div style={{ position: "relative" }}>
-              <Mail
-                size={18}
-                style={{
-                  position: "absolute",
-                  left: "14px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "hsl(var(--text-muted))",
-                }}
-              />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "0 14px",
+                borderRadius: "10px",
+                border: "1px solid hsl(var(--border-color))",
+                backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                transition: "border-color 0.2s, box-shadow 0.2s",
+              }}
+              onFocusCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary))";
+                e.currentTarget.style.boxShadow = "0 0 0 3px hsl(var(--primary) / 0.1)";
+              }}
+              onBlurCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border-color))";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <Mail size={18} style={{ color: "hsl(var(--text-muted))", flexShrink: 0 }} />
               <input
                 type="email"
                 required
@@ -179,10 +200,11 @@ export default function SignupPage() {
                 placeholder="you@example.com"
                 style={{
                   width: "100%",
-                  padding: "12px 14px 12px 42px",
-                  borderRadius: "10px",
-                  border: "1px solid hsl(var(--border-color))",
-                  backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                  padding: "12px 0",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "hsl(var(--text-primary))",
                 }}
               />
             </div>
@@ -192,17 +214,27 @@ export default function SignupPage() {
             <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
               Phone Number (Optional)
             </label>
-            <div style={{ position: "relative" }}>
-              <Phone
-                size={18}
-                style={{
-                  position: "absolute",
-                  left: "14px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "hsl(var(--text-muted))",
-                }}
-              />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "0 14px",
+                borderRadius: "10px",
+                border: "1px solid hsl(var(--border-color))",
+                backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                transition: "border-color 0.2s, box-shadow 0.2s",
+              }}
+              onFocusCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary))";
+                e.currentTarget.style.boxShadow = "0 0 0 3px hsl(var(--primary) / 0.1)";
+              }}
+              onBlurCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border-color))";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <Phone size={18} style={{ color: "hsl(var(--text-muted))", flexShrink: 0 }} />
               <input
                 type="tel"
                 value={phone}
@@ -210,10 +242,11 @@ export default function SignupPage() {
                 placeholder="+1 (555) 000-0000"
                 style={{
                   width: "100%",
-                  padding: "12px 14px 12px 42px",
-                  borderRadius: "10px",
-                  border: "1px solid hsl(var(--border-color))",
-                  backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                  padding: "12px 0",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "hsl(var(--text-primary))",
                 }}
               />
             </div>
@@ -223,17 +256,27 @@ export default function SignupPage() {
             <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--text-secondary))" }}>
               Password
             </label>
-            <div style={{ position: "relative" }}>
-              <Lock
-                size={18}
-                style={{
-                  position: "absolute",
-                  left: "14px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "hsl(var(--text-muted))",
-                }}
-              />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "0 14px",
+                borderRadius: "10px",
+                border: "1px solid hsl(var(--border-color))",
+                backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                transition: "border-color 0.2s, box-shadow 0.2s",
+              }}
+              onFocusCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary))";
+                e.currentTarget.style.boxShadow = "0 0 0 3px hsl(var(--primary) / 0.1)";
+              }}
+              onBlurCapture={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border-color))";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <Lock size={18} style={{ color: "hsl(var(--text-muted))", flexShrink: 0 }} />
               <input
                 type="password"
                 required
@@ -242,10 +285,11 @@ export default function SignupPage() {
                 placeholder="••••••••"
                 style={{
                   width: "100%",
-                  padding: "12px 14px 12px 42px",
-                  borderRadius: "10px",
-                  border: "1px solid hsl(var(--border-color))",
-                  backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
+                  padding: "12px 0",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "hsl(var(--text-primary))",
                 }}
               />
             </div>

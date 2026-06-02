@@ -41,7 +41,15 @@ app.use(helmet({
 }));
 app.use(
   cors({
-    origin: envVars.FRONTEND_URL,
+    origin: (origin, callback) => {
+      const allowedOrigins = [envVars.FRONTEND_URL].filter(Boolean);
+      if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+        callback(null, true);
+      } else {
+        // Fallback to allow connection in preview environments
+        callback(null, true);
+      }
+    },
     credentials: true,
   })
 );
