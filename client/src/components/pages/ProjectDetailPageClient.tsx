@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Calendar, Users, Plus, ArrowLeft, Clock, X } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import Loading from "../Loading";
 
 interface Member {
   _id: string;
@@ -345,16 +346,7 @@ export default function ProjectDetailPageClient({
           alignItems: "center",
           justifyContent: "center",
         }}>
-        <div
-          style={{
-            width: "36px",
-            height: "36px",
-            border: "3px solid hsl(var(--primary) / 0.1)",
-            borderTop: "3px solid hsl(var(--primary))",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        />
+        <Loading text='Loading project board...' />
       </div>
     );
   }

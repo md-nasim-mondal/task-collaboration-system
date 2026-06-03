@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
+import Loading from "./Loading";
 import {
   Bell,
   Sun,
@@ -50,40 +51,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          height: "100vh",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "hsl(var(--bg-primary))",
-          color: "hsl(var(--primary))",
-          fontSize: "1.25rem",
-          fontWeight: 600,
-        }}>
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              width: "48px",
-              height: "48px",
-              border: "4px solid hsl(var(--primary) / 0.2)",
-              borderTop: "4px solid hsl(var(--primary))",
-              borderRadius: "50%",
-              margin: "0 auto 16px",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-          Loading workspace...
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
-      </div>
-    );
+    return <Loading fullPage={true} text='Loading workspace...' />;
   }
 
   if (!isAuthenticated) return null;

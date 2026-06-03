@@ -8,9 +8,20 @@ interface LoadingProps {
 
 export default function Loading({
   fullPage = false,
-  size = 40,
+  size = 50,
   text = "Loading...",
 }: LoadingProps) {
+  const customStyles = size !== 50 ? {
+    ring1: {
+      width: `${size}px`,
+      height: `${size}px`,
+    },
+    ring2: {
+      width: `${size * 0.72}px`,
+      height: `${size * 0.72}px`,
+    }
+  } : null;
+
   const loader = (
     <div
       style={{
@@ -20,37 +31,28 @@ export default function Loading({
         justifyContent: "center",
         gap: "16px",
       }}>
-      <div
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          border: "3px solid hsl(var(--primary) / 0.1)",
-          borderTop: "3px solid hsl(var(--primary))",
-          borderRadius: "50%",
-          animation: "spin 1s linear infinite",
-        }}
-      />
+      <div className="premium-loader">
+        <div 
+          className="premium-loader-ring1" 
+          style={customStyles ? customStyles.ring1 : undefined}
+        />
+        <div 
+          className="premium-loader-ring2" 
+          style={customStyles ? customStyles.ring2 : undefined}
+        />
+      </div>
       {text && (
         <p
           style={{
             color: "hsl(var(--text-secondary))",
             fontSize: "0.875rem",
-            fontWeight: 500,
+            fontWeight: 600,
             letterSpacing: "0.5px",
+            animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
           }}>
           {text}
         </p>
       )}
-      <style jsx>{`
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </div>
   );
 

@@ -15,6 +15,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Loading from "../Loading";
 
 interface KPIs {
   totalProjects: number;
@@ -136,19 +137,7 @@ export default function DashboardPageClient({
           alignItems: "center",
           justifyContent: "center",
         }}>
-        <div
-          style={{
-            width: "40px",
-            height: "40px",
-            border: "3px solid hsl(var(--primary) / 0.1)",
-            borderTop: "3px solid hsl(var(--primary))",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <span style={{ marginLeft: "12px", fontWeight: 600 }}>
-          Analyzing workspace data...
-        </span>
+        <Loading text='Analyzing workspace data...' />
       </div>
     );
   }
