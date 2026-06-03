@@ -101,7 +101,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
           transform:
             isMobile && !sidebarOpen ? "translateX(-100%)" : "translateX(0)",
         }}>
-        <Sidebar sidebarOpen={sidebarOpen || !isMobile} />
+        <Sidebar sidebarOpen={sidebarOpen} />
       </div>
 
       {/* MAIN VIEWPORT */}
