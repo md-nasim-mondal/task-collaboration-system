@@ -102,14 +102,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, onLinkClick }) =>
         </div>
         {sidebarOpen && (
           <span
+            className='gradient-text'
             style={{
               fontFamily: "var(--font-display)",
               fontSize: "1.4rem",
               fontWeight: 800,
               letterSpacing: "-0.5px",
-              background: "linear-gradient(135deg, #fff 0%, #a5b4fc 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
             }}>
             CollabSphere
           </span>
