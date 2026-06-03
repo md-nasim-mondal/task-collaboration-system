@@ -17,42 +17,7 @@ import {
 import { useRouter } from "next/navigation";
 import Loading from "../Loading";
 
-interface KPIs {
-  totalProjects: number;
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-  overdueTasks: number;
-}
-
-interface ProjectProgress {
-  projectId: string;
-  name: string;
-  deadline: string;
-  status: string;
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-  completionRate: number;
-}
-
-interface Workload {
-  member: {
-    _id: string;
-    name: string;
-    email: string;
-    role: string;
-    picture?: string;
-  };
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-}
-
-interface ChartData {
-  tasksByPriority: { priority: string; count: number }[];
-  taskStatusDistribution: { status: string; count: number }[];
-}
+import { KPIs, ProjectProgress, Workload, ChartData } from "@/types";
 
 export default function DashboardPageClient({
   initialKpis,

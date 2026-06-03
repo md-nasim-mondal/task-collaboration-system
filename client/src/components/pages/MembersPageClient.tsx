@@ -5,26 +5,7 @@ import { Search, Mail, Shield, ChevronRight, X, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Loading from "../Loading";
 
-interface Member {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-}
-
-interface Workload {
-  member: {
-    _id: string;
-    name: string;
-    email: string;
-    role: string;
-    picture?: string;
-  };
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-}
+import { Member, Workload } from "@/types";
 
 export default function MembersPageClient({
   initialMembers,

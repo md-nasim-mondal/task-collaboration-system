@@ -18,39 +18,20 @@ import {
 } from "lucide-react";
 import Loading from "../Loading";
 
-interface Project {
-  _id: string;
-  name: string;
-  description?: string;
-  deadline: string;
-  status: string;
-  members: any[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-}
-
-interface MemberOption {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
+import { Project, Member } from "@/types";
 
 export default function ProjectsPageClient({
   initialProjects,
   initialMembers,
 }: {
   initialProjects: Project[];
-  initialMembers: MemberOption[];
+  initialMembers: Member[];
 }) {
   const { apiFetch, showToast, user } = useAuth();
   const router = useRouter();
 
   const [projects, setProjects] = useState<Project[]>(initialProjects || []);
-  const [memberOptions, setMemberOptions] = useState<MemberOption[]>(
+  const [memberOptions, setMemberOptions] = useState<Member[]>(
     initialMembers || [],
   );
   const [loading, setLoading] = useState(false);
@@ -140,11 +121,11 @@ export default function ProjectsPageClient({
     setName(proj.name);
     setDescription(proj.description || "");
     // Format date for input
-    const date = new Date(proj.deadline);
+    const date = new Date(proj.deadline || "");
     const dateStr = date.toISOString().split("T")[0];
     setDeadline(dateStr);
-    setStatus(proj.status);
-    setSelectedMembers(proj.members.map((m) => m._id));
+    setStatus(proj.status || "Active");
+    setSelectedMembers((proj.members || []).map((m) => m._id));
     setIsModalOpen(true);
   };
 
@@ -422,7 +403,7 @@ export default function ProjectsPageClient({
           }}>
           {projects.map((proj) => {
             const overdue =
-              new Date(proj.deadline) < new Date() &&
+              new Date(proj.deadline || "") < new Date() &&
               proj.status !== "Completed";
             return (
               <div
@@ -518,7 +499,7 @@ export default function ProjectsPageClient({
                       }}>
                       <Calendar size={14} />
                       <span>
-                        {new Date(proj.deadline).toLocaleDateString("en-US", {
+                        {new Date(proj.deadline || "").toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
@@ -532,7 +513,7 @@ export default function ProjectsPageClient({
                         gap: "6px",
                       }}>
                       <Users size={14} />
-                      <span>{proj.members.length} Members</span>
+                      <span>{(proj.members || []).length} Members</span>
                     </div>
                   </div>
 

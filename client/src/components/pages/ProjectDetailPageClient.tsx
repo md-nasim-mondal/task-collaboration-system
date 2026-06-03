@@ -9,42 +9,7 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import Loading from "../Loading";
 
-interface Member {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface Project {
-  _id: string;
-  name: string;
-  description?: string;
-  deadline: string;
-  status: string;
-  members: Member[];
-  createdBy: {
-    _id: string;
-    name: string;
-  };
-}
-
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  status: "Todo" | "In Progress" | "Completed";
-  priority: "High" | "Medium" | "Low";
-  dueDate: string;
-  assignedMember?: Member;
-}
-
-interface UserOption {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
+import { Project, Member, Task } from "@/types";
 
 export default function ProjectDetailPageClient({
   projectId,
@@ -55,7 +20,7 @@ export default function ProjectDetailPageClient({
   projectId: string;
   initialProject: Project | null;
   initialTasks: Task[];
-  initialUsers: UserOption[];
+  initialUsers: Member[];
 }) {
   const id = projectId;
   const { apiFetch, showToast, user } = useAuth();
@@ -63,7 +28,7 @@ export default function ProjectDetailPageClient({
 
   const [project, setProject] = useState<Project | null>(initialProject);
   const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
-  const [userOptions, setUserOptions] = useState<UserOption[]>(
+  const [userOptions, setUserOptions] = useState<Member[]>(
     initialUsers || [],
   );
   const [loading, setLoading] = useState(!initialProject);
@@ -488,7 +453,7 @@ export default function ProjectDetailPageClient({
                   Deadline
                 </p>
                 <p style={{ fontSize: "0.875rem", fontWeight: 700 }}>
-                  {new Date(project.deadline).toLocaleDateString([], {
+                  {new Date(project.deadline || "").toLocaleDateString([], {
                     month: "long",
                     day: "numeric",
                     year: "numeric",
@@ -539,7 +504,7 @@ export default function ProjectDetailPageClient({
           {/* Members avatars list */}
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
-              {project.members.slice(0, 5).map((memb, idx) => (
+              {(project.members || []).slice(0, 5).map((memb, idx) => (
                 <div
                   key={memb._id}
                   className='gradient-bg'
@@ -567,7 +532,7 @@ export default function ProjectDetailPageClient({
                     .slice(0, 2)}
                 </div>
               ))}
-              {project.members.length > 5 && (
+              {(project.members || []).length > 5 && (
                 <div
                   style={{
                     width: "32px",
@@ -584,7 +549,7 @@ export default function ProjectDetailPageClient({
                     marginLeft: "-8px",
                     zIndex: 0,
                   }}>
-                  +{project.members.length - 5}
+                  +{(project.members || []).length - 5}
                 </div>
               )}
             </div>
@@ -999,7 +964,7 @@ export default function ProjectDetailPageClient({
                     cursor: "pointer",
                   }}>
                   <option value=''>Unassigned</option>
-                  {project.members.map((opt) => (
+                  {(project.members || []).map((opt) => (
                     <option key={opt._id} value={opt._id}>
                       {opt.name} ({opt.role.replace("_", " ")})
                     </option>
@@ -1121,7 +1086,7 @@ export default function ProjectDetailPageClient({
                   <option value=''>Select a user to add...</option>
                   {userOptions
                     .filter(
-                      (o) => !project.members.some((m) => m._id === o._id),
+                      (o) => !(project.members || []).some((m) => m._id === o._id),
                     )
                     .map((opt) => (
                       <option key={opt._id} value={opt._id}>
