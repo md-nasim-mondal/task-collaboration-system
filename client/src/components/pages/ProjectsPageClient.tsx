@@ -307,6 +307,7 @@ export default function ProjectsPageClient({
           marginBottom: "32px",
           display: "flex",
           alignItems: "center",
+          justifyContent: isMobile ? "flex-start" : "center",
           gap: "20px",
           flexWrap: "wrap",
         }}>
@@ -396,13 +397,15 @@ export default function ProjectsPageClient({
               borderRadius: "8px",
               border: "1px solid hsl(var(--border-color))",
               backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+              color: "hsl(var(--text-primary))",
               cursor: "pointer",
               fontWeight: 500,
+              outline: "none",
             }}>
-            <option value=''>All Project Statuses</option>
-            <option value='Active'>Active</option>
-            <option value='Completed'>Completed</option>
-            <option value='On Hold'>On Hold</option>
+            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Project Statuses</option>
+            <option value='Active' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Active</option>
+            <option value='Completed' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Completed</option>
+            <option value='On Hold' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>On Hold</option>
           </select>
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
   Send,
   Plus,
   ClipboardList,
+  Filter,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -470,7 +471,7 @@ export default function TasksPageClient({
           gap: "16px",
         }}>
         {/* Row 1: Search & Sort */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: isMobile ? "flex-start" : "center", alignItems: "center", gap: "16px" }}>
           {/* Search */}
           <div
             style={{
@@ -577,10 +578,17 @@ export default function TasksPageClient({
           style={{
             display: "flex",
             flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: isMobile ? "flex-start" : "center",
             gap: "12px",
             borderTop: "1px solid hsl(var(--border-color) / 0.5)",
             paddingTop: "16px",
           }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "hsl(var(--text-secondary))", fontSize: "0.85rem", fontWeight: 600, marginRight: "4px" }}>
+            <Filter size={16} />
+            <span>Filter By:</span>
+          </div>
+
           {/* Status */}
           <select
             value={statusFilter}
@@ -589,12 +597,17 @@ export default function TasksPageClient({
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid hsl(var(--border-color))",
+              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+              color: "hsl(var(--text-primary))",
               fontSize: "0.85rem",
+              fontWeight: 500,
+              cursor: "pointer",
+              outline: "none",
             }}>
-            <option value=''>All Statuses</option>
-            <option value='Todo'>Todo</option>
-            <option value='In Progress'>In Progress</option>
-            <option value='Completed'>Completed</option>
+            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Statuses</option>
+            <option value='Todo' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Todo</option>
+            <option value='In Progress' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>In Progress</option>
+            <option value='Completed' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Completed</option>
           </select>
 
           {/* Priority */}
@@ -605,12 +618,17 @@ export default function TasksPageClient({
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid hsl(var(--border-color))",
+              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+              color: "hsl(var(--text-primary))",
               fontSize: "0.85rem",
+              fontWeight: 500,
+              cursor: "pointer",
+              outline: "none",
             }}>
-            <option value=''>All Priorities</option>
-            <option value='High'>High Priority</option>
-            <option value='Medium'>Medium Priority</option>
-            <option value='Low'>Low Priority</option>
+            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Priorities</option>
+            <option value='High' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>High Priority</option>
+            <option value='Medium' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Medium Priority</option>
+            <option value='Low' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Low Priority</option>
           </select>
 
           {/* Project */}
@@ -621,12 +639,17 @@ export default function TasksPageClient({
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid hsl(var(--border-color))",
+              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+              color: "hsl(var(--text-primary))",
               fontSize: "0.85rem",
+              fontWeight: 500,
+              cursor: "pointer",
+              outline: "none",
               maxWidth: "180px",
             }}>
-            <option value=''>All Projects</option>
+            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Projects</option>
             {projects.map((p) => (
-              <option key={p._id} value={p._id}>
+              <option key={p._id} value={p._id} style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>
                 {p.name}
               </option>
             ))}
@@ -640,12 +663,17 @@ export default function TasksPageClient({
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid hsl(var(--border-color))",
+              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+              color: "hsl(var(--text-primary))",
               fontSize: "0.85rem",
+              fontWeight: 500,
+              cursor: "pointer",
+              outline: "none",
               maxWidth: "180px",
             }}>
-            <option value=''>All Assignees</option>
+            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Assignees</option>
             {teamMembers.map((m) => (
-              <option key={m._id} value={m._id}>
+              <option key={m._id} value={m._id} style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>
                 {m.name}
               </option>
             ))}
@@ -659,16 +687,19 @@ export default function TasksPageClient({
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid hsl(var(--border-color))",
-              fontSize: "0.85rem",
+              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
               color:
                 deadlineStatusFilter === "Overdue"
                   ? "hsl(var(--danger))"
-                  : "inherit",
-              fontWeight: deadlineStatusFilter === "Overdue" ? 600 : "inherit",
+                  : "hsl(var(--text-primary))",
+              fontSize: "0.85rem",
+              fontWeight: deadlineStatusFilter === "Overdue" ? 600 : 500,
+              cursor: "pointer",
+              outline: "none",
             }}>
-            <option value=''>All Deadlines</option>
-            <option value='Upcoming'>Upcoming Only</option>
-            <option value='Overdue'>Overdue Warnings ⚠️</option>
+            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Deadlines</option>
+            <option value='Upcoming' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Upcoming Only</option>
+            <option value='Overdue' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Overdue Warnings ⚠️</option>
           </select>
         </div>
       </div>
