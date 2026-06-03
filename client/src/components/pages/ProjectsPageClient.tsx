@@ -16,7 +16,7 @@ import {
   Clock,
   X,
 } from "lucide-react";
-import Loading from "../Loading";
+import Loading from "../ui/Loading";
 
 import { Project, Member } from "@/types";
 

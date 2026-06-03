@@ -18,10 +18,10 @@ import {
   Filter,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Loading from "../Loading";
+import Loading from "../ui/Loading";
 import { Task, Member, Project } from "@/types";
-import TaskDetailsModal from "../TaskDetailsModal";
-import CreateTaskModal from "../CreateTaskModal";
+import TaskDetailsModal from "../tasks/TaskDetailsModal";
+import CreateTaskModal from "../tasks/CreateTaskModal";
 
 export default function TasksPageClient({
   initialTasks,

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Search, Mail, Shield, ChevronRight, X, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Loading from "../Loading";
+import Loading from "../ui/Loading";
 
 import { Member, Workload } from "@/types";
 

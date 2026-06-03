@@ -1,5 +1,5 @@
 import React from "react";
-import Providers from "@/components/Providers";
+import Providers from "@/components/ui/Providers";
 import "@/app/globals.css";
 import { Metadata } from "next";
 import { Toaster } from "react-hot-toast";

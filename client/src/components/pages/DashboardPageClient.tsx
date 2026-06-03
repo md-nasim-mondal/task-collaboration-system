@@ -15,7 +15,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Loading from "../Loading";
+import Loading from "../ui/Loading";
 
 import { KPIs, ProjectProgress, Workload, ChartData } from "@/types";
 

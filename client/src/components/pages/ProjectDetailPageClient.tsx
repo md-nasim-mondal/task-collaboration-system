@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Calendar, Users, Plus, ArrowLeft, Clock, X } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
-import Loading from "../Loading";
+import Loading from "../ui/Loading";
 
 import { Project, Member, Task } from "@/types";
 

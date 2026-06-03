@@ -1,5 +1,5 @@
 import React from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 // This layout automatically wraps all routes in the (dashboard) group
 // with the sidebar + header shell. Individual pages only render their content.
