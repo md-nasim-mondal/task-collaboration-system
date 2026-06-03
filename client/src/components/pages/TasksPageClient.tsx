@@ -413,7 +413,8 @@ export default function TasksPageClient({
   const canModifyStatus = isManager || isAssignedToCurrentUser;
 
   return (
-    <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
+    <>
+      <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
       {/* Header Section */}
       <div
         style={{
@@ -737,7 +738,7 @@ export default function TasksPageClient({
         <div className='glass-panel' style={{ overflow: "hidden" }}>
           <div
             className='responsive-table-container'
-            style={{ border: "none" }}>
+            style={{ border: "none", overflowX: "auto" }}>
             <table
               style={{
                 width: "100%",
@@ -962,6 +963,8 @@ export default function TasksPageClient({
         </div>
       )}
 
+      </div>
+
       {/* TASK DETAILS MODAL */}
       {isTaskModalOpen && selectedTask && (
         <div
@@ -972,24 +975,28 @@ export default function TasksPageClient({
             width: "100%",
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.4)",
-            zIndex: 1000,
+            backdropFilter: "blur(6px)",
+            zIndex: 2000,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "24px",
-          }}>
+            padding: isMobile ? "8px" : "24px",
+          }}
+          onClick={() => setIsTaskModalOpen(false)}>
           <div
             className='glass-panel'
+            onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: "960px",
               width: "100%",
-              height: "85vh",
+              maxHeight: isMobile ? "95vh" : "90vh",
               display: "flex",
               flexDirection: "column",
-              overflow: "hidden",
+              overflow: isMobile ? "auto" : "hidden",
               boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
               backgroundColor: "hsl(var(--bg-secondary))",
               position: "relative",
+              animation: "fadeIn var(--transition-normal) forwards",
             }}>
             {/* Modal Close */}
             <button
@@ -1006,14 +1013,15 @@ export default function TasksPageClient({
             </button>
 
             {/* Modal Body Container */}
-            <div style={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flexGrow: 1, overflow: isMobile ? "visible" : "hidden" }}>
               {/* Left Side: Task Fields Form */}
               <div
                 style={{
                   flex: 1,
-                  padding: "32px",
-                  overflowY: "auto",
-                  borderRight: "1px solid hsl(var(--border-color) / 0.5)",
+                  padding: isMobile ? "20px" : "32px",
+                  overflowY: isMobile ? "visible" : "auto",
+                  borderRight: isMobile ? "none" : "1px solid hsl(var(--border-color) / 0.5)",
+                  borderBottom: isMobile ? "1px solid hsl(var(--border-color) / 0.5)" : "none",
                 }}>
                 <div
                   style={{
@@ -1114,7 +1122,7 @@ export default function TasksPageClient({
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
+                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                       gap: "16px",
                     }}>
                     {/* Due Date */}
@@ -1138,10 +1146,13 @@ export default function TasksPageClient({
                           value={editDueDate}
                           onChange={(e) => setEditDueDate(e.target.value)}
                           style={{
+                            width: "100%",
+                            boxSizing: "border-box",
                             padding: "10px",
                             borderRadius: "8px",
                             border: "1px solid hsl(var(--border-color))",
                             backgroundColor: "hsl(var(--bg-primary) / 0.3)",
+                            color: "hsl(var(--text-primary))",
                             fontSize: "0.85rem",
                           }}
                         />
@@ -1186,10 +1197,13 @@ export default function TasksPageClient({
                           value={editPriority}
                           onChange={(e) => setEditPriority(e.target.value)}
                           style={{
+                            width: "100%",
+                            boxSizing: "border-box",
                             padding: "10px",
                             borderRadius: "8px",
                             border: "1px solid hsl(var(--border-color))",
                             backgroundColor: "hsl(var(--bg-primary) / 0.3)",
+                            color: "hsl(var(--text-primary))",
                             fontSize: "0.85rem",
                             cursor: "pointer",
                           }}>
@@ -1217,7 +1231,7 @@ export default function TasksPageClient({
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
+                      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                       gap: "16px",
                     }}>
                     {/* Status */}
@@ -1240,10 +1254,13 @@ export default function TasksPageClient({
                         value={editStatus}
                         onChange={(e) => setEditStatus(e.target.value)}
                         style={{
+                          width: "100%",
+                          boxSizing: "border-box",
                           padding: "10px",
                           borderRadius: "8px",
                           border: "1px solid hsl(var(--border-color))",
                           backgroundColor: "hsl(var(--bg-primary) / 0.3)",
+                          color: "hsl(var(--text-primary))",
                           fontSize: "0.85rem",
                           cursor: canModifyStatus ? "pointer" : "not-allowed",
                           opacity: canModifyStatus ? 1 : 0.7,
@@ -1285,10 +1302,13 @@ export default function TasksPageClient({
                           value={editAssignee}
                           onChange={(e) => setEditAssignee(e.target.value)}
                           style={{
+                            width: "100%",
+                            boxSizing: "border-box",
                             padding: "10px",
                             borderRadius: "8px",
                             border: "1px solid hsl(var(--border-color))",
                             backgroundColor: "hsl(var(--bg-primary) / 0.3)",
+                            color: "hsl(var(--text-primary))",
                             fontSize: "0.85rem",
                             cursor:
                               selectedTask.status === "Completed"
@@ -1400,7 +1420,8 @@ export default function TasksPageClient({
                   flex: 1,
                   display: "flex",
                   flexDirection: "column",
-                  height: "100%",
+                  height: isMobile ? "auto" : "100%",
+                  minHeight: isMobile ? "400px" : "auto",
                 }}>
                 <div
                   style={{
@@ -1486,11 +1507,11 @@ export default function TasksPageClient({
                       </div>
                     )}
 
-                    {/* Add Attachment Inline Form */}
                     <form
                       onSubmit={handleAddAttachment}
                       style={{
                         display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
                         gap: "8px",
                         marginTop: "10px",
                       }}>
@@ -1501,12 +1522,14 @@ export default function TasksPageClient({
                         value={attachName}
                         onChange={(e) => setAttachName(e.target.value)}
                         style={{
-                          flex: 1,
+                          width: "100%",
+                          boxSizing: "border-box",
                           padding: "6px 10px",
                           borderRadius: "6px",
                           border: "1px solid hsl(var(--border-color))",
                           fontSize: "0.75rem",
                           backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                          color: "hsl(var(--text-primary))",
                         }}
                       />
                       <input
@@ -1516,12 +1539,14 @@ export default function TasksPageClient({
                         value={attachUrl}
                         onChange={(e) => setAttachUrl(e.target.value)}
                         style={{
-                          flex: 1.5,
+                          width: "100%",
+                          boxSizing: "border-box",
                           padding: "6px 10px",
                           borderRadius: "6px",
                           border: "1px solid hsl(var(--border-color))",
                           fontSize: "0.75rem",
                           backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                          color: "hsl(var(--text-primary))",
                         }}
                       />
                       <button
@@ -1533,6 +1558,7 @@ export default function TasksPageClient({
                           backgroundColor: "hsl(var(--border-color))",
                           fontSize: "0.75rem",
                           fontWeight: 600,
+                          width: isMobile ? "100%" : "auto",
                         }}>
                         Upload
                       </button>
@@ -1659,9 +1685,10 @@ export default function TasksPageClient({
                 <form
                   onSubmit={handleAddComment}
                   style={{
-                    padding: "20px 24px",
+                    padding: isMobile ? "12px 16px" : "20px 24px",
                     borderTop: "1px solid hsl(var(--border-color) / 0.5)",
                     display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
                     gap: "12px",
                     backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
                   }}>
@@ -1671,12 +1698,14 @@ export default function TasksPageClient({
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     style={{
-                      flexGrow: 1,
+                      width: "100%",
+                      boxSizing: "border-box",
                       padding: "10px 14px",
                       borderRadius: "8px",
                       border: "1px solid hsl(var(--border-color))",
                       fontSize: "0.85rem",
                       backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
                     }}
                   />
                   <button
@@ -1690,6 +1719,7 @@ export default function TasksPageClient({
                       alignItems: "center",
                       justifyContent: "center",
                       color: "#fff",
+                      width: isMobile ? "100%" : "auto",
                     }}>
                     <Send size={18} />
                   </button>
@@ -1702,31 +1732,32 @@ export default function TasksPageClient({
       {/* CREATE TASK MODAL */}
       {isCreateModalOpen && (
         <div
-          className='modal-overlay'
-          onClick={() => setIsCreateModalOpen(false)}
           style={{
             position: "fixed",
             top: 0,
             left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(6px)",
+            zIndex: 2000,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            zIndex: 1000,
-            padding: "20px",
-            backdropFilter: "blur(4px)",
+            padding: isMobile ? "8px" : "24px",
           }}>
           <div
-            className='glass-panel modal-content'
-            onClick={(e) => e.stopPropagation()}
+            className='glass-panel'
             style={{
-              width: "100%",
               maxWidth: "600px",
-              padding: "32px",
+              width: "100%",
+              padding: isMobile ? "20px 20px 32px 20px" : "32px 32px 48px 32px",
               position: "relative",
-              animation: "slideUp 0.3s ease-out",
+              animation: "fadeIn var(--transition-normal) forwards",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
+              backgroundColor: "hsl(var(--bg-secondary))",
+              maxHeight: "85vh",
+              overflowY: "auto",
             }}>
             <button
               onClick={() => setIsCreateModalOpen(false)}
@@ -1735,33 +1766,44 @@ export default function TasksPageClient({
                 top: "20px",
                 right: "20px",
                 cursor: "pointer",
+                color: "hsl(var(--text-secondary))",
+                zIndex: 10,
                 background: "none",
                 border: "none",
-                color: "hsl(var(--text-secondary))",
-              }}>
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "hsl(var(--primary))")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "hsl(var(--text-secondary))")
+              }>
               <X size={24} />
             </button>
 
             <h2
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                marginBottom: "24px",
+                fontSize: "1.75rem",
+                fontWeight: 800,
+                marginBottom: "28px",
+                textAlign: "center",
+                background: "linear-gradient(135deg, #fff 0%, #a5b4fc 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}>
               Create New Task
             </h2>
 
             <form
               onSubmit={handleCreateTask}
-              style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+              style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               <div
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "8px",
                 }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                   Task Title *
                 </label>
                 <input
@@ -1771,11 +1813,19 @@ export default function TasksPageClient({
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder='e.g. Implement API Authentication'
                   style={{
-                    padding: "10px 14px",
-                    borderRadius: "8px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "12px 16px",
+                    borderRadius: "10px",
                     border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary))",
+                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
+                    fontSize: "1rem",
+                    outline: "none",
+                    transition: "border-color 0.2s",
                   }}
+                  onFocus={(e) => (e.target.style.borderColor = "hsl(var(--primary))")}
+                  onBlur={(e) => (e.target.style.borderColor = "hsl(var(--border-color))")}
                 />
               </div>
 
@@ -1783,39 +1833,47 @@ export default function TasksPageClient({
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "8px",
                 }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                   Description
                 </label>
                 <textarea
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
                   placeholder='Detailed instructions for the task...'
-                  rows={3}
+                  rows={4}
                   style={{
-                    padding: "10px 14px",
-                    borderRadius: "8px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "12px 16px",
+                    borderRadius: "10px",
                     border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary))",
+                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
+                    fontSize: "1rem",
                     resize: "none",
+                    outline: "none",
+                    transition: "border-color 0.2s",
                   }}
+                  onFocus={(e) => (e.target.style.borderColor = "hsl(var(--primary))")}
+                  onBlur={(e) => (e.target.style.borderColor = "hsl(var(--border-color))")}
                 />
               </div>
 
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                  gap: "20px",
                 }}>
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "6px",
+                    gap: "8px",
                   }}>
-                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                     Project *
                   </label>
                   <select
@@ -1823,14 +1881,20 @@ export default function TasksPageClient({
                     value={newProject}
                     onChange={(e) => setNewProject(e.target.value)}
                     style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      padding: "12px 16px",
+                      borderRadius: "10px",
                       border: "1px solid hsl(var(--border-color))",
-                      backgroundColor: "hsl(var(--bg-primary))",
+                      backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
+                      fontSize: "1rem",
+                      cursor: "pointer",
+                      outline: "none",
                     }}>
-                    <option value=''>Select Project</option>
+                    <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Select Project</option>
                     {projects.map((p) => (
-                      <option key={p._id} value={p._id}>
+                      <option key={p._id} value={p._id} style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>
                         {p.name}
                       </option>
                     ))}
@@ -1841,9 +1905,9 @@ export default function TasksPageClient({
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "6px",
+                    gap: "8px",
                   }}>
-                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                     Assign To *
                   </label>
                   <select
@@ -1851,14 +1915,20 @@ export default function TasksPageClient({
                     value={newAssignee}
                     onChange={(e) => setNewAssignee(e.target.value)}
                     style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      padding: "12px 16px",
+                      borderRadius: "10px",
                       border: "1px solid hsl(var(--border-color))",
-                      backgroundColor: "hsl(var(--bg-primary))",
+                      backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
+                      fontSize: "1rem",
+                      cursor: "pointer",
+                      outline: "none",
                     }}>
-                    <option value=''>Select Member</option>
+                    <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Select Member</option>
                     {teamMembers.map((m) => (
-                      <option key={m._id} value={m._id}>
+                      <option key={m._id} value={m._id} style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>
                         {m.name} ({m.role.replace("_", " ")})
                       </option>
                     ))}
@@ -1869,30 +1939,36 @@ export default function TasksPageClient({
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                  gap: "20px",
                 }}>
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "6px",
+                    gap: "8px",
                   }}>
-                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                     Priority
                   </label>
                   <select
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value)}
                     style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      padding: "12px 16px",
+                      borderRadius: "10px",
                       border: "1px solid hsl(var(--border-color))",
-                      backgroundColor: "hsl(var(--bg-primary))",
+                      backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
+                      fontSize: "1rem",
+                      cursor: "pointer",
+                      outline: "none",
                     }}>
-                    <option value='High'>High</option>
-                    <option value='Medium'>Medium</option>
-                    <option value='Low'>Low</option>
+                    <option value='High' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>High Priority</option>
+                    <option value='Medium' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Medium Priority</option>
+                    <option value='Low' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Low Priority</option>
                   </select>
                 </div>
 
@@ -1900,9 +1976,9 @@ export default function TasksPageClient({
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "6px",
+                    gap: "8px",
                   }}>
-                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                     Due Date *
                   </label>
                   <input
@@ -1912,33 +1988,64 @@ export default function TasksPageClient({
                     onChange={(e) => setNewDueDate(e.target.value)}
                     min={new Date().toISOString().split("T")[0]}
                     style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      padding: "12px 16px",
+                      borderRadius: "10px",
                       border: "1px solid hsl(var(--border-color))",
-                      backgroundColor: "hsl(var(--bg-primary))",
+                      backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
+                      fontSize: "1rem",
+                      outline: "none",
                     }}
                   />
                 </div>
               </div>
 
-              <button
-                type='submit'
-                disabled={createLoading}
-                className='gradient-bg'
-                style={{
-                  marginTop: "12px",
-                  padding: "14px",
-                  borderRadius: "10px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  boxShadow: "0 4px 12px hsl(var(--primary) / 0.2)",
-                }}>
-                {createLoading ? "Creating..." : "Create Task"}
-              </button>
+              <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
+                <button
+                  type='button'
+                  onClick={() => setIsCreateModalOpen(false)}
+                  style={{
+                    flex: 1,
+                    padding: "14px",
+                    borderRadius: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    backgroundColor: "hsl(var(--bg-tertiary))",
+                    border: "1px solid hsl(var(--border-color))",
+                    color: "hsl(var(--text-primary))",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--border-color))")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--bg-tertiary))")}>
+                  Cancel
+                </button>
+                <button
+                  type='submit'
+                  disabled={createLoading}
+                  className='gradient-bg'
+                  style={{
+                    flex: 2,
+                    padding: "14px",
+                    borderRadius: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    border: "none",
+                    color: "white",
+                    boxShadow: "0 10px 15px -3px hsl(var(--primary) / 0.3)",
+                    transition: "transform 0.2s",
+                    opacity: createLoading ? 0.7 : 1,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
+                  {createLoading ? "Creating Task..." : "Create Task"}
+                </button>
+              </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

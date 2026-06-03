@@ -146,7 +146,7 @@ export default function MembersPageClient({
             backgroundColor: "hsl(var(--bg-primary) / 0.5)",
             flexGrow: 1,
             maxWidth: "450px",
-            minWidth: "280px",
+            minWidth: "200px",
             transition: "all var(--transition-normal)",
             boxShadow: isSearchFocused
               ? "0 0 0 4px hsl(var(--primary) / 0.1)"

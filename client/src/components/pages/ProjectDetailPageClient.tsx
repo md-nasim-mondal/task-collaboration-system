@@ -360,7 +360,8 @@ export default function ProjectDetailPageClient({
   }
 
   return (
-    <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
+    <>
+      <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
       {/* Back Link */}
       <Link
         href='/projects'
@@ -808,6 +809,8 @@ export default function ProjectDetailPageClient({
         </div>
       </div>
 
+      </div>
+
       {/* CREATE TASK MODAL */}
       {isTaskModalOpen && (
         <div
@@ -822,16 +825,18 @@ export default function ProjectDetailPageClient({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "24px",
+            padding: isMobile ? "8px" : "24px",
           }}>
           <div
             className='glass-panel'
             style={{
               maxWidth: "600px",
               width: "100%",
-              padding: "32px",
+              padding: isMobile ? "20px 20px 32px 20px" : "32px 32px 48px 32px",
               backgroundColor: "hsl(var(--bg-secondary))",
               position: "relative",
+              maxHeight: "85vh",
+              overflowY: "auto",
             }}>
             <button
               onClick={() => setIsTaskModalOpen(false)}
@@ -875,10 +880,13 @@ export default function ProjectDetailPageClient({
                   onChange={(e) => setTaskTitle(e.target.value)}
                   placeholder='E.g. Design Landing Page'
                   style={{
+                    width: "100%",
+                    boxSizing: "border-box",
                     padding: "10px 14px",
                     borderRadius: "8px",
                     border: "1px solid hsl(var(--border-color))",
                     backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
                   }}
                 />
               </div>
@@ -899,10 +907,13 @@ export default function ProjectDetailPageClient({
                   placeholder='Specify requirements...'
                   rows={3}
                   style={{
+                    width: "100%",
+                    boxSizing: "border-box",
                     padding: "10px 14px",
                     borderRadius: "8px",
                     border: "1px solid hsl(var(--border-color))",
                     backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
                     resize: "none",
                   }}
                 />
@@ -911,7 +922,7 @@ export default function ProjectDetailPageClient({
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                   gap: "16px",
                 }}>
                 {/* Due Date */}
@@ -931,10 +942,13 @@ export default function ProjectDetailPageClient({
                     value={taskDueDate}
                     onChange={(e) => setTaskDueDate(e.target.value)}
                     style={{
+                      width: "100%",
+                      boxSizing: "border-box",
                       padding: "10px 14px",
                       borderRadius: "8px",
                       border: "1px solid hsl(var(--border-color))",
                       backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
                     }}
                   />
                 </div>
@@ -953,10 +967,13 @@ export default function ProjectDetailPageClient({
                     value={taskPriority}
                     onChange={(e) => setTaskPriority(e.target.value)}
                     style={{
+                      width: "100%",
+                      boxSizing: "border-box",
                       padding: "10px 14px",
                       borderRadius: "8px",
                       border: "1px solid hsl(var(--border-color))",
                       backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
                       cursor: "pointer",
                     }}>
                     <option value='High'>High</option>
@@ -980,10 +997,13 @@ export default function ProjectDetailPageClient({
                   value={taskAssignee}
                   onChange={(e) => setTaskAssignee(e.target.value)}
                   style={{
+                    width: "100%",
+                    boxSizing: "border-box",
                     padding: "10px 14px",
                     borderRadius: "8px",
                     border: "1px solid hsl(var(--border-color))",
                     backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
                     cursor: "pointer",
                   }}>
                   <option value=''>Unassigned</option>
@@ -1048,16 +1068,18 @@ export default function ProjectDetailPageClient({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "24px",
+            padding: isMobile ? "8px" : "24px",
           }}>
           <div
             className='glass-panel'
             style={{
               maxWidth: "460px",
               width: "100%",
-              padding: "32px",
+              padding: isMobile ? "20px" : "32px",
               backgroundColor: "hsl(var(--bg-secondary))",
               position: "relative",
+              maxHeight: "90vh",
+              overflowY: "auto",
             }}>
             <button
               onClick={() => setIsInviteModalOpen(false)}
@@ -1156,7 +1178,7 @@ export default function ProjectDetailPageClient({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

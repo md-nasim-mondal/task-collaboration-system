@@ -37,12 +37,12 @@ export default function SignupPageClient() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center relative overflow-hidden bg-background p-6">
+    <div className="flex min-h-screen items-center justify-center relative overflow-hidden bg-background p-3 sm:p-6">
       {/* Background visual art blobs for premium aesthetic */}
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.15)_0%,transparent_70%)] -top-[100px] -left-[100px] blur-[40px] z-0" />
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,hsl(var(--accent)/0.15)_0%,transparent_70%)] -bottom-[100px] -right-[100px] blur-[40px] z-0" />
+      <div className="absolute w-100 h-100 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.15)_0%,transparent_70%)] -top-25 -left-25 blur-2xl z-0" />
+      <div className="absolute w-100 h-100 rounded-full bg-[radial-gradient(circle,hsl(var(--accent)/0.15)_0%,transparent_70%)] -bottom-25 -right-25 blur-2xl z-0" />
 
-      <div className="glass-panel max-w-[480px] w-full p-12 z-10 shadow-lg shadow-[rgba(99,102,241,0.05)] border border-white/5 animate-[fadeIn_0.5s_ease_forwards]">
+      <div className="glass-panel max-w-120 w-full p-5 sm:p-12 z-10 shadow-lg shadow-[rgba(99,102,241,0.05)] border border-white/5 animate-[fadeIn_0.5s_ease_forwards]">
         {/* Logo Header */}
         <div className="text-center mb-10">
           <div className="gradient-bg w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-[0_8px_24px_hsl(var(--primary)/0.25)]">

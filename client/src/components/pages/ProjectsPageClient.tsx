@@ -246,7 +246,8 @@ export default function ProjectsPageClient({
   };
 
   return (
-    <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
+    <>
+      <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
       {/* Header Row */}
       <div
         style={{
@@ -658,6 +659,8 @@ export default function ProjectsPageClient({
         </div>
       )}
 
+      </div>
+
       {/* CREATE PROJECT MODAL */}
       {isModalOpen && (
         <div
@@ -668,21 +671,27 @@ export default function ProjectsPageClient({
             width: "100%",
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.4)",
-            zIndex: 1000,
+            backdropFilter: "blur(6px)",
+            zIndex: 2000,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "24px",
-          }}>
+            padding: isMobile ? "8px" : "24px",
+          }}
+          onClick={() => setIsModalOpen(false)}>
           <div
             className='glass-panel'
+            onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: "600px",
               width: "100%",
-              padding: "32px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+              padding: isMobile ? "20px 20px 32px 20px" : "32px 32px 48px 32px",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
               backgroundColor: "hsl(var(--bg-secondary))",
               position: "relative",
+              animation: "fadeIn var(--transition-normal) forwards",
+              maxHeight: "85vh",
+              overflowY: "auto",
             }}>
             <button
               onClick={() => setIsModalOpen(false)}
@@ -692,31 +701,39 @@ export default function ProjectsPageClient({
                 right: "24px",
                 cursor: "pointer",
                 color: "hsl(var(--text-secondary))",
-              }}>
-              <X size={20} />
+                background: "none",
+                border: "none",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--primary))")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}>
+              <X size={24} />
             </button>
 
             <h2
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                marginBottom: "24px",
+                fontSize: "1.75rem",
+                fontWeight: 800,
+                marginBottom: "28px",
+                textAlign: "center",
+                background: "linear-gradient(135deg, #fff 0%, #a5b4fc 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}>
-              {editingProject ? "Edit Project" : "Create New Project"}
+              {editingProject ? "Edit Project Details" : "Create New Project"}
             </h2>
 
             <form
               onSubmit={handleCreateOrUpdateProject}
-              style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+              style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               {/* Project Name */}
               <div
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "8px",
                 }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                   Project Name *
                 </label>
                 <input
@@ -726,11 +743,19 @@ export default function ProjectsPageClient({
                   onChange={(e) => setName(e.target.value)}
                   placeholder='E.g. Website Redesign'
                   style={{
-                    padding: "10px 14px",
-                    borderRadius: "8px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "12px 16px",
+                    borderRadius: "10px",
                     border: "1px solid hsl(var(--border-color))",
                     backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
+                    fontSize: "1rem",
+                    outline: "none",
+                    transition: "border-color 0.2s",
                   }}
+                  onFocus={(e) => (e.target.style.borderColor = "hsl(var(--primary))")}
+                  onBlur={(e) => (e.target.style.borderColor = "hsl(var(--border-color))")}
                 />
               </div>
 
@@ -739,23 +764,31 @@ export default function ProjectsPageClient({
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "8px",
                 }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                   Description
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder='Brief scope summary...'
-                  rows={3}
+                  rows={4}
                   style={{
-                    padding: "10px 14px",
-                    borderRadius: "8px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "12px 16px",
+                    borderRadius: "10px",
                     border: "1px solid hsl(var(--border-color))",
                     backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
+                    fontSize: "1rem",
                     resize: "none",
+                    outline: "none",
+                    transition: "border-color 0.2s",
                   }}
+                  onFocus={(e) => (e.target.style.borderColor = "hsl(var(--primary))")}
+                  onBlur={(e) => (e.target.style.borderColor = "hsl(var(--border-color))")}
                 />
               </div>
 
@@ -764,22 +797,27 @@ export default function ProjectsPageClient({
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "8px",
                 }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                   Project Deadline *
                 </label>
                 <input
                   type='date'
                   required
-                  min={getTodayDateString()} // HTML5 browser min validation
+                  min={getTodayDateString()}
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
                   style={{
-                    padding: "10px 14px",
-                    borderRadius: "8px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "12px 16px",
+                    borderRadius: "10px",
                     border: "1px solid hsl(var(--border-color))",
                     backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                    color: "hsl(var(--text-primary))",
+                    fontSize: "1rem",
+                    outline: "none",
                   }}
                 />
               </div>
@@ -790,23 +828,29 @@ export default function ProjectsPageClient({
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "6px",
+                    gap: "8px",
                   }}>
-                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                     Project Status
                   </label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
                     style={{
-                      padding: "10px 14px",
-                      borderRadius: "8px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      padding: "12px 16px",
+                      borderRadius: "10px",
                       border: "1px solid hsl(var(--border-color))",
                       backgroundColor: "hsl(var(--bg-primary) / 0.5)",
+                      color: "hsl(var(--text-primary))",
+                      fontSize: "1rem",
+                      outline: "none",
+                      cursor: "pointer",
                     }}>
-                    <option value='Active'>Active</option>
-                    <option value='Completed'>Completed</option>
-                    <option value='On Hold'>On Hold</option>
+                    <option value='Active' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Active</option>
+                    <option value='Completed' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Completed</option>
+                    <option value='On Hold' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>On Hold</option>
                   </select>
                 </div>
               )}
@@ -816,9 +860,9 @@ export default function ProjectsPageClient({
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "8px",
                 }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
                   Add Members
                 </label>
                 <div
@@ -826,12 +870,12 @@ export default function ProjectsPageClient({
                     maxHeight: "150px",
                     overflowY: "auto",
                     border: "1px solid hsl(var(--border-color))",
-                    borderRadius: "8px",
-                    padding: "10px",
+                    borderRadius: "10px",
+                    padding: "12px",
                     backgroundColor: "hsl(var(--bg-primary) / 0.3)",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "6px",
+                    gap: "8px",
                   }}>
                   {memberOptions.map((opt) => (
                     <label
@@ -839,23 +883,20 @@ export default function ProjectsPageClient({
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "10px",
-                        fontSize: "0.85rem",
+                        gap: "12px",
+                        fontSize: "0.875rem",
                         cursor: "pointer",
-                        padding: "6px",
-                        borderRadius: "4px",
+                        padding: "8px",
+                        borderRadius: "8px",
+                        transition: "background-color 0.2s",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "hsl(var(--border-color))")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }>
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--bg-tertiary))")}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}>
                       <input
                         type='checkbox'
                         checked={selectedMembers.includes(opt._id)}
                         onChange={() => handleMemberToggle(opt._id)}
+                        style={{ cursor: "pointer" }}
                       />
                       <span>
                         {opt.name} ({opt.role.replace("_", " ")})
@@ -865,24 +906,23 @@ export default function ProjectsPageClient({
                 </div>
               </div>
 
-              {/* Action buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "12px",
-                  marginTop: "12px",
-                }}>
+              <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
                 <button
                   type='button'
                   onClick={() => setIsModalOpen(false)}
                   style={{
-                    padding: "10px 20px",
-                    borderRadius: "8px",
+                    flex: 1,
+                    padding: "14px",
+                    borderRadius: "12px",
+                    fontWeight: 700,
                     cursor: "pointer",
+                    backgroundColor: "hsl(var(--bg-tertiary))",
                     border: "1px solid hsl(var(--border-color))",
-                    fontWeight: 600,
-                  }}>
+                    color: "hsl(var(--text-primary))",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--border-color))")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--bg-tertiary))")}>
                   Cancel
                 </button>
                 <button
@@ -890,13 +930,19 @@ export default function ProjectsPageClient({
                   disabled={formLoading}
                   className='gradient-bg'
                   style={{
-                    marginTop: "12px",
+                    flex: 2,
                     padding: "14px",
-                    borderRadius: "10px",
+                    borderRadius: "12px",
                     fontWeight: 700,
                     cursor: "pointer",
-                    boxShadow: "0 4px 12px hsl(var(--primary) / 0.2)",
-                  }}>
+                    border: "none",
+                    color: "white",
+                    boxShadow: "0 10px 15px -3px hsl(var(--primary) / 0.3)",
+                    transition: "transform 0.2s",
+                    opacity: formLoading ? 0.7 : 1,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
                   {formLoading
                     ? "Processing..."
                     : editingProject
@@ -908,6 +954,6 @@ export default function ProjectsPageClient({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
