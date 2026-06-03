@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { useAuth } from "@/context/AuthContext";
 import {
   FolderKanban,
@@ -16,7 +15,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Loading from "../ui/Loading";
-
 import { KPIs, ProjectProgress, Workload, ChartData } from "@/types";
 
 export default function DashboardPageClient({
@@ -35,34 +33,17 @@ export default function DashboardPageClient({
   const { user, apiFetch, showToast } = useAuth();
   const router = useRouter();
 
-  const isAdminOrManager =
-    user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
+  const isAdminOrManager = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
 
   const [kpis, setKpis] = useState<KPIs | null>(initialKpis);
-  const [progress, setProgress] = useState<ProjectProgress[]>(
-    initialProgress || [],
-  );
-  const [workloads, setWorkloads] = useState<Workload[]>(
-    initialWorkloads || [],
-  );
-  const [chartData, setChartData] = useState<ChartData | null>(
-    initialChartData,
-  );
+  const [progress, setProgress] = useState<ProjectProgress[]>(initialProgress || []);
+  const [workloads, setWorkloads] = useState<Workload[]>(initialWorkloads || []);
+  const [chartData, setChartData] = useState<ChartData | null>(initialChartData);
   const [activities, setActivities] = useState<any[]>(initialActivities || []);
   const [loading, setLoading] = useState(!initialKpis);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    if (initialKpis) {
-      return;
-    }
+    if (initialKpis) return;
 
     const fetchDashboardData = async () => {
       try {
@@ -81,10 +62,7 @@ export default function DashboardPageClient({
         if (chartRes.success) setChartData(chartRes.data);
         if (actRes.success) setActivities(actRes.data);
       } catch (err: any) {
-        showToast(
-          err.message || "Failed to load dashboard statistics",
-          "error",
-        );
+        showToast(err.message || "Failed to load dashboard statistics", "error");
       } finally {
         setLoading(false);
       }
@@ -95,224 +73,100 @@ export default function DashboardPageClient({
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          height: "60vh",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-        <Loading text='Analyzing workspace data...' />
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loading text="Analyzing workspace data..." />
       </div>
     );
   }
 
-  // Fallback defaults if charts are empty
   const priorityDistribution = chartData?.tasksByPriority || [];
   const statusDistribution = chartData?.taskStatusDistribution || [];
 
+  const getStatusBarColor = (status: string) => {
+    if (status === "Completed") return "hsl(var(--success))";
+    if (status === "Todo") return "hsl(var(--text-muted))";
+    return "hsl(var(--primary))";
+  };
+
+  const getPriorityBarColor = (priority: string) => {
+    if (priority === "High") return "hsl(var(--danger))";
+    if (priority === "Medium") return "hsl(var(--warning))";
+    if (priority === "Low") return "hsl(var(--success))";
+    return "hsl(var(--primary))";
+  };
+
   return (
-    <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
-      {/* Header Title */}
-      <div style={{ marginBottom: "32px", padding: isMobile ? "0 4px" : "0" }}>
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: isMobile ? "1.5rem" : "2rem",
-            fontWeight: 800,
-          }}>
+    <div className="animate-[fadeIn_var(--transition-normal)_forwards]">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="font-display text-2xl md:text-3xl font-extrabold text-foreground">
           Welcome back, {user?.name?.split(" ")[0] || "User"}!
         </h1>
-        <p
-          style={{
-            color: "hsl(var(--text-secondary))",
-            marginTop: "4px",
-            fontSize: isMobile ? "0.85rem" : "1rem",
-          }}>
+        <p className="text-secondary mt-1 text-sm md:text-base">
           {isAdminOrManager
             ? "Real-time project analytics, team workloads, and pending alerts."
             : "Here's an overview of your assigned tasks and project progress."}
         </p>
       </div>
 
-      {/* OVERDUE ALERT CARD BANNER */}
+      {/* OVERDUE ALERT BANNER */}
       {kpis && kpis.overdueTasks > 0 && (
-        <div
-          className='glass-panel'
-          style={{
-            backgroundColor: "hsl(var(--danger) / 0.04)",
-            borderColor: "hsl(var(--danger) / 0.3)",
-            padding: "16px 24px",
-            marginBottom: "32px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-          }}>
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              backgroundColor: "hsl(var(--danger) / 0.15)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "hsl(var(--danger))",
-            }}>
+        <div className="glass-panel bg-danger/4 border-danger/30 p-4 px-6 mb-8 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-danger/15 flex items-center justify-center text-danger shrink-0">
             <AlertOctagon size={22} />
           </div>
           <div>
-            <h4
-              style={{
-                fontWeight: 700,
-                color: "hsl(var(--text-primary))",
-                fontSize: "0.95rem",
-              }}>
+            <h4 className="font-bold text-foreground text-[0.95rem]">
               System Warning: {kpis.overdueTasks} Overdue Task
               {kpis.overdueTasks > 1 ? "s" : ""} Detected!
             </h4>
-            <p
-              style={{
-                color: "hsl(var(--text-secondary))",
-                fontSize: "0.85rem",
-                marginTop: "2px",
-              }}>
-              Some active tasks have passed their scheduled due dates. Please
-              review assignments and adjust priorities.
+            <p className="text-secondary text-sm mt-0.5">
+              Some active tasks have passed their scheduled due dates. Please review
+              assignments and adjust priorities.
             </p>
           </div>
         </div>
       )}
 
-      {/* KPI CARDS GRID */}
+      {/* KPI CARDS */}
       <div
-        className='dashboard-grid'
-        style={{
-          marginBottom: "32px",
-          gridTemplateColumns: isMobile
-            ? "repeat(auto-fit, minmax(200px, 1fr))"
-            : "repeat(auto-fit, minmax(240px, 1fr))",
-        }}>
-        {/* Card 1 */}
-        <div
-          className='glass-panel glass-panel-hover'
-          style={{ padding: "24px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}>
-            <span
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "hsl(var(--text-secondary))",
-              }}>
-              Active Projects
-            </span>
-            <div
-              style={{
-                padding: "8px",
-                borderRadius: "10px",
-                backgroundColor: "hsl(var(--primary) / 0.1)",
-                color: "hsl(var(--primary))",
-              }}>
+        className="dashboard-grid mb-8"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}
+      >
+        {/* Active Projects */}
+        <div className="glass-panel glass-panel-hover p-6">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-semibold text-secondary">Active Projects</span>
+            <div className="p-2 rounded-[10px] bg-primary/10 text-primary">
               <FolderKanban size={20} />
             </div>
           </div>
-          <h2 style={{ fontSize: "2rem", fontWeight: 800, marginTop: "16px" }}>
-            {kpis?.totalProjects || 0}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "hsl(var(--text-muted))",
-              marginTop: "6px",
-            }}>
-            Projects tracked in pipeline
-          </p>
+          <h2 className="text-4xl font-extrabold mt-4 text-foreground">{kpis?.totalProjects || 0}</h2>
+          <p className="text-xs text-muted mt-1.5">Projects tracked in pipeline</p>
         </div>
 
-        {/* Card 2 */}
-        <div
-          className='glass-panel glass-panel-hover'
-          style={{ padding: "24px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}>
-            <span
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "hsl(var(--text-secondary))",
-              }}>
-              Total Task Count
-            </span>
-            <div
-              style={{
-                padding: "8px",
-                borderRadius: "10px",
-                backgroundColor: "hsl(var(--accent) / 0.1)",
-                color: "hsl(var(--accent))",
-              }}>
+        {/* Total Tasks */}
+        <div className="glass-panel glass-panel-hover p-6">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-semibold text-secondary">Total Task Count</span>
+            <div className="p-2 rounded-[10px] bg-accent/10 text-accent">
               <TrendingUp size={20} />
             </div>
           </div>
-          <h2 style={{ fontSize: "2rem", fontWeight: 800, marginTop: "16px" }}>
-            {kpis?.totalTasks || 0}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "hsl(var(--text-muted))",
-              marginTop: "6px",
-            }}>
-            Across all project boards
-          </p>
+          <h2 className="text-4xl font-extrabold mt-4 text-foreground">{kpis?.totalTasks || 0}</h2>
+          <p className="text-xs text-muted mt-1.5">Across all project boards</p>
         </div>
 
-        {/* Card 3 */}
-        <div
-          className='glass-panel glass-panel-hover'
-          style={{ padding: "24px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}>
-            <span
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "hsl(var(--text-secondary))",
-              }}>
-              Completed Tasks
-            </span>
-            <div
-              style={{
-                padding: "8px",
-                borderRadius: "10px",
-                backgroundColor: "hsl(var(--success) / 0.1)",
-                color: "hsl(var(--success))",
-              }}>
+        {/* Completed Tasks */}
+        <div className="glass-panel glass-panel-hover p-6">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-semibold text-secondary">Completed Tasks</span>
+            <div className="p-2 rounded-[10px] bg-success/10 text-success">
               <CheckCircle2 size={20} />
             </div>
           </div>
-          <h2 style={{ fontSize: "2rem", fontWeight: 800, marginTop: "16px" }}>
-            {kpis?.completedTasks || 0}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "hsl(var(--success))",
-              fontWeight: 600,
-              marginTop: "6px",
-            }}>
+          <h2 className="text-4xl font-extrabold mt-4 text-foreground">{kpis?.completedTasks || 0}</h2>
+          <p className="text-xs text-success font-semibold mt-1.5">
             {kpis?.totalTasks && kpis.totalTasks > 0
               ? Math.round((kpis.completedTasks / kpis.totalTasks) * 100)
               : 0}
@@ -320,195 +174,82 @@ export default function DashboardPageClient({
           </p>
         </div>
 
-        {/* Card 4 */}
+        {/* Overdue */}
         <div
-          className='glass-panel glass-panel-hover'
-          style={{
-            padding: "24px",
-            border:
-              kpis && kpis.overdueTasks > 0
-                ? "1px solid hsl(var(--danger) / 0.3)"
-                : undefined,
-          }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}>
-            <span
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "hsl(var(--text-secondary))",
-              }}>
-              Overdue Warning
-            </span>
+          className={`glass-panel glass-panel-hover p-6 ${
+            kpis && kpis.overdueTasks > 0 ? "border-danger/30" : ""
+          }`}
+        >
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-semibold text-secondary">Overdue Warning</span>
             <div
-              style={{
-                padding: "8px",
-                borderRadius: "10px",
-                backgroundColor:
-                  kpis && kpis.overdueTasks > 0
-                    ? "hsl(var(--danger) / 0.15)"
-                    : "hsl(var(--border-color))",
-                color:
-                  kpis && kpis.overdueTasks > 0
-                    ? "hsl(var(--danger))"
-                    : "hsl(var(--text-secondary))",
-              }}>
+              className={`p-2 rounded-[10px] ${
+                kpis && kpis.overdueTasks > 0
+                  ? "bg-danger/15 text-danger"
+                  : "bg-border text-secondary"
+              }`}
+            >
               <Clock size={20} />
             </div>
           </div>
           <h2
-            style={{
-              fontSize: "2rem",
-              fontWeight: 800,
-              marginTop: "16px",
-              color:
-                kpis && kpis.overdueTasks > 0
-                  ? "hsl(var(--danger))"
-                  : "inherit",
-            }}>
+            className={`text-4xl font-extrabold mt-4 ${
+              kpis && kpis.overdueTasks > 0 ? "text-danger" : "text-foreground"
+            }`}
+          >
             {kpis?.overdueTasks || 0}
           </h2>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "hsl(var(--text-muted))",
-              marginTop: "6px",
-            }}>
-            Tasks requiring attention
-          </p>
+          <p className="text-xs text-muted mt-1.5">Tasks requiring attention</p>
         </div>
       </div>
 
       {/* PROJECTS PROGRESS OVERVIEW */}
-      <div
-        className='glass-panel'
-        style={{ padding: "30px", marginBottom: "32px" }}>
-        <h3
-          style={{
-            fontSize: "1.125rem",
-            fontWeight: 700,
-            marginBottom: "24px",
-          }}>
-          Active Projects Pipeline Summary
-        </h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: "24px",
-          }}>
+      <div className="glass-panel p-7 mb-8">
+        <h3 className="text-lg font-bold text-foreground mb-6">Active Projects Pipeline Summary</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
           {progress.length === 0 ? (
-            <p
-              style={{ color: "hsl(var(--text-muted))", fontSize: "0.875rem" }}>
-              No active projects tracked yet.
-            </p>
+            <p className="text-muted text-sm">No active projects tracked yet.</p>
           ) : (
             progress.map((proj) => {
               const pending = proj.totalTasks - proj.completedTasks;
-              const isOverdue =
-                proj.deadline && new Date(proj.deadline) < new Date();
+              const isOverdue = proj.deadline && new Date(proj.deadline) < new Date();
               return (
                 <div
                   key={proj.projectId}
                   onClick={() => router.push(`/projects/${proj.projectId}`)}
-                  style={{
-                    padding: "16px",
-                    borderRadius: "12px",
-                    backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
-                    border: "1px solid hsl(var(--border-color) / 0.5)",
-                    cursor: "pointer",
-                    transition: "transform 0.2s",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "scale(1.02)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "scale(1)")
-                  }>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "12px",
-                    }}>
-                    <h4 style={{ fontWeight: 700, fontSize: "1rem" }}>
-                      {proj.name}
-                    </h4>
+                  className="p-4 rounded-xl bg-secondary-bg/50 border border-border/50 cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+                >
+                  <div className="flex justify-between mb-3">
+                    <h4 className="font-bold text-foreground">{proj.name}</h4>
                     {isOverdue && (
-                      <span
-                        style={{
-                          fontSize: "0.7rem",
-                          color: "hsl(var(--danger))",
-                          fontWeight: 700,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}>
+                      <span className="text-[0.7rem] text-danger font-bold flex items-center gap-1">
                         <Clock size={12} /> Overdue
                       </span>
                     )}
                   </div>
 
-                  <div style={{ marginBottom: "16px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "0.85rem",
-                        marginBottom: "8px",
-                      }}>
-                      <span
-                        style={{
-                          color: "hsl(var(--text-primary))",
-                          fontWeight: 600,
-                        }}>
-                        {proj.completedTasks}/{proj.totalTasks} Tasks (
-                        {proj.completionRate}%)
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-foreground font-semibold">
+                        {proj.completedTasks}/{proj.totalTasks} Tasks ({proj.completionRate}%)
                       </span>
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          color: "hsl(var(--primary))",
-                        }}>
-                        {pending} Pending
-                      </span>
+                      <span className="font-bold text-primary">{pending} Pending</span>
                     </div>
-                    <div
-                      style={{
-                        height: "10px",
-                        backgroundColor: "hsl(var(--border-color) / 0.3)",
-                        borderRadius: "5px",
-                        overflow: "hidden",
-                        border: "1px solid hsl(var(--border-color) / 0.1)",
-                      }}>
+                    <div className="h-2.5 bg-border/30 rounded-full overflow-hidden border border-border/10">
                       <div
+                        className="h-full rounded-full transition-[width] duration-1000 ease-in-out shadow-[0_0_10px_hsl(var(--primary)/0.3)]"
                         style={{
-                          height: "100%",
                           width: `${proj.completionRate}%`,
                           background:
                             proj.completionRate === 100
-                              ? "linear-gradient(90deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.8) 100%)"
-                              : "linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%)",
-                          borderRadius: "5px",
-                          boxShadow: "0 0 10px hsl(var(--primary) / 0.3)",
-                          transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                              ? "linear-gradient(90deg, hsl(var(--success)) 0%, hsl(var(--success)/0.8) 100%)"
+                              : "linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.8) 100%)",
                         }}
                       />
                     </div>
                   </div>
 
-                  <div
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "hsl(var(--text-muted))",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}>
+                  <div className="text-xs text-muted flex items-center gap-1.5">
                     <Calendar size={12} />
                     Due {new Date(proj.deadline).toLocaleDateString()}
                   </div>
@@ -519,109 +260,45 @@ export default function DashboardPageClient({
         </div>
       </div>
 
-      {/* TWO-COLUMN GRAPH & CHARTS ROW */}
+      {/* CHARTS ROW */}
       {isAdminOrManager && (
         <div
+          className="mb-8"
           style={{
             display: "grid",
-            gridTemplateColumns: isMobile
-              ? "1fr"
-              : "repeat(auto-fit, minmax(400px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
             gap: "32px",
-            marginBottom: "32px",
-          }}>
-          {/* Status Distribution Custom SVG Chart */}
-          <div className='glass-panel' style={{ padding: "30px" }}>
-            <h3
-              style={{
-                fontSize: "1.125rem",
-                fontWeight: 700,
-                marginBottom: "24px",
-              }}>
-              Task Status Distribution
-            </h3>
+          }}
+        >
+          {/* Status Distribution */}
+          <div className="glass-panel p-7">
+            <h3 className="text-lg font-bold text-foreground mb-6">Task Status Distribution</h3>
             {statusDistribution.length === 0 ? (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "200px",
-                  gap: "12px",
-                  color: "hsl(var(--text-muted))",
-                }}>
-                <div
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "12px",
-                    backgroundColor: "hsl(var(--bg-secondary))",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
+              <div className="flex flex-col items-center justify-center h-50 gap-3 text-muted">
+                <div className="w-12 h-12 rounded-xl bg-secondary-bg flex items-center justify-center">
                   <CheckSquare size={24} />
                 </div>
-                <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
-                  No task state data available yet.
-                </p>
+                <p className="text-sm font-medium">No task state data available yet.</p>
               </div>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "18px",
-                }}>
+              <div className="flex flex-col gap-4">
                 {statusDistribution.map((item) => {
-                  const maxCount =
-                    Math.max(...statusDistribution.map((i) => i.count)) || 1;
+                  const maxCount = Math.max(...statusDistribution.map((i) => i.count)) || 1;
                   const percent = Math.round((item.count / maxCount) * 100);
-                  let barColor = "hsl(var(--primary))";
-                  if (item.status === "Completed")
-                    barColor = "hsl(var(--success))";
-                  if (item.status === "Todo")
-                    barColor = "hsl(var(--text-muted))";
-
                   return (
-                    <div
-                      key={item.status}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "6px",
-                      }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          fontSize: "0.85rem",
-                        }}>
-                        <span style={{ fontWeight: 600 }}>{item.status}</span>
-                        <span
-                          style={{
-                            color: "hsl(var(--text-secondary))",
-                            fontWeight: 700,
-                          }}>
+                    <div key={item.status} className="flex flex-col gap-1.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-semibold text-foreground">{item.status}</span>
+                        <span className="text-secondary font-bold">
                           {item.count} task{item.count !== 1 ? "s" : ""}
                         </span>
                       </div>
-                      <div
-                        style={{
-                          height: "10px",
-                          width: "100%",
-                          borderRadius: "5px",
-                          backgroundColor: "hsl(var(--border-color))",
-                          overflow: "hidden",
-                        }}>
+                      <div className="h-2.5 w-full rounded-full bg-border overflow-hidden">
                         <div
+                          className="h-full rounded-full transition-[width] duration-1000 ease-in-out"
                           style={{
-                            height: "100%",
                             width: `${percent}%`,
-                            borderRadius: "5px",
-                            backgroundColor: barColor,
-                            transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                            backgroundColor: getStatusBarColor(item.status),
                           }}
                         />
                       </div>
@@ -632,100 +309,35 @@ export default function DashboardPageClient({
             )}
           </div>
 
-          {/* Priority Distribution Custom SVG Chart */}
-          <div className='glass-panel' style={{ padding: "30px" }}>
-            <h3
-              style={{
-                fontSize: "1.125rem",
-                fontWeight: 700,
-                marginBottom: "24px",
-              }}>
-              Task Priority Breakdown
-            </h3>
+          {/* Priority Distribution */}
+          <div className="glass-panel p-7">
+            <h3 className="text-lg font-bold text-foreground mb-6">Task Priority Breakdown</h3>
             {priorityDistribution.length === 0 ? (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "200px",
-                  gap: "12px",
-                  color: "hsl(var(--text-muted))",
-                }}>
-                <div
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "12px",
-                    backgroundColor: "hsl(var(--bg-secondary))",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
+              <div className="flex flex-col items-center justify-center h-50 gap-3 text-muted">
+                <div className="w-12 h-12 rounded-xl bg-secondary-bg flex items-center justify-center">
                   <BarChart3 size={24} />
                 </div>
-                <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>
-                  No task priority data available yet.
-                </p>
+                <p className="text-sm font-medium">No task priority data available yet.</p>
               </div>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "18px",
-                }}>
+              <div className="flex flex-col gap-4">
                 {priorityDistribution.map((item) => {
-                  const maxCount =
-                    Math.max(...priorityDistribution.map((i) => i.count)) || 1;
+                  const maxCount = Math.max(...priorityDistribution.map((i) => i.count)) || 1;
                   const percent = Math.round((item.count / maxCount) * 100);
-                  let barColor = "hsl(var(--primary))";
-                  if (item.priority === "High") barColor = "hsl(var(--danger))";
-                  if (item.priority === "Medium")
-                    barColor = "hsl(var(--warning))";
-                  if (item.priority === "Low") barColor = "hsl(var(--success))";
-
                   return (
-                    <div
-                      key={item.priority}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "6px",
-                      }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          fontSize: "0.85rem",
-                        }}>
-                        <span style={{ fontWeight: 600 }}>
-                          {item.priority} Priority
-                        </span>
-                        <span
-                          style={{
-                            color: "hsl(var(--text-secondary))",
-                            fontWeight: 700,
-                          }}>
+                    <div key={item.priority} className="flex flex-col gap-1.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-semibold text-foreground">{item.priority} Priority</span>
+                        <span className="text-secondary font-bold">
                           {item.count} task{item.count !== 1 ? "s" : ""}
                         </span>
                       </div>
-                      <div
-                        style={{
-                          height: "10px",
-                          width: "100%",
-                          borderRadius: "5px",
-                          backgroundColor: "hsl(var(--border-color))",
-                          overflow: "hidden",
-                        }}>
+                      <div className="h-2.5 w-full rounded-full bg-border overflow-hidden">
                         <div
+                          className="h-full rounded-full transition-[width] duration-1000 ease-in-out"
                           style={{
-                            height: "100%",
                             width: `${percent}%`,
-                            borderRadius: "5px",
-                            backgroundColor: barColor,
-                            transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                            backgroundColor: getPriorityBarColor(item.priority),
                           }}
                         />
                       </div>
@@ -738,127 +350,51 @@ export default function DashboardPageClient({
         </div>
       )}
 
-      {/* WORKLOAD & ACTIVITIES ROW */}
+      {/* WORKLOAD & ACTIVITY ROW */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: isMobile
-            ? "1fr"
-            : isAdminOrManager
-              ? "repeat(auto-fit, minmax(400px, 1fr))"
-              : "1fr",
+          gridTemplateColumns: isAdminOrManager
+            ? "repeat(auto-fit, minmax(400px, 1fr))"
+            : "1fr",
           gap: "32px",
-        }}>
-        {/* Member Workload Summary - Only for Admin/Manager */}
+        }}
+      >
+        {/* Member Workload */}
         {isAdminOrManager && (
-          <div className='glass-panel' style={{ padding: "30px" }}>
-            <h3
-              style={{
-                fontSize: "1.125rem",
-                fontWeight: 700,
-                marginBottom: "24px",
-              }}>
-              Member Workload Balance
-            </h3>
+          <div className="glass-panel p-7">
+            <h3 className="text-lg font-bold text-foreground mb-6">Member Workload Balance</h3>
             {workloads.length === 0 ? (
-              <p
-                style={{
-                  color: "hsl(var(--text-muted))",
-                  fontSize: "0.875rem",
-                }}>
-                No active team members with assigned tasks.
-              </p>
+              <p className="text-muted text-sm">No active team members with assigned tasks.</p>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "20px",
-                }}>
+              <div className="flex flex-col gap-5">
                 {workloads.map((item) => {
                   const rate =
                     item.totalTasks > 0
-                      ? Math.round(
-                          (item.completedTasks / item.totalTasks) * 100,
-                        )
+                      ? Math.round((item.completedTasks / item.totalTasks) * 100)
                       : 0;
                   return (
                     <div
                       key={item.member._id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "16px",
-                        paddingBottom: "14px",
-                        borderBottom:
-                          "1px solid hsl(var(--border-color) / 0.5)",
-                      }}>
-                      <div
-                        className='gradient-bg'
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#fff",
-                          fontWeight: 700,
-                          fontSize: "0.8rem",
-                          flexShrink: 0,
-                        }}>
-                        {item.member.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)}
+                      className="flex items-center gap-4 pb-3.5 border-b border-border/50"
+                    >
+                      <div className="gradient-bg w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-[0.8rem] shrink-0">
+                        {item.member.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                       </div>
-                      <div style={{ flexGrow: 1 }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: "6px",
-                          }}>
+                      <div className="grow">
+                        <div className="flex justify-between items-center mb-1.5">
                           <div>
-                            <p
-                              style={{ fontSize: "0.875rem", fontWeight: 700 }}>
-                              {item.member.name}
-                            </p>
-                            <p
-                              style={{
-                                fontSize: "0.75rem",
-                                color: "hsl(var(--text-muted))",
-                              }}>
-                              {item.member.role.replace("_", " ")}
-                            </p>
+                            <p className="text-sm font-bold text-foreground">{item.member.name}</p>
+                            <p className="text-xs text-muted">{item.member.role.replace("_", " ")}</p>
                           </div>
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              fontWeight: 700,
-                              color: "hsl(var(--primary))",
-                            }}>
-                            {item.completedTasks}/{item.totalTasks} Tasks (
-                            {rate}%)
+                          <span className="text-xs font-bold text-primary">
+                            {item.completedTasks}/{item.totalTasks} ({rate}%)
                           </span>
                         </div>
-                        <div
-                          style={{
-                            height: "6px",
-                            backgroundColor: "hsl(var(--border-color))",
-                            borderRadius: "3px",
-                            overflow: "hidden",
-                          }}>
+                        <div className="h-1.5 bg-border rounded-full overflow-hidden">
                           <div
-                            style={{
-                              height: "100%",
-                              width: `${rate}%`,
-                              backgroundColor: "hsl(var(--success))",
-                              borderRadius: "3px",
-                            }}
+                            className="h-full bg-success rounded-full transition-[width] duration-700"
+                            style={{ width: `${rate}%` }}
                           />
                         </div>
                       </div>
@@ -870,99 +406,27 @@ export default function DashboardPageClient({
           </div>
         )}
 
-        {/* Recent System Activity Logs */}
-        <div className='glass-panel' style={{ padding: "30px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "24px",
-            }}>
-            <Activity size={20} style={{ color: "hsl(var(--primary))" }} />
-            <h3 style={{ fontSize: "1.125rem", fontWeight: 700 }}>
-              Timeline Activity Logs
-            </h3>
+        {/* Activity Logs */}
+        <div className="glass-panel p-7">
+          <div className="flex items-center gap-2.5 mb-6">
+            <Activity size={20} className="text-primary" />
+            <h3 className="text-lg font-bold text-foreground">Timeline Activity Logs</h3>
           </div>
           {activities.length === 0 ? (
-            <p
-              style={{
-                color: "hsl(var(--text-muted))",
-                fontSize: "0.875rem",
-              }}>
-              No recent activity recorded in workspace.
-            </p>
+            <p className="text-muted text-sm">No recent activity recorded in workspace.</p>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "18px",
-              }}>
+            <div className="flex flex-col gap-4">
               {activities.map((act) => (
-                <div
-                  key={act._id}
-                  style={{
-                    display: "flex",
-                    gap: "14px",
-                    position: "relative",
-                    paddingBottom: "4px",
-                  }}>
-                  {/* Circle icon */}
-                  <div
-                    style={{
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      backgroundColor: "hsl(var(--primary))",
-                      marginTop: "5px",
-                      flexShrink: 0,
-                      boxShadow: "0 0 0 4px hsl(var(--primary) / 0.1)",
-                    }}
-                  />
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "2px",
-                    }}>
-                    <p
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "hsl(var(--text-primary))",
-                        fontWeight: 550,
-                      }}>
-                      {act.action}
-                    </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "hsl(var(--text-muted))",
-                          fontWeight: 500,
-                        }}>
+                <div key={act._id} className="flex gap-3.5 relative pb-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0 shadow-[0_0_0_4px_hsl(var(--primary)/0.1)]" />
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[0.85rem] text-foreground font-[550]">{act.action}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted font-medium">
                         By {act.user?.name || "System"}
                       </span>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "hsl(var(--text-muted))",
-                        }}>
-                        •
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "hsl(var(--text-muted))",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}>
+                      <span className="text-xs text-muted">•</span>
+                      <span className="text-xs text-muted flex items-center gap-1">
                         <Calendar size={12} />
                         {new Date(act.createdAt).toLocaleDateString([], {
                           month: "short",

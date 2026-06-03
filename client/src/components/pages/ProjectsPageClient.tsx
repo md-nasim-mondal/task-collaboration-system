@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -17,8 +16,10 @@ import {
   X,
 } from "lucide-react";
 import Loading from "../ui/Loading";
-
 import { Project, Member } from "@/types";
+
+const inputClass =
+  "w-full p-3 px-4 rounded-[10px] border border-border bg-background/50 text-foreground text-base outline-none focus:border-primary transition-all duration-200";
 
 export default function ProjectsPageClient({
   initialProjects,
@@ -31,15 +32,12 @@ export default function ProjectsPageClient({
   const router = useRouter();
 
   const [projects, setProjects] = useState<Project[]>(initialProjects || []);
-  const [memberOptions, setMemberOptions] = useState<Member[]>(
-    initialMembers || [],
-  );
+  const [memberOptions, setMemberOptions] = useState<Member[]>(initialMembers || []);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
 
-  // Create/Edit Project Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [name, setName] = useState("");
@@ -48,17 +46,8 @@ export default function ProjectsPageClient({
   const [status, setStatus] = useState("Active");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [formLoading, setFormLoading] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const isEligibleToCreate =
-    user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
+  const isEligibleToCreate = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
 
   const fetchProjects = async () => {
     try {
@@ -66,11 +55,8 @@ export default function ProjectsPageClient({
       const queryParams = new URLSearchParams();
       if (searchTerm) queryParams.append("searchTerm", searchTerm);
       if (statusFilter) queryParams.append("status", statusFilter);
-
       const res = await apiFetch(`/projects?${queryParams.toString()}`);
-      if (res.success) {
-        setProjects(res.data);
-      }
+      if (res.success) setProjects(res.data);
     } catch (err: any) {
       showToast(err.message || "Failed to load projects", "error");
     } finally {
@@ -80,23 +66,15 @@ export default function ProjectsPageClient({
 
   const fetchMembers = async () => {
     try {
-      const res = await apiFetch("/user"); // get all active users to add as members
-      if (res.success) {
-        setMemberOptions(res.data);
-      }
+      const res = await apiFetch("/user");
+      if (res.success) setMemberOptions(res.data);
     } catch (err: any) {
       console.error("Failed to load user options", err);
     }
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // If initialProjects is provided and searchTerm/statusFilter are empty,
-      // we don't necessarily need to fetch unless it's a manual clear.
-      // But to be safe and fix the "clear not showing all" issue, we allow fetch when empty.
-      fetchProjects();
-    }, 400); // Debounce search
-
+    const timer = setTimeout(() => { fetchProjects(); }, 400);
     return () => clearTimeout(timer);
   }, [searchTerm, statusFilter]);
 
@@ -108,11 +86,7 @@ export default function ProjectsPageClient({
 
   const handleOpenCreateModal = () => {
     setEditingProject(null);
-    setName("");
-    setDescription("");
-    setDeadline("");
-    setStatus("Active");
-    setSelectedMembers([]);
+    setName(""); setDescription(""); setDeadline(""); setStatus("Active"); setSelectedMembers([]);
     setIsModalOpen(true);
   };
 
@@ -120,10 +94,8 @@ export default function ProjectsPageClient({
     setEditingProject(proj);
     setName(proj.name);
     setDescription(proj.description || "");
-    // Format date for input
     const date = new Date(proj.deadline || "");
-    const dateStr = date.toISOString().split("T")[0];
-    setDeadline(dateStr);
+    setDeadline(date.toISOString().split("T")[0]);
     setStatus(proj.status || "Active");
     setSelectedMembers((proj.members || []).map((m) => m._id));
     setIsModalOpen(true);
@@ -133,9 +105,7 @@ export default function ProjectsPageClient({
     e.preventDefault();
     if (!name || !deadline) return;
 
-    // Direct client date verification
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
+    const now = new Date(); now.setHours(0, 0, 0, 0);
     if (new Date(deadline) < now) {
       showToast("Please select a valid deadline.", "error");
       return;
@@ -143,39 +113,19 @@ export default function ProjectsPageClient({
 
     try {
       setFormLoading(true);
-      const payload = {
-        name,
-        description,
-        deadline,
-        status,
-        members: selectedMembers,
-      };
-
-      const endpoint = editingProject
-        ? `/projects/${editingProject._id}`
-        : "/projects";
+      const payload = { name, description, deadline, status, members: selectedMembers };
+      const endpoint = editingProject ? `/projects/${editingProject._id}` : "/projects";
       const method = editingProject ? "PATCH" : "POST";
 
-      const res = await apiFetch(endpoint, {
-        method,
-        body: JSON.stringify(payload),
-      });
-
+      const res = await apiFetch(endpoint, { method, body: JSON.stringify(payload) });
       if (res.success) {
-        showToast(
-          `Project ${editingProject ? "updated" : "created"} successfully!`,
-          "success",
-        );
+        showToast(`Project ${editingProject ? "updated" : "created"} successfully!`, "success");
         setIsModalOpen(false);
         fetchProjects();
         router.refresh();
       }
     } catch (err: any) {
-      showToast(
-        err.message ||
-          `Failed to ${editingProject ? "update" : "create"} project`,
-        "error",
-      );
+      showToast(err.message || `Failed to ${editingProject ? "update" : "create"} project`, "error");
     } finally {
       setFormLoading(false);
     }
@@ -193,18 +143,13 @@ export default function ProjectsPageClient({
       background: "hsl(var(--bg-secondary))",
       color: "hsl(var(--text-primary))",
     });
-
     if (!result.isConfirmed) return;
 
     try {
-      const res = await apiFetch(`/projects/${projectId}`, {
-        method: "DELETE",
-      });
-
+      const res = await apiFetch(`/projects/${projectId}`, { method: "DELETE" });
       if (res.success) {
         showToast("Project deleted successfully", "success");
-        fetchProjects();
-        router.refresh();
+        fetchProjects(); router.refresh();
       }
     } catch (err: any) {
       showToast(err.message || "Failed to delete project", "error");
@@ -217,721 +162,267 @@ export default function ProjectsPageClient({
     );
   };
 
-  // Get Today's Date String for Date input min constraint
   const getTodayDateString = () => {
     const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-    return `${yyyy}-${mm}-${dd}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   };
 
   return (
     <>
-      <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
-      {/* Header Row */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "20px",
-          marginBottom: "32px",
-        }}>
-        <div>
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "2rem",
-              fontWeight: 800,
-            }}>
-            Projects Workspace
-          </h1>
-          <p style={{ color: "hsl(var(--text-secondary))", marginTop: "4px" }}>
-            Coordinate timelines, invite team members, and monitor boards.
-          </p>
-        </div>
-
-        {isEligibleToCreate && (
-          <button
-            onClick={handleOpenCreateModal}
-            className='gradient-bg'
-            style={{
-              padding: "12px 20px",
-              borderRadius: "10px",
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              boxShadow: "0 4px 12px hsl(var(--primary) / 0.2)",
-              transition: "transform 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-1px)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0)")
-            }>
-            <Plus size={18} />
-            <span>Create Project</span>
-          </button>
-        )}
-      </div>
-
-      {/* Filter Controls Row */}
-      <div
-        className='glass-panel'
-        style={{
-          padding: isMobile ? "16px" : "16px 24px",
-          marginBottom: "32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: isMobile ? "flex-start" : "center",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}>
-        {/* Search Box */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "0 16px",
-            height: "44px",
-            borderRadius: "10px",
-            border: `1px solid ${isSearchFocused ? "hsl(var(--primary))" : "hsl(var(--border-color))"}`,
-            backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-            flexGrow: 1,
-            maxWidth: "450px",
-            minWidth: "260px",
-            transition: "all var(--transition-normal)",
-            boxShadow: isSearchFocused
-              ? "0 0 0 4px hsl(var(--primary) / 0.1)"
-              : "none",
-          }}>
-          <Search
-            size={20}
-            style={{
-              color: isSearchFocused
-                ? "hsl(var(--primary))"
-                : "hsl(var(--text-muted))",
-              transition: "color var(--transition-normal)",
-              flexShrink: 0,
-            }}
-          />
-          <input
-            type='text'
-            placeholder='Search projects by name...'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setIsSearchFocused(false)}
-            style={{
-              flex: 1,
-              height: "100%",
-              border: "none",
-              backgroundColor: "transparent",
-              color: "hsl(var(--text-primary))",
-              outline: "none",
-              fontSize: "1rem",
-              boxShadow: "none",
-              padding: 0,
-              margin: 0,
-              minWidth: 0,
-              display: "block",
-            }}
-          />
-          {searchTerm && (
+      <div className="animate-[fadeIn_var(--transition-normal)_forwards]">
+        {/* Header */}
+        <div className="flex justify-between items-center flex-wrap gap-5 mb-8">
+          <div>
+            <h1 className="font-display text-3xl font-extrabold text-foreground">Projects Workspace</h1>
+            <p className="text-secondary mt-1 text-sm">
+              Coordinate timelines, invite team members, and monitor boards.
+            </p>
+          </div>
+          {isEligibleToCreate && (
             <button
-              onClick={() => setSearchTerm("")}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: "4px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "hsl(var(--text-muted))",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "hsl(var(--danger))")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "hsl(var(--text-muted))")
-              }>
-              <X size={16} />
+              onClick={handleOpenCreateModal}
+              className="gradient-bg px-5 py-3 rounded-[10px] font-semibold flex items-center gap-2 cursor-pointer border-none text-white shadow-[0_4px_12px_hsl(var(--primary)/0.2)] hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200"
+            >
+              <Plus size={18} />
+              <span>Create Project</span>
             </button>
           )}
         </div>
 
-        {/* Status Dropdown Filter */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <Filter size={18} style={{ color: "hsl(var(--text-secondary))" }} />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              padding: "10px 16px",
-              borderRadius: "8px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              color: "hsl(var(--text-primary))",
-              cursor: "pointer",
-              fontWeight: 500,
-              outline: "none",
-            }}>
-            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Project Statuses</option>
-            <option value='Active' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Active</option>
-            <option value='Completed' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Completed</option>
-            <option value='On Hold' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>On Hold</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Projects Cards Grid */}
-      {loading ? (
-        <Loading text='Loading projects...' />
-      ) : projects.length > 0 ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-            gap: "24px",
-          }}>
-          {projects.map((proj) => {
-            const overdue =
-              new Date(proj.deadline || "") < new Date() &&
-              proj.status !== "Completed";
-            return (
-              <div
-                key={proj._id}
-                className='glass-panel glass-panel-hover'
-                style={{
-                  padding: "24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  minHeight: "220px",
-                  border: overdue
-                    ? "1px solid hsl(var(--danger) / 0.3)"
-                    : undefined,
-                }}>
-                <div>
-                  {/* Status Badge row */}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "16px",
-                    }}>
-                    <span
-                      className={`badge badge-${
-                        proj.status === "Active"
-                          ? "progress"
-                          : proj.status === "Completed"
-                            ? "completed"
-                            : "todo"
-                      }`}>
-                      {proj.status}
-                    </span>
-                    {overdue && (
-                      <span
-                        className='badge badge-high'
-                        style={{
-                          fontSize: "0.7rem",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}>
-                        <Clock size={12} />
-                        Overdue
-                      </span>
-                    )}
-                  </div>
-
-                  <h3
-                    style={{
-                      fontSize: "1.25rem",
-                      fontWeight: 700,
-                      marginBottom: "8px",
-                      color: "hsl(var(--text-primary))",
-                    }}>
-                    {proj.name}
-                  </h3>
-                  <p
-                    style={{
-                      color: "hsl(var(--text-secondary))",
-                      fontSize: "0.9rem",
-                      lineHeight: "1.5",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      marginBottom: "16px",
-                    }}>
-                    {proj.description || "No description provided."}
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                  }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      fontSize: "0.85rem",
-                      color: "hsl(var(--text-muted))",
-                    }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}>
-                      <Calendar size={14} />
-                      <span>
-                        {new Date(proj.deadline || "").toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}>
-                      <Users size={14} />
-                      <span>{(proj.members || []).length} Members</span>
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      paddingTop: "16px",
-                      borderTop: "1px solid hsl(var(--border-color) / 0.5)",
-                    }}>
-                    <button
-                      onClick={() => router.push(`/projects/${proj._id}`)}
-                      style={{
-                        flex: 1,
-                        padding: "8px",
-                        borderRadius: "8px",
-                        backgroundColor: "hsl(var(--primary) / 0.1)",
-                        color: "hsl(var(--primary))",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        transition: "background 0.2s",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "hsl(var(--primary) / 0.15)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "hsl(var(--primary) / 0.1)")
-                      }>
-                      <FolderKanban size={16} />
-                      Board
-                    </button>
-
-                    {isEligibleToCreate && (
-                      <button
-                        onClick={() => handleOpenEditModal(proj)}
-                        style={{
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          backgroundColor: "hsl(var(--bg-tertiary))",
-                          color: "hsl(var(--text-secondary))",
-                          fontSize: "0.85rem",
-                          fontWeight: 600,
-                          cursor: "pointer",
-                          transition: "all 0.2s",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor =
-                            "hsl(var(--border-color))";
-                          e.currentTarget.style.color =
-                            "hsl(var(--text-primary))";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor =
-                            "hsl(var(--bg-tertiary))";
-                          e.currentTarget.style.color =
-                            "hsl(var(--text-secondary))";
-                        }}>
-                        Edit
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div
-          className='glass-panel'
-          style={{
-            padding: "80px 24px",
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "20px",
-          }}>
+        {/* Filter Bar */}
+        <div className="glass-panel p-4 px-6 mb-8 flex items-center justify-start md:justify-center gap-5 flex-wrap">
           <div
-            style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
-              backgroundColor: "hsl(var(--primary) / 0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "hsl(var(--primary))",
-              marginBottom: "12px",
-            }}>
-            <FolderOpen size={40} />
+            className={`flex items-center gap-3 px-4 h-11 rounded-[10px] border bg-background/50 grow max-w-112.5 min-w-65 transition-all duration-200 ${
+              isSearchFocused ? "border-primary ring-4 ring-primary/10" : "border-border"
+            }`}
+          >
+            <Search
+              size={20}
+              className={`shrink-0 transition-colors duration-200 ${isSearchFocused ? "text-primary" : "text-muted"}`}
+            />
+            <input
+              type="text"
+              placeholder="Search projects by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className="flex-1 h-full border-none bg-transparent text-foreground outline-none text-base placeholder:text-muted min-w-0"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="bg-transparent border-none cursor-pointer p-1 text-muted hover:text-danger transition-colors duration-200 flex items-center"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
-            No projects found
-          </h2>
-          <p
-            style={{
-              color: "hsl(var(--text-secondary))",
-              maxWidth: "400px",
-              lineHeight: 1.6,
-            }}>
-            We couldn't find any projects matching your current filters. Try
-            adjusting your search or status filter.
-          </p>
-          <button
-            onClick={() => {
-              setSearchTerm("");
-              setStatusFilter("");
-            }}
-            className='gradient-bg'
-            style={{
-              padding: "12px 24px",
-              borderRadius: "10px",
-              fontWeight: 600,
-              cursor: "pointer",
-              border: "none",
-              marginTop: "8px",
-            }}>
-            Reset All Filters
-          </button>
-        </div>
-      )}
 
+          <div className="flex items-center gap-2.5">
+            <Filter size={18} className="text-secondary" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="p-2.5 px-4 rounded-lg border border-border bg-background/50 text-foreground font-medium outline-none cursor-pointer focus:border-primary transition-all duration-200"
+            >
+              <option value="" className="bg-secondary-bg">All Project Statuses</option>
+              <option value="Active" className="bg-secondary-bg">Active</option>
+              <option value="Completed" className="bg-secondary-bg">Completed</option>
+              <option value="On Hold" className="bg-secondary-bg">On Hold</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Projects Grid */}
+        {loading ? (
+          <Loading text="Loading projects..." />
+        ) : projects.length > 0 ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "24px" }}>
+            {projects.map((proj) => {
+              const overdue = new Date(proj.deadline || "") < new Date() && proj.status !== "Completed";
+              return (
+                <div
+                  key={proj._id}
+                  className={`glass-panel glass-panel-hover p-6 flex flex-col justify-between min-h-55 ${
+                    overdue ? "border-danger/30" : ""
+                  }`}
+                >
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <span
+                        className={`badge badge-${
+                          proj.status === "Active" ? "progress" : proj.status === "Completed" ? "completed" : "todo"
+                        }`}
+                      >
+                        {proj.status}
+                      </span>
+                      {overdue && (
+                        <span className="badge badge-high text-[0.7rem] flex items-center gap-1">
+                          <Clock size={12} /> Overdue
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-xl font-bold mb-2 text-foreground">{proj.name}</h3>
+                    <p className="text-secondary text-sm leading-relaxed line-clamp-2 mb-4">
+                      {proj.description || "No description provided."}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <div className="flex justify-between items-center text-sm text-muted">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={14} />
+                        <span>
+                          {new Date(proj.deadline || "").toLocaleDateString("en-US", {
+                            month: "short", day: "numeric", year: "numeric",
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Users size={14} />
+                        <span>{(proj.members || []).length} Members</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2.5 pt-4 border-t border-border/50">
+                      <button
+                        onClick={() => router.push(`/projects/${proj._id}`)}
+                        className="flex-1 py-2 rounded-lg bg-primary/10 text-primary text-sm font-semibold cursor-pointer border-none flex items-center justify-center gap-1.5 hover:bg-primary/20 transition-colors duration-200"
+                      >
+                        <FolderKanban size={16} /> Board
+                      </button>
+
+                      {isEligibleToCreate && (
+                        <button
+                          onClick={() => handleOpenEditModal(proj)}
+                          className="py-2 px-3 rounded-lg bg-[hsl(var(--bg-tertiary))] text-secondary text-sm font-semibold cursor-pointer border-none hover:bg-border hover:text-foreground transition-all duration-200"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="glass-panel p-20 text-center flex flex-col items-center gap-5">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+              <FolderOpen size={40} />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">No projects found</h2>
+            <p className="text-secondary max-w-100 leading-relaxed">
+              We couldn&apos;t find any projects matching your current filters. Try adjusting your search or status filter.
+            </p>
+            <button
+              onClick={() => { setSearchTerm(""); setStatusFilter(""); }}
+              className="gradient-bg px-6 py-3 rounded-[10px] font-semibold cursor-pointer border-none text-white mt-2 hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* CREATE PROJECT MODAL */}
+      {/* CREATE / EDIT PROJECT MODAL */}
       {isModalOpen && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
-            backdropFilter: "blur(6px)",
-            zIndex: 2000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: isMobile ? "8px" : "24px",
-          }}
-          onClick={() => setIsModalOpen(false)}>
+          className="fixed inset-0 bg-black/40 backdrop-blur-md z-2000 flex items-center justify-center p-2 sm:p-6"
+          onClick={() => setIsModalOpen(false)}
+        >
           <div
-            className='glass-panel'
+            className="glass-panel max-w-150 w-full p-5 sm:p-8 sm:pb-12 relative shadow-2xl bg-secondary-bg max-h-[85vh] overflow-y-auto animate-[fadeIn_var(--transition-normal)_forwards]"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "600px",
-              width: "100%",
-              padding: isMobile ? "20px 20px 32px 20px" : "32px 32px 48px 32px",
-              boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
-              backgroundColor: "hsl(var(--bg-secondary))",
-              position: "relative",
-              animation: "fadeIn var(--transition-normal) forwards",
-              maxHeight: "85vh",
-              overflowY: "auto",
-            }}>
+          >
             <button
               onClick={() => setIsModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "24px",
-                right: "24px",
-                cursor: "pointer",
-                color: "hsl(var(--text-secondary))",
-                background: "none",
-                border: "none",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "hsl(var(--primary))")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(var(--text-secondary))")}>
+              className="absolute top-6 right-6 cursor-pointer text-secondary hover:text-primary border-none bg-transparent outline-none transition-colors duration-200"
+            >
               <X size={24} />
             </button>
 
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.75rem",
-                fontWeight: 800,
-                marginBottom: "28px",
-                textAlign: "center",
-                background: "linear-gradient(135deg, #fff 0%, #a5b4fc 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}>
+            <h2 className="gradient-text font-display text-2xl sm:text-3xl font-extrabold mb-7 text-center">
               {editingProject ? "Edit Project Details" : "Create New Project"}
             </h2>
 
-            <form
-              onSubmit={handleCreateOrUpdateProject}
-              style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              {/* Project Name */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
-                  Project Name *
-                </label>
+            <form onSubmit={handleCreateOrUpdateProject} className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.85rem] font-bold text-secondary">Project Name *</label>
                 <input
-                  type='text'
-                  required
-                  value={name}
+                  type="text" required value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder='E.g. Website Redesign'
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "12px 16px",
-                    borderRadius: "10px",
-                    border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                    color: "hsl(var(--text-primary))",
-                    fontSize: "1rem",
-                    outline: "none",
-                    transition: "border-color 0.2s",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "hsl(var(--primary))")}
-                  onBlur={(e) => (e.target.style.borderColor = "hsl(var(--border-color))")}
+                  placeholder="E.g. Website Redesign"
+                  className={inputClass}
                 />
               </div>
 
-              {/* Description */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
-                  Description
-                </label>
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.85rem] font-bold text-secondary">Description</label>
                 <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder='Brief scope summary...'
-                  rows={4}
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "12px 16px",
-                    borderRadius: "10px",
-                    border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                    color: "hsl(var(--text-primary))",
-                    fontSize: "1rem",
-                    resize: "none",
-                    outline: "none",
-                    transition: "border-color 0.2s",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "hsl(var(--primary))")}
-                  onBlur={(e) => (e.target.style.borderColor = "hsl(var(--border-color))")}
+                  value={description} onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Brief scope summary..." rows={4}
+                  className={`${inputClass} resize-none`}
                 />
               </div>
 
-              {/* Deadline */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
-                  Project Deadline *
-                </label>
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.85rem] font-bold text-secondary">Project Deadline *</label>
                 <input
-                  type='date'
-                  required
-                  min={getTodayDateString()}
-                  value={deadline}
+                  type="date" required min={getTodayDateString()} value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "12px 16px",
-                    borderRadius: "10px",
-                    border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                    color: "hsl(var(--text-primary))",
-                    fontSize: "1rem",
-                    outline: "none",
-                  }}
+                  className={inputClass}
                 />
               </div>
 
-              {/* Status (Only for Editing) */}
               {editingProject && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}>
-                  <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
-                    Project Status
-                  </label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[0.85rem] font-bold text-secondary">Project Status</label>
                   <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    style={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      padding: "12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid hsl(var(--border-color))",
-                      backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                      color: "hsl(var(--text-primary))",
-                      fontSize: "1rem",
-                      outline: "none",
-                      cursor: "pointer",
-                    }}>
-                    <option value='Active' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Active</option>
-                    <option value='Completed' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>Completed</option>
-                    <option value='On Hold' style={{ backgroundColor: "hsl(var(--bg-secondary))" }}>On Hold</option>
+                    value={status} onChange={(e) => setStatus(e.target.value)}
+                    className={`${inputClass} cursor-pointer`}
+                  >
+                    <option value="Active" className="bg-secondary-bg">Active</option>
+                    <option value="Completed" className="bg-secondary-bg">Completed</option>
+                    <option value="On Hold" className="bg-secondary-bg">On Hold</option>
                   </select>
                 </div>
               )}
 
-              {/* Members Selection List */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--text-secondary))" }}>
-                  Add Members
-                </label>
-                <div
-                  style={{
-                    maxHeight: "150px",
-                    overflowY: "auto",
-                    border: "1px solid hsl(var(--border-color))",
-                    borderRadius: "10px",
-                    padding: "12px",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.3)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}>
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.85rem] font-bold text-secondary">Add Members</label>
+                <div className="max-h-37.5 overflow-y-auto border border-border rounded-[10px] p-3 bg-background/30 flex flex-col gap-2">
                   {memberOptions.map((opt) => (
                     <label
                       key={opt._id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        fontSize: "0.875rem",
-                        cursor: "pointer",
-                        padding: "8px",
-                        borderRadius: "8px",
-                        transition: "background-color 0.2s",
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--bg-tertiary))")}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}>
+                      className="flex items-center gap-3 text-sm cursor-pointer p-2 rounded-lg hover:bg-[hsl(var(--bg-tertiary))] transition-colors duration-200 text-foreground"
+                    >
                       <input
-                        type='checkbox'
+                        type="checkbox"
                         checked={selectedMembers.includes(opt._id)}
                         onChange={() => handleMemberToggle(opt._id)}
-                        style={{ cursor: "pointer" }}
+                        className="cursor-pointer"
                       />
-                      <span>
-                        {opt.name} ({opt.role.replace("_", " ")})
-                      </span>
+                      <span>{opt.name} ({opt.role.replace("_", " ")})</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
+              <div className="flex gap-3 mt-3">
                 <button
-                  type='button'
-                  onClick={() => setIsModalOpen(false)}
-                  style={{
-                    flex: 1,
-                    padding: "14px",
-                    borderRadius: "12px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    backgroundColor: "hsl(var(--bg-tertiary))",
-                    border: "1px solid hsl(var(--border-color))",
-                    color: "hsl(var(--text-primary))",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--border-color))")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--bg-tertiary))")}>
+                  type="button" onClick={() => setIsModalOpen(false)}
+                  className="flex-1 p-3.5 rounded-xl font-bold cursor-pointer bg-[hsl(var(--bg-tertiary))] border border-border text-foreground hover:bg-border transition-colors duration-200"
+                >
                   Cancel
                 </button>
                 <button
-                  type='submit'
-                  disabled={formLoading}
-                  className='gradient-bg'
-                  style={{
-                    flex: 2,
-                    padding: "14px",
-                    borderRadius: "12px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    border: "none",
-                    color: "white",
-                    boxShadow: "0 10px 15px -3px hsl(var(--primary) / 0.3)",
-                    transition: "transform 0.2s",
-                    opacity: formLoading ? 0.7 : 1,
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
-                  {formLoading
-                    ? "Processing..."
-                    : editingProject
-                      ? "Save Changes"
-                      : "Launch Project"}
+                  type="submit" disabled={formLoading}
+                  className="flex-2 p-3.5 rounded-xl font-bold cursor-pointer border-none text-white gradient-bg shadow-[0_10px_15px_-3px_hsl(var(--primary)/0.3)] hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200 disabled:opacity-70"
+                >
+                  {formLoading ? "Processing..." : editingProject ? "Save Changes" : "Launch Project"}
                 </button>
               </div>
             </form>

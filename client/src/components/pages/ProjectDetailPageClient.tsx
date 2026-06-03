@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Calendar, Users, Plus, ArrowLeft, Clock, X } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import Loading from "../ui/Loading";
-
 import { Project, Member, Task } from "@/types";
+
+const inputClass =
+  "w-full p-2.5 px-3.5 rounded-lg border border-border bg-background/50 text-foreground text-sm outline-none focus:border-primary transition-all duration-200";
 
 export default function ProjectDetailPageClient({
   projectId,
@@ -28,16 +29,12 @@ export default function ProjectDetailPageClient({
 
   const [project, setProject] = useState<Project | null>(initialProject);
   const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
-  const [userOptions, setUserOptions] = useState<Member[]>(
-    initialUsers || [],
-  );
+  const [userOptions, setUserOptions] = useState<Member[]>(initialUsers || []);
   const [loading, setLoading] = useState(!initialProject);
 
-  // Modals States
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
-  // Add Task States
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskDueDate, setTaskDueDate] = useState("");
@@ -45,17 +42,8 @@ export default function ProjectDetailPageClient({
   const [taskAssignee, setTaskAssignee] = useState("");
   const [taskFormLoading, setTaskFormLoading] = useState(false);
 
-  // Invite Member States
   const [inviteUserId, setInviteUserId] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   const isManager = user?.role === "ADMIN" || user?.role === "PROJECT_MANAGER";
 
@@ -66,7 +54,6 @@ export default function ProjectDetailPageClient({
         apiFetch(`/projects/${id}`),
         apiFetch(`/tasks?project=${id}`),
       ]);
-
       if (projRes.success) setProject(projRes.data);
       if (tasksRes.success) setTasks(tasksRes.data);
     } catch (err: any) {
@@ -80,929 +67,325 @@ export default function ProjectDetailPageClient({
   const fetchInviteOptions = async () => {
     try {
       const res = await apiFetch("/user");
-      if (res.success) {
-        setUserOptions(res.data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+      if (res.success) setUserOptions(res.data);
+    } catch (err) { console.error(err); }
   };
 
   useEffect(() => {
-    if (initialProject) {
-      return;
-    }
+    if (initialProject) return;
     if (id) {
       fetchProjectDetails();
-      if (isManager) {
-        fetchInviteOptions();
-      }
+      if (isManager) fetchInviteOptions();
     }
   }, [id, initialProject]);
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!taskTitle || !taskDueDate || !taskAssignee) return;
-
-    // Strict Date Validation
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    if (new Date(taskDueDate) < now) {
-      showToast("Please select a valid deadline.", "error");
-      return;
-    }
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    if (new Date(taskDueDate) < now) { showToast("Please select a valid deadline.", "error"); return; }
 
     try {
       setTaskFormLoading(true);
-      const payload = {
-        title: taskTitle,
-        description: taskDesc,
-        project: id,
-        dueDate: taskDueDate,
-        priority: taskPriority,
-        assignedMember: taskAssignee,
-      };
-
       const res = await apiFetch("/tasks", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ title: taskTitle, description: taskDesc, project: id, dueDate: taskDueDate, priority: taskPriority, assignedMember: taskAssignee }),
       });
-
       if (res.success) {
         showToast("Task created and assigned successfully!", "success");
         setIsTaskModalOpen(false);
-        // Reset Task Form
-        setTaskTitle("");
-        setTaskDesc("");
-        setTaskDueDate("");
-        setTaskPriority("Medium");
-        setTaskAssignee("");
-        fetchProjectDetails();
-        router.refresh();
+        setTaskTitle(""); setTaskDesc(""); setTaskDueDate(""); setTaskPriority("Medium"); setTaskAssignee("");
+        fetchProjectDetails(); router.refresh();
       }
-    } catch (err: any) {
-      showToast(err.message || "Failed to create task", "error");
-    } finally {
-      setTaskFormLoading(false);
-    }
+    } catch (err: any) { showToast(err.message || "Failed to create task", "error"); }
+    finally { setTaskFormLoading(false); }
   };
 
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteUserId) return;
-
     try {
       setInviteLoading(true);
-      const res = await apiFetch(`/projects/${id}/members`, {
-        method: "POST",
-        body: JSON.stringify({ userId: inviteUserId }),
-      });
-
+      const res = await apiFetch(`/projects/${id}/members`, { method: "POST", body: JSON.stringify({ userId: inviteUserId }) });
       if (res.success) {
         showToast("Member successfully invited to project!", "success");
-        setIsInviteModalOpen(false);
-        setInviteUserId("");
-        fetchProjectDetails();
-        router.refresh();
+        setIsInviteModalOpen(false); setInviteUserId("");
+        fetchProjectDetails(); router.refresh();
       }
-    } catch (err: any) {
-      showToast(err.message || "Failed to invite member", "error");
-    } finally {
-      setInviteLoading(false);
-    }
+    } catch (err: any) { showToast(err.message || "Failed to invite member", "error"); }
+    finally { setInviteLoading(false); }
   };
 
   const handleUpdateProjectStatus = async (newStatus: string) => {
     try {
-      const res = await apiFetch(`/projects/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (res.success) {
-        showToast("Project status updated", "success");
-        fetchProjectDetails();
-        router.refresh();
-      }
-    } catch (err: any) {
-      showToast(err.message || "Failed to update project status", "error");
-    }
+      const res = await apiFetch(`/projects/${id}`, { method: "PATCH", body: JSON.stringify({ status: newStatus }) });
+      if (res.success) { showToast("Project status updated", "success"); fetchProjectDetails(); router.refresh(); }
+    } catch (err: any) { showToast(err.message || "Failed to update project status", "error"); }
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (memberId === project?.createdBy?._id) {
-      showToast("Cannot remove the project owner.", "error");
-      return;
-    }
-
-    const result = await Swal.fire({
-      title: "Remove Member?",
-      text: "This member will no longer have access to this project.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "hsl(var(--danger))",
-      cancelButtonColor: "hsl(var(--border-color))",
-      confirmButtonText: "Remove Member",
-      background: "hsl(var(--bg-secondary))",
-      color: "hsl(var(--text-primary))",
-    });
-
+    if (memberId === project?.createdBy?._id) { showToast("Cannot remove the project owner.", "error"); return; }
+    const result = await Swal.fire({ title: "Remove Member?", text: "This member will no longer have access to this project.", icon: "question", showCancelButton: true, confirmButtonColor: "hsl(var(--danger))", cancelButtonColor: "hsl(var(--border-color))", confirmButtonText: "Remove Member", background: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" });
     if (!result.isConfirmed) return;
-
     try {
-      const res = await apiFetch(`/projects/${id}/members/${memberId}`, {
-        method: "DELETE",
-      });
-
-      if (res.success) {
-        showToast("Member removed from project", "success");
-        fetchProjectDetails();
-        router.refresh();
-      }
-    } catch (err: any) {
-      showToast(err.message || "Failed to remove member", "error");
-    }
+      const res = await apiFetch(`/projects/${id}/members/${memberId}`, { method: "DELETE" });
+      if (res.success) { showToast("Member removed from project", "success"); fetchProjectDetails(); router.refresh(); }
+    } catch (err: any) { showToast(err.message || "Failed to remove member", "error"); }
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    const result = await Swal.fire({
-      title: "Delete Task?",
-      text: "This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "hsl(var(--danger))",
-      cancelButtonColor: "hsl(var(--border-color))",
-      confirmButtonText: "Yes, delete",
-      background: "hsl(var(--bg-secondary))",
-      color: "hsl(var(--text-primary))",
-    });
-
+    const result = await Swal.fire({ title: "Delete Task?", text: "This action cannot be undone.", icon: "warning", showCancelButton: true, confirmButtonColor: "hsl(var(--danger))", cancelButtonColor: "hsl(var(--border-color))", confirmButtonText: "Yes, delete", background: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" });
     if (!result.isConfirmed) return;
-
     try {
-      const res = await apiFetch(`/tasks/${taskId}`, {
-        method: "DELETE",
-      });
-
-      if (res.success) {
-        showToast("Task deleted successfully", "success");
-        fetchProjectDetails();
-        router.refresh();
-      }
-    } catch (err: any) {
-      showToast(err.message || "Failed to delete task", "error");
-    }
+      const res = await apiFetch(`/tasks/${taskId}`, { method: "DELETE" });
+      if (res.success) { showToast("Task deleted successfully", "success"); fetchProjectDetails(); router.refresh(); }
+    } catch (err: any) { showToast(err.message || "Failed to delete task", "error"); }
   };
 
   const handleDeleteProject = async () => {
-    const result = await Swal.fire({
-      title: "Delete Entire Project?",
-      text: "This will permanently remove this project and all its tasks. This action is irreversible!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "hsl(var(--danger))",
-      cancelButtonColor: "hsl(var(--border-color))",
-      confirmButtonText: "Yes, delete project",
-      background: "hsl(var(--bg-secondary))",
-      color: "hsl(var(--text-primary))",
-    });
-
+    const result = await Swal.fire({ title: "Delete Entire Project?", text: "This will permanently remove this project and all its tasks. This action is irreversible!", icon: "warning", showCancelButton: true, confirmButtonColor: "hsl(var(--danger))", cancelButtonColor: "hsl(var(--border-color))", confirmButtonText: "Yes, delete project", background: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" });
     if (!result.isConfirmed) return;
-
     try {
-      const res = await apiFetch(`/projects/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.success) {
-        showToast("Project deleted successfully", "success");
-        router.push("/projects");
-        router.refresh();
-      }
-    } catch (err: any) {
-      showToast(err.message || "Failed to delete project", "error");
-    }
+      const res = await apiFetch(`/projects/${id}`, { method: "DELETE" });
+      if (res.success) { showToast("Project deleted successfully", "success"); router.push("/projects"); router.refresh(); }
+    } catch (err: any) { showToast(err.message || "Failed to delete project", "error"); }
   };
 
-  // Group tasks into columns for Kanban display
   const todoTasks = tasks.filter((t) => t.status === "Todo");
   const inProgressTasks = tasks.filter((t) => t.status === "In Progress");
   const completedTasks = tasks.filter((t) => t.status === "Completed");
-
-  const completionRate =
-    tasks.length > 0
-      ? Math.round((completedTasks.length / tasks.length) * 100)
-      : 0;
+  const completionRate = tasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
 
   const getTodayDateString = () => {
     const today = new Date();
-    const dd = String(today.getDate()).padStart(2, "0");
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const yyyy = today.getFullYear();
-    return `${yyyy}-${mm}-${dd}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   };
 
   if (loading || !project) {
     return (
-      <div
-        style={{
-          display: "flex",
-          height: "60vh",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-        <Loading text='Loading project board...' />
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loading text="Loading project board..." />
       </div>
     );
   }
 
   return (
     <>
-      <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
-      {/* Back Link */}
-      <Link
-        href='/projects'
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "8px",
-          color: "hsl(var(--text-secondary))",
-          marginBottom: "24px",
-          fontSize: "0.875rem",
-          fontWeight: 600,
-        }}>
-        <ArrowLeft size={16} /> Back to Projects
-      </Link>
+      <div className="animate-[fadeIn_var(--transition-normal)_forwards]">
+        {/* Back Link */}
+        <Link
+          href="/projects"
+          className="inline-flex items-center gap-2 text-secondary text-sm font-semibold mb-6 hover:text-primary transition-colors duration-200"
+        >
+          <ArrowLeft size={16} /> Back to Projects
+        </Link>
 
-      {/* Project Header panel */}
-      <div
-        className='glass-panel'
-        style={{
-          padding: isMobile ? "20px" : "32px",
-          marginBottom: "32px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
-        }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: "20px",
-          }}>
-          <div>
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.875rem",
-                fontWeight: 800,
-              }}>
-              {project.name}
-            </h1>
-            <p
-              style={{
-                color: "hsl(var(--text-secondary))",
-                marginTop: "8px",
-                fontSize: "0.95rem",
-              }}>
-              {project.description || "No project description loaded."}
-            </p>
-          </div>
-
-          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-            <select
-              value={project.status}
-              onChange={(e) => handleUpdateProjectStatus(e.target.value)}
-              disabled={!isManager}
-              style={{
-                padding: "6px 12px",
-                borderRadius: "8px",
-                border: "1px solid hsl(var(--border-color))",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                cursor: isManager ? "pointer" : "default",
-                backgroundColor:
-                  project.status === "Completed"
-                    ? "hsl(var(--success) / 0.1)"
-                    : project.status === "Active"
-                      ? "hsl(var(--primary) / 0.1)"
-                      : "hsl(var(--bg-secondary))",
-                color:
-                  project.status === "Completed"
-                    ? "hsl(var(--success))"
-                    : project.status === "Active"
-                      ? "hsl(var(--primary))"
-                      : "inherit",
-              }}>
-              <option value='Active'>Active</option>
-              <option value='Completed'>Completed</option>
-              <option value='On Hold'>On Hold</option>
-            </select>
-
-            {isManager && (
-              <button
-                onClick={handleDeleteProject}
-                style={{
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: "none",
-                  backgroundColor: "hsl(var(--danger) / 0.1)",
-                  color: "hsl(var(--danger))",
-                  cursor: "pointer",
-                }}
-                title='Delete Project'>
-                <X size={18} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Timeline and members section */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "24px",
-            borderTop: "1px solid hsl(var(--border-color) / 0.5)",
-            paddingTop: "24px",
-          }}>
-          <div
-            style={{
-              display: "flex",
-              gap: "24px",
-              flexWrap: "wrap",
-              width: isMobile ? "100%" : "auto",
-            }}>
-            {/* Deadline */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <Calendar
-                size={18}
-                style={{ color: "hsl(var(--text-secondary))" }}
-              />
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "hsl(var(--text-muted))",
-                    fontWeight: 500,
-                  }}>
-                  Deadline
-                </p>
-                <p style={{ fontSize: "0.875rem", fontWeight: 700 }}>
-                  {new Date(project.deadline || "").toLocaleDateString([], {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
+        {/* Project Header */}
+        <div className="glass-panel p-5 md:p-8 mb-8 flex flex-col gap-6">
+          <div className="flex justify-between items-start flex-wrap gap-5">
+            <div>
+              <h1 className="font-display text-3xl font-extrabold text-foreground">{project.name}</h1>
+              <p className="text-secondary mt-2 text-[0.95rem]">
+                {project.description || "No project description loaded."}
+              </p>
             </div>
 
-            {/* Progress */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                minWidth: "180px",
-              }}>
-              <div>
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "hsl(var(--text-muted))",
-                    fontWeight: 500,
-                  }}>
-                  Progress ({completionRate}%)
-                </p>
-                <div
-                  style={{
-                    height: "8px",
-                    width: "140px",
-                    backgroundColor: "hsl(var(--border-color))",
-                    borderRadius: "4px",
-                    overflow: "hidden",
-                    marginTop: "6px",
-                  }}>
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${completionRate}%`,
-                      backgroundColor: "hsl(var(--success))",
-                      borderRadius: "4px",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+            <div className="flex gap-3 items-center">
+              <select
+                value={project.status}
+                onChange={(e) => handleUpdateProjectStatus(e.target.value)}
+                disabled={!isManager}
+                className={`p-1.5 px-3 rounded-lg border border-border text-sm font-semibold outline-none transition-all duration-200 ${
+                  isManager ? "cursor-pointer" : "cursor-default opacity-70"
+                } ${
+                  project.status === "Completed"
+                    ? "bg-success/10 text-success"
+                    : project.status === "Active"
+                      ? "bg-primary/10 text-primary"
+                      : "bg-secondary-bg text-foreground"
+                }`}
+              >
+                <option value="Active" className="bg-secondary-bg text-foreground">Active</option>
+                <option value="Completed" className="bg-secondary-bg text-foreground">Completed</option>
+                <option value="On Hold" className="bg-secondary-bg text-foreground">On Hold</option>
+              </select>
 
-          {/* Members avatars list */}
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {(project.members || []).slice(0, 5).map((memb, idx) => (
-                <div
-                  key={memb._id}
-                  className='gradient-bg'
-                  title={`${memb.name} (${memb.role.replace("_", " ")})`}
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    border: "2px solid hsl(var(--bg-secondary))",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#fff",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    marginLeft: idx > 0 ? "-8px" : 0,
-                    zIndex: 5 - idx,
-                    cursor: "help",
-                  }}>
-                  {memb.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2)}
-                </div>
-              ))}
-              {(project.members || []).length > 5 && (
-                <div
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    border: "2px solid hsl(var(--bg-secondary))",
-                    backgroundColor: "hsl(var(--border-color))",
-                    color: "hsl(var(--text-secondary))",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginLeft: "-8px",
-                    zIndex: 0,
-                  }}>
-                  +{(project.members || []).length - 5}
-                </div>
+              {isManager && (
+                <button
+                  onClick={handleDeleteProject}
+                  className="p-2 rounded-lg border-none bg-danger/10 text-danger cursor-pointer hover:bg-danger/20 transition-colors duration-200"
+                  title="Delete Project"
+                >
+                  <X size={18} />
+                </button>
               )}
             </div>
-
-            {isManager && (
-              <button
-                onClick={() => setIsInviteModalOpen(true)}
-                style={{
-                  cursor: "pointer",
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid hsl(var(--border-color))",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    "hsl(var(--border-color))")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }>
-                <Users size={14} />
-                <span>Invite</span>
-              </button>
-            )}
           </div>
-        </div>
-      </div>
 
-      {/* KANBAN BOARD SECTION HEADER */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-        }}>
-        <h3 style={{ fontSize: "1.125rem", fontWeight: 700 }}>Project Tasks</h3>
-        {isManager && (
-          <button
-            onClick={() => setIsTaskModalOpen(true)}
-            style={{
-              cursor: "pointer",
-              padding: "8px 16px",
-              borderRadius: "8px",
-              backgroundColor: "hsl(var(--primary) / 0.1)",
-              color: "hsl(var(--primary))",
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor =
-                "hsl(var(--primary) / 0.15)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor =
-                "hsl(var(--primary) / 0.1)")
-            }>
-            <Plus size={16} />
-            <span>Add Task</span>
-          </button>
-        )}
-      </div>
-
-      {/* KANBAN COLUMNS */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
-          gap: "24px",
-          alignItems: "start",
-        }}>
-        {/* COLUMN 1: TODO */}
-        <div
-          className='glass-panel'
-          style={{
-            padding: "20px",
-            backgroundColor: "hsl(var(--bg-secondary) / 0.4)",
-          }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "16px",
-            }}>
-            <h4 style={{ fontWeight: 700, fontSize: "0.95rem" }}>Todo</h4>
-            <span
-              style={{
-                fontSize: "0.75rem",
-                padding: "2px 8px",
-                borderRadius: "10px",
-                backgroundColor: "hsl(var(--border-color))",
-                fontWeight: 700,
-              }}>
-              {todoTasks.length}
-            </span>
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {todoTasks.map((t) => (
-              <TaskCard key={t._id} task={t} />
-            ))}
-            {todoTasks.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "20px",
-                  color: "hsl(var(--text-muted))",
-                  fontSize: "0.8rem",
-                }}>
-                No tasks in Todo
+          {/* Timeline & Members */}
+          <div className="flex justify-between items-center flex-wrap gap-6 border-t border-border/50 pt-6">
+            <div className="flex gap-6 flex-wrap">
+              {/* Deadline */}
+              <div className="flex items-center gap-2.5">
+                <Calendar size={18} className="text-secondary" />
+                <div>
+                  <p className="text-xs text-muted font-medium">Deadline</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {new Date(project.deadline || "").toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" })}
+                  </p>
+                </div>
               </div>
-            )}
+
+              {/* Progress */}
+              <div className="flex items-center gap-2.5 min-w-45">
+                <div>
+                  <p className="text-xs text-muted font-medium">Progress ({completionRate}%)</p>
+                  <div className="h-2 w-35 bg-border rounded-full overflow-hidden mt-1.5">
+                    <div
+                      className="h-full bg-success rounded-full transition-[width] duration-700"
+                      style={{ width: `${completionRate}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Members Avatars */}
+            <div className="flex items-center gap-3.5">
+              <div className="flex items-center">
+                {(project.members || []).slice(0, 5).map((memb, idx) => (
+                  <div
+                    key={memb._id}
+                    className="gradient-bg w-8 h-8 rounded-full border-2 border-secondary-bg flex items-center justify-center text-white text-xs font-bold cursor-help"
+                    title={`${memb.name} (${memb.role.replace("_", " ")})`}
+                    style={{ marginLeft: idx > 0 ? "-8px" : 0, zIndex: 5 - idx }}
+                  >
+                    {memb.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                  </div>
+                ))}
+                {(project.members || []).length > 5 && (
+                  <div className="w-8 h-8 rounded-full border-2 border-secondary-bg bg-border text-secondary text-xs font-bold flex items-center justify-center" style={{ marginLeft: "-8px", zIndex: 0 }}>
+                    +{(project.members || []).length - 5}
+                  </div>
+                )}
+              </div>
+
+              {isManager && (
+                <button
+                  onClick={() => setIsInviteModalOpen(true)}
+                  className="cursor-pointer p-1.5 px-3 rounded-md border border-border text-sm font-semibold flex items-center gap-1.5 text-secondary hover:bg-border hover:text-foreground transition-all duration-200 bg-transparent"
+                >
+                  <Users size={14} />
+                  <span>Invite</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* COLUMN 2: IN PROGRESS */}
-        <div
-          className='glass-panel'
-          style={{
-            padding: "20px",
-            backgroundColor: "hsl(var(--bg-secondary) / 0.4)",
-          }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "16px",
-            }}>
-            <h4 style={{ fontWeight: 700, fontSize: "0.95rem" }}>
-              In Progress
-            </h4>
-            <span
-              style={{
-                fontSize: "0.75rem",
-                padding: "2px 8px",
-                borderRadius: "10px",
-                backgroundColor: "hsl(var(--primary) / 0.1)",
-                color: "hsl(var(--primary))",
-                fontWeight: 700,
-              }}>
-              {inProgressTasks.length}
-            </span>
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {inProgressTasks.map((t) => (
-              <TaskCard key={t._id} task={t} />
-            ))}
-            {inProgressTasks.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "20px",
-                  color: "hsl(var(--text-muted))",
-                  fontSize: "0.8rem",
-                }}>
-                No tasks In Progress
-              </div>
-            )}
-          </div>
+        {/* Kanban Header */}
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-lg font-bold text-foreground">Project Tasks</h3>
+          {isManager && (
+            <button
+              onClick={() => setIsTaskModalOpen(true)}
+              className="cursor-pointer p-2 px-4 rounded-lg border-none bg-primary/10 text-primary text-sm font-bold flex items-center gap-1.5 hover:bg-primary/20 transition-colors duration-200"
+            >
+              <Plus size={16} />
+              <span>Add Task</span>
+            </button>
+          )}
         </div>
 
-        {/* COLUMN 3: COMPLETED */}
-        <div
-          className='glass-panel'
-          style={{
-            padding: "20px",
-            backgroundColor: "hsl(var(--bg-secondary) / 0.4)",
-          }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "16px",
-            }}>
-            <h4 style={{ fontWeight: 700, fontSize: "0.95rem" }}>Completed</h4>
-            <span
-              style={{
-                fontSize: "0.75rem",
-                padding: "2px 8px",
-                borderRadius: "10px",
-                backgroundColor: "hsl(var(--success) / 0.1)",
-                color: "hsl(var(--success))",
-                fontWeight: 700,
-              }}>
-              {completedTasks.length}
-            </span>
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {completedTasks.map((t) => (
-              <TaskCard key={t._id} task={t} />
-            ))}
-            {completedTasks.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "20px",
-                  color: "hsl(var(--text-muted))",
-                  fontSize: "0.8rem",
-                }}>
-                No completed tasks
-              </div>
-            )}
-          </div>
+        {/* Kanban Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          {/* Todo */}
+          <KanbanColumn
+            title="Todo"
+            tasks={todoTasks}
+            countClass="bg-border text-foreground"
+            emptyLabel="No tasks in Todo"
+          />
+          {/* In Progress */}
+          <KanbanColumn
+            title="In Progress"
+            tasks={inProgressTasks}
+            countClass="bg-primary/10 text-primary"
+            emptyLabel="No tasks In Progress"
+          />
+          {/* Completed */}
+          <KanbanColumn
+            title="Completed"
+            tasks={completedTasks}
+            countClass="bg-success/10 text-success"
+            emptyLabel="No completed tasks"
+          />
         </div>
       </div>
 
-      </div>
-
-      {/* CREATE TASK MODAL */}
+      {/* ADD TASK MODAL */}
       {isTaskModalOpen && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: isMobile ? "8px" : "24px",
-          }}>
+          className="fixed inset-0 bg-black/40 backdrop-blur-md z-1000 flex items-center justify-center p-2 sm:p-6"
+          onClick={() => setIsTaskModalOpen(false)}
+        >
           <div
-            className='glass-panel'
-            style={{
-              maxWidth: "600px",
-              width: "100%",
-              padding: isMobile ? "20px 20px 32px 20px" : "32px 32px 48px 32px",
-              backgroundColor: "hsl(var(--bg-secondary))",
-              position: "relative",
-              maxHeight: "85vh",
-              overflowY: "auto",
-            }}>
+            className="glass-panel max-w-150 w-full p-5 sm:p-8 sm:pb-12 relative bg-secondary-bg max-h-[85vh] overflow-y-auto animate-[fadeIn_var(--transition-normal)_forwards]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setIsTaskModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "24px",
-                right: "24px",
-                cursor: "pointer",
-                color: "hsl(var(--text-secondary))",
-              }}>
+              className="absolute top-6 right-6 cursor-pointer text-secondary hover:text-primary border-none bg-transparent outline-none transition-colors duration-200"
+            >
               <X size={20} />
             </button>
 
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                marginBottom: "24px",
-              }}>
-              Add Project Task
-            </h2>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-6">Add Project Task</h2>
 
-            <form
-              onSubmit={handleCreateTask}
-              style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-              {/* Title */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                  Task Title *
-                </label>
-                <input
-                  type='text'
-                  required
-                  value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
-                  placeholder='E.g. Design Landing Page'
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "10px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                    color: "hsl(var(--text-primary))",
-                  }}
-                />
+            <form onSubmit={handleCreateTask} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-foreground">Task Title *</label>
+                <input type="text" required value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder="E.g. Design Landing Page" className={inputClass} />
               </div>
 
-              {/* Description */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                  Description
-                </label>
-                <textarea
-                  value={taskDesc}
-                  onChange={(e) => setTaskDesc(e.target.value)}
-                  placeholder='Specify requirements...'
-                  rows={3}
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "10px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                    color: "hsl(var(--text-primary))",
-                    resize: "none",
-                  }}
-                />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-foreground">Description</label>
+                <textarea value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} placeholder="Specify requirements..." rows={3} className={`${inputClass} resize-none`} />
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                  gap: "16px",
-                }}>
-                {/* Due Date */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                  }}>
-                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                    Due Date *
-                  </label>
-                  <input
-                    type='date'
-                    required
-                    min={getTodayDateString()} // Client side restriction
-                    value={taskDueDate}
-                    onChange={(e) => setTaskDueDate(e.target.value)}
-                    style={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      padding: "10px 14px",
-                      borderRadius: "8px",
-                      border: "1px solid hsl(var(--border-color))",
-                      backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                      color: "hsl(var(--text-primary))",
-                    }}
-                  />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-foreground">Due Date *</label>
+                  <input type="date" required min={getTodayDateString()} value={taskDueDate} onChange={(e) => setTaskDueDate(e.target.value)} className={inputClass} />
                 </div>
 
-                {/* Priority */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                  }}>
-                  <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                    Priority
-                  </label>
-                  <select
-                    value={taskPriority}
-                    onChange={(e) => setTaskPriority(e.target.value)}
-                    style={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      padding: "10px 14px",
-                      borderRadius: "8px",
-                      border: "1px solid hsl(var(--border-color))",
-                      backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                      color: "hsl(var(--text-primary))",
-                      cursor: "pointer",
-                    }}>
-                    <option value='High'>High</option>
-                    <option value='Medium'>Medium</option>
-                    <option value='Low'>Low</option>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-foreground">Priority</label>
+                  <select value={taskPriority} onChange={(e) => setTaskPriority(e.target.value)} className={`${inputClass} cursor-pointer`}>
+                    <option value="High" className="bg-secondary-bg">High</option>
+                    <option value="Medium" className="bg-secondary-bg">Medium</option>
+                    <option value="Low" className="bg-secondary-bg">Low</option>
                   </select>
                 </div>
               </div>
 
-              {/* Assignee */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                  Assign To
-                </label>
-                <select
-                  value={taskAssignee}
-                  onChange={(e) => setTaskAssignee(e.target.value)}
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "10px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                    color: "hsl(var(--text-primary))",
-                    cursor: "pointer",
-                  }}>
-                  <option value=''>Unassigned</option>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-foreground">Assign To</label>
+                <select value={taskAssignee} onChange={(e) => setTaskAssignee(e.target.value)} className={`${inputClass} cursor-pointer`}>
+                  <option value="" className="bg-secondary-bg">Unassigned</option>
                   {(project.members || []).map((opt) => (
-                    <option key={opt._id} value={opt._id}>
+                    <option key={opt._id} value={opt._id} className="bg-secondary-bg">
                       {opt.name} ({opt.role.replace("_", " ")})
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "12px",
-                  marginTop: "12px",
-                }}>
-                <button
-                  type='button'
-                  onClick={() => setIsTaskModalOpen(false)}
-                  style={{
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    border: "1px solid hsl(var(--border-color))",
-                    fontWeight: 600,
-                  }}>
+              <div className="flex justify-end gap-3 mt-3">
+                <button type="button" onClick={() => setIsTaskModalOpen(false)} className="py-2.5 px-5 rounded-lg cursor-pointer border border-border bg-transparent text-foreground font-semibold hover:bg-border transition-colors duration-200">
                   Cancel
                 </button>
-                <button
-                  type='submit'
-                  disabled={taskFormLoading}
-                  className='gradient-bg'
-                  style={{
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: 600,
-                    opacity: taskFormLoading ? 0.7 : 1,
-                  }}>
+                <button type="submit" disabled={taskFormLoading} className="py-2.5 px-5 rounded-lg cursor-pointer border-none gradient-bg text-white font-semibold disabled:opacity-70">
                   {taskFormLoading ? "Creating..." : "Save Task"}
                 </button>
               </div>
@@ -1014,120 +397,42 @@ export default function ProjectDetailPageClient({
       {/* INVITE MEMBER MODAL */}
       {isInviteModalOpen && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: isMobile ? "8px" : "24px",
-          }}>
+          className="fixed inset-0 bg-black/40 backdrop-blur-md z-1000 flex items-center justify-center p-2 sm:p-6"
+          onClick={() => setIsInviteModalOpen(false)}
+        >
           <div
-            className='glass-panel'
-            style={{
-              maxWidth: "460px",
-              width: "100%",
-              padding: isMobile ? "20px" : "32px",
-              backgroundColor: "hsl(var(--bg-secondary))",
-              position: "relative",
-              maxHeight: "90vh",
-              overflowY: "auto",
-            }}>
+            className="glass-panel max-w-md w-full p-5 sm:p-8 relative bg-secondary-bg max-h-[90vh] overflow-y-auto animate-[fadeIn_var(--transition-normal)_forwards]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setIsInviteModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "24px",
-                right: "24px",
-                cursor: "pointer",
-                color: "hsl(var(--text-secondary))",
-              }}>
+              className="absolute top-6 right-6 cursor-pointer text-secondary hover:text-primary border-none bg-transparent outline-none transition-colors duration-200"
+            >
               <X size={20} />
             </button>
 
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.25rem",
-                fontWeight: 700,
-                marginBottom: "20px",
-              }}>
-              Add Project Member
-            </h2>
+            <h2 className="font-display text-xl font-bold text-foreground mb-5">Add Project Member</h2>
 
-            <form
-              onSubmit={handleInviteMember}
-              style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                  Select User
-                </label>
-                <select
-                  required
-                  value={inviteUserId}
-                  onChange={(e) => setInviteUserId(e.target.value)}
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                    cursor: "pointer",
-                  }}>
-                  <option value=''>Select a user to add...</option>
+            <form onSubmit={handleInviteMember} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-foreground">Select User</label>
+                <select required value={inviteUserId} onChange={(e) => setInviteUserId(e.target.value)} className={`${inputClass} cursor-pointer`}>
+                  <option value="">Select a user to add...</option>
                   {userOptions
-                    .filter(
-                      (o) => !(project.members || []).some((m) => m._id === o._id),
-                    )
+                    .filter((o) => !(project.members || []).some((m) => m._id === o._id))
                     .map((opt) => (
-                      <option key={opt._id} value={opt._id}>
+                      <option key={opt._id} value={opt._id} className="bg-secondary-bg">
                         {opt.name} ({opt.role.replace("_", " ")})
                       </option>
                     ))}
                 </select>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "12px",
-                  marginTop: "12px",
-                }}>
-                <button
-                  type='button'
-                  onClick={() => setIsInviteModalOpen(false)}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    border: "1px solid hsl(var(--border-color))",
-                    fontSize: "0.85rem",
-                    fontWeight: 600,
-                  }}>
+              <div className="flex justify-end gap-3 mt-3">
+                <button type="button" onClick={() => setIsInviteModalOpen(false)} className="py-2 px-4 rounded-md cursor-pointer border border-border bg-transparent text-foreground text-sm font-semibold hover:bg-border transition-colors duration-200">
                   Cancel
                 </button>
-                <button
-                  type='submit'
-                  disabled={inviteLoading}
-                  className='gradient-bg'
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "0.85rem",
-                    fontWeight: 600,
-                    opacity: inviteLoading ? 0.7 : 1,
-                  }}>
+                <button type="submit" disabled={inviteLoading} className="py-2 px-4 rounded-md cursor-pointer border-none gradient-bg text-white text-sm font-semibold disabled:opacity-70">
                   {inviteLoading ? "Adding..." : "Add Member"}
                 </button>
               </div>
@@ -1139,132 +444,73 @@ export default function ProjectDetailPageClient({
   );
 }
 
-// Kanban Task Card Component
+// Kanban Column Component
+function KanbanColumn({
+  title, tasks, countClass, emptyLabel,
+}: {
+  title: string;
+  tasks: Task[];
+  countClass: string;
+  emptyLabel: string;
+}) {
+  return (
+    <div className="glass-panel p-5 bg-secondary-bg/40">
+      <div className="flex justify-between mb-4">
+        <h4 className="font-bold text-[0.95rem] text-foreground">{title}</h4>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${countClass}`}>
+          {tasks.length}
+        </span>
+      </div>
+      <div className="flex flex-col gap-3">
+        {tasks.map((t) => <TaskCard key={t._id} task={t} />)}
+        {tasks.length === 0 && (
+          <div className="text-center py-5 text-muted text-xs">{emptyLabel}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Task Card Component
 const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
   const router = useRouter();
-  const overdue =
-    new Date(task.dueDate) < new Date() && task.status !== "Completed";
+  const overdue = new Date(task.dueDate) < new Date() && task.status !== "Completed";
 
   return (
     <div
-      className='glass-panel'
+      className={`glass-panel p-4 cursor-pointer flex flex-col gap-3 bg-secondary-bg shadow-sm hover:-translate-y-px hover:border-primary/15 transition-all duration-200 ${
+        overdue ? "border-danger/30" : ""
+      }`}
       onClick={() => router.push("/tasks")}
-      style={{
-        padding: "16px",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        border: overdue ? "1px solid hsl(var(--danger) / 0.3)" : undefined,
-        backgroundColor: "hsl(var(--bg-secondary))",
-        boxShadow: "var(--shadow-sm)",
-        transition:
-          "transform var(--transition-fast), border-color var(--transition-fast)",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-1px)";
-        e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.15)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.borderColor = "var(--glass-border)";
-      }}>
+    >
       <div>
-        <h5
-          style={{
-            fontWeight: 700,
-            fontSize: "0.875rem",
-            marginBottom: "4px",
-          }}>
-          {task.title}
-        </h5>
+        <h5 className="font-bold text-sm text-foreground mb-1">{task.title}</h5>
         {task.description && (
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "hsl(var(--text-secondary))",
-              lineHeight: 1.4,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}>
-            {task.description}
-          </p>
+          <p className="text-xs text-secondary leading-snug line-clamp-2">{task.description}</p>
         )}
       </div>
 
-      {/* Meta Footer */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderTop: "1px solid hsl(var(--border-color) / 0.4)",
-          paddingTop: "12px",
-          marginTop: "4px",
-        }}>
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <span
-            className={`badge badge-${task.priority.toLowerCase()}`}
-            style={{ padding: "2px 6px", fontSize: "0.65rem" }}>
+      {/* Footer */}
+      <div className="flex justify-between items-center border-t border-border/40 pt-3">
+        <div className="flex gap-2 items-center">
+          <span className={`badge badge-${task.priority.toLowerCase()} py-0.5! px-1.5! text-[0.65rem]!`}>
             {task.priority}
           </span>
-          <span
-            style={{
-              fontSize: "0.675rem",
-              color: overdue ? "hsl(var(--danger))" : "hsl(var(--text-muted))",
-              display: "flex",
-              alignItems: "center",
-              gap: "2px",
-              fontWeight: overdue ? 700 : 500,
-            }}>
+          <span className={`text-[0.675rem] flex items-center gap-0.5 font-medium ${overdue ? "text-danger font-bold" : "text-muted"}`}>
             <Clock size={10} />
-            {new Date(task.dueDate).toLocaleDateString([], {
-              month: "short",
-              day: "numeric",
-            })}
+            {new Date(task.dueDate).toLocaleDateString([], { month: "short", day: "numeric" })}
           </span>
         </div>
 
-        {/* Assignee Avatar */}
         {task.assignedMember ? (
           <div
-            className='gradient-bg'
+            className="gradient-bg w-6 h-6 rounded-full flex items-center justify-center text-white text-[0.65rem] font-bold cursor-help"
             title={`Assigned to: ${task.assignedMember.name}`}
-            style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#fff",
-              fontSize: "0.65rem",
-              fontWeight: 700,
-            }}>
-            {task.assignedMember.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()
-              .slice(0, 2)}
+          >
+            {task.assignedMember.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
           </div>
         ) : (
-          <div
-            style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "50%",
-              backgroundColor: "hsl(var(--border-color))",
-              color: "hsl(var(--text-muted))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "0.65rem",
-              fontWeight: 500,
-            }}
-            title='Unassigned'>
+          <div className="w-6 h-6 rounded-full bg-border text-muted flex items-center justify-center text-[0.65rem] font-medium" title="Unassigned">
             U
           </div>
         )}

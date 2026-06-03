@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Home, ArrowLeft, Search } from "lucide-react";
 
@@ -8,121 +7,38 @@ export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px",
-        textAlign: "center",
-        backgroundColor: "hsl(var(--bg-primary))",
-      }}>
-      <div
-        style={{
-          position: "relative",
-          marginBottom: "40px",
-        }}>
-        <h1
-          style={{
-            fontSize: "12rem",
-            fontWeight: 900,
-            lineHeight: 1,
-            margin: 0,
-            opacity: 0.05,
-            userSelect: "none",
-          }}>
+    <div className="h-screen flex flex-col items-center justify-center p-6 text-center bg-background">
+      {/* Giant 404 text behind icon */}
+      <div className="relative mb-10">
+        <h1 className="text-[12rem] font-black leading-none m-0 opacity-5 select-none text-foreground">
           404
         </h1>
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "100%",
-          }}>
-          <div
-            style={{
-              width: "120px",
-              height: "120px",
-              borderRadius: "50%",
-              backgroundColor: "hsl(var(--primary) / 0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "hsl(var(--primary))",
-              margin: "0 auto 24px",
-            }}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">
+          <div className="w-30 h-30 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-6">
             <Search size={60} />
           </div>
-          <h2
-            style={{
-              fontSize: "2rem",
-              fontWeight: 800,
-              color: "hsl(var(--text-primary))",
-            }}>
-            Page Not Found
-          </h2>
+          <h2 className="text-3xl font-extrabold text-foreground">Page Not Found</h2>
         </div>
       </div>
 
-      <p
-        style={{
-          color: "hsl(var(--text-secondary))",
-          maxWidth: "460px",
-          fontSize: "1.125rem",
-          lineHeight: 1.6,
-          marginBottom: "32px",
-        }}>
-        Oops! The page you're looking for doesn't exist or has been moved. 
-        Let's get you back on track.
+      <p className="text-secondary max-w-115 text-lg leading-relaxed mb-8">
+        Oops! The page you&apos;re looking for doesn&apos;t exist or has been moved.
+        Let&apos;s get you back on track.
       </p>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "16px",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}>
+      <div className="flex gap-4 flex-wrap justify-center">
         <button
           onClick={() => router.back()}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "12px 24px",
-            borderRadius: "12px",
-            backgroundColor: "hsl(var(--bg-secondary))",
-            border: "1px solid hsl(var(--border-color))",
-            color: "hsl(var(--text-primary))",
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--bg-tertiary))")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--bg-secondary))")}>
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary-bg border border-border text-foreground font-semibold cursor-pointer hover:bg-[hsl(var(--bg-tertiary))] transition-colors duration-200"
+        >
           <ArrowLeft size={20} />
           Go Back
         </button>
 
         <button
           onClick={() => router.push("/dashboard")}
-          className="gradient-bg"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "12px 24px",
-            borderRadius: "12px",
-            border: "none",
-            color: "white",
-            fontWeight: 600,
-            cursor: "pointer",
-            boxShadow: "0 10px 15px -3px hsl(var(--primary) / 0.3)",
-          }}>
+          className="gradient-bg flex items-center gap-2 px-6 py-3 rounded-xl border-none text-white font-semibold cursor-pointer shadow-[0_10px_15px_-3px_hsl(var(--primary)/0.3)] hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200"
+        >
           <Home size={20} />
           Back to Dashboard
         </button>

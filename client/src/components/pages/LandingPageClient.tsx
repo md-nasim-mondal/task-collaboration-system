@@ -6,159 +6,55 @@ import { Shield, ArrowRight, Zap, CheckSquare, Sparkles } from "lucide-react";
 
 export default function LandingPageClient() {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "hsl(var(--bg-primary))",
-        color: "hsl(var(--text-primary))",
-        position: "relative",
-        overflow: "hidden",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "24px",
-      }}
-    >
+    <div className="flex flex-col min-h-screen bg-background text-foreground relative overflow-hidden justify-center items-center p-6">
       {/* Background aesthetic blobs */}
-      <div
-        style={{
-          position: "absolute",
-          width: "500px",
-          height: "500px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, hsl(var(--primary) / 0.12) 0%, transparent 70%)",
-          top: "-150px",
-          left: "-150px",
-          filter: "blur(60px)",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          width: "500px",
-          height: "500px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, hsl(var(--accent) / 0.12) 0%, transparent 70%)",
-          bottom: "-150px",
-          right: "-150px",
-          filter: "blur(60px)",
-        }}
-      />
+      <div className="absolute w-125 h-125 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.12)_0%,transparent_70%)] -top-37.5 -left-37.5 blur-[60px]" />
+      <div className="absolute w-125 h-125 rounded-full bg-[radial-gradient(circle,hsl(var(--accent)/0.12)_0%,transparent_70%)] -bottom-37.5 -right-37.5 blur-[60px]" />
 
-      <div
-        className="glass-panel"
-        style={{
-          maxWidth: "800px",
-          width: "100%",
-          padding: "60px",
-          textAlign: "center",
-          boxShadow: "var(--shadow-lg), 0 20px 80px rgba(0,0,0,0.1)",
-          animation: "fadeIn 0.6s ease forwards",
-        }}
-      >
-        <div
-          className="gradient-bg"
-          style={{
-            width: "56px",
-            height: "56px",
-            borderRadius: "14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 24px",
-            color: "#fff",
-            boxShadow: "0 8px 30px hsl(var(--primary) / 0.25)",
-          }}
-        >
+      <div className="glass-panel max-w-200 w-full p-15 text-center shadow-[var(--shadow-lg),0_20px_80px_rgba(0,0,0,0.1)] animate-[fadeIn_0.6s_ease_forwards]">
+        <div className="gradient-bg w-14 h-14 rounded-[14px] flex items-center justify-center mx-auto mb-6 text-white shadow-[0_8px_30px_hsl(var(--primary)/0.25)]">
           <Shield size={28} />
         </div>
 
-        <h1
-          className="gradient-text"
-          style={{
-            fontSize: "3.5rem",
-            fontWeight: 800,
-            letterSpacing: "-1.5px",
-            lineHeight: 1.1,
-            marginBottom: "16px",
-          }}
-        >
+        <h1 className="gradient-text text-[3.5rem] font-extrabold tracking-[-1.5px] leading-[1.1] mb-4">
           CollabSphere
         </h1>
 
-        <p
-          style={{
-            fontSize: "1.125rem",
-            color: "hsl(var(--text-secondary))",
-            maxWidth: "600px",
-            margin: "0 auto 40px",
-            lineHeight: 1.6,
-          }}
-        >
-          Empower your team with a high-performance workspace. Experience glassmorphic dashboards, custom workload balance analytics, granular roles, and instant task validations.
+        <p className="text-lg text-secondary max-w-150 mx-auto mb-10 leading-relaxed">
+          Empower your team with a high-performance workspace. Experience glassmorphic dashboards,
+          custom workload balance analytics, granular roles, and instant task validations.
         </p>
 
-        {/* Action Button */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "48px" }}>
+        {/* CTA Button */}
+        <div className="flex justify-center mb-12">
           <Link
             href="/login"
-            className="gradient-bg"
-            style={{
-              padding: "16px 36px",
-              borderRadius: "12px",
-              fontWeight: 700,
-              fontSize: "1.05rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              boxShadow: "0 10px 30px hsl(var(--primary) / 0.3)",
-              transition: "transform 0.2s, box-shadow 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 12px 40px hsl(var(--primary) / 0.4)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 10px 30px hsl(var(--primary) / 0.3)";
-            }}
+            className="gradient-bg px-9 py-4 rounded-xl font-bold text-[1.05rem] flex items-center gap-2.5 text-white shadow-[0_10px_30px_hsl(var(--primary)/0.3)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_hsl(var(--primary)/0.4)] active:translate-y-0 transition-all duration-200"
           >
             <span>Enter Secure Workspace</span>
             <ArrowRight size={20} />
           </Link>
         </div>
 
-        {/* Feature Icons Row */}
+        {/* Feature Icons */}
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "24px",
-            borderTop: "1px solid hsl(var(--border-color) / 0.6)",
-            paddingTop: "40px",
-          }}
+          className="border-t border-border/60 pt-10"
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}
         >
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <Zap size={22} style={{ color: "hsl(var(--primary))" }} />
-            <h4 style={{ fontWeight: 700, fontSize: "0.95rem" }}>Role-Based Access</h4>
-            <p style={{ fontSize: "0.8rem", color: "hsl(var(--text-secondary))" }}>
-              Secure portals for Admin, PM, and Team Members.
-            </p>
+          <div className="flex flex-col items-center gap-2">
+            <Zap size={22} className="text-primary" />
+            <h4 className="font-bold text-[0.95rem] text-foreground">Role-Based Access</h4>
+            <p className="text-[0.8rem] text-secondary">Secure portals for Admin, PM, and Team Members.</p>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <CheckSquare size={22} style={{ color: "hsl(var(--primary))" }} />
-            <h4 style={{ fontWeight: 700, fontSize: "0.95rem" }}>Task Automation</h4>
-            <p style={{ fontSize: "0.8rem", color: "hsl(var(--text-secondary))" }}>
-              Automated collision checks and deadline rules.
-            </p>
+          <div className="flex flex-col items-center gap-2">
+            <CheckSquare size={22} className="text-primary" />
+            <h4 className="font-bold text-[0.95rem] text-foreground">Task Automation</h4>
+            <p className="text-[0.8rem] text-secondary">Automated collision checks and deadline rules.</p>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <Sparkles size={22} style={{ color: "hsl(var(--primary))" }} />
-            <h4 style={{ fontWeight: 700, fontSize: "0.95rem" }}>Workload Charts</h4>
-            <p style={{ fontSize: "0.8rem", color: "hsl(var(--text-secondary))" }}>
-              Dynamic workload charts and timeline activity streaming.
-            </p>
+          <div className="flex flex-col items-center gap-2">
+            <Sparkles size={22} className="text-primary" />
+            <h4 className="font-bold text-[0.95rem] text-foreground">Workload Charts</h4>
+            <p className="text-[0.8rem] text-secondary">Dynamic workload charts and timeline activity streaming.</p>
           </div>
         </div>
       </div>

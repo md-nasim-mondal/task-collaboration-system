@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import { useAuth } from "@/context/AuthContext";
 import {
   Search,
@@ -9,10 +8,8 @@ import {
   MessageSquare,
   Paperclip,
   Calendar,
-  User,
   Folder,
   X,
-  Send,
   Plus,
   ClipboardList,
   Filter,
@@ -37,12 +34,9 @@ export default function TasksPageClient({
 
   const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
   const [projects, setProjects] = useState<Project[]>(initialProjects || []);
-  const [teamMembers, setTeamMembers] = useState<Member[]>(
-    initialTeamMembers || [],
-  );
+  const [teamMembers, setTeamMembers] = useState<Member[]>(initialTeamMembers || []);
   const [loading, setLoading] = useState(false);
 
-  // Filter and Sort States
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
@@ -52,11 +46,8 @@ export default function TasksPageClient({
   const [deadlineStatusFilter, setDeadlineStatusFilter] = useState("");
   const [sortOption, setSortOption] = useState("-createdAt");
 
-  // Selected Task Detail Modal States
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-
-  // Create Task Modal States
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -78,14 +69,11 @@ export default function TasksPageClient({
       if (priorityFilter) queryParams.append("priority", priorityFilter);
       if (projectFilter) queryParams.append("project", projectFilter);
       if (assigneeFilter) queryParams.append("assignedMember", assigneeFilter);
-      if (deadlineStatusFilter)
-        queryParams.append("deadlineStatus", deadlineStatusFilter);
+      if (deadlineStatusFilter) queryParams.append("deadlineStatus", deadlineStatusFilter);
       queryParams.append("sort", sortOption);
 
       const res = await apiFetch(`/tasks?${queryParams.toString()}`);
-      if (res.success) {
-        setTasks(res.data);
-      }
+      if (res.success) setTasks(res.data);
     } catch (err: any) {
       showToast(err.message || "Failed to load tasks", "error");
     } finally {
@@ -108,20 +96,10 @@ export default function TasksPageClient({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Always fetch when dependencies change to ensure data stays in sync with filters
       fetchTasks();
-    }, 400); // Debounce search
-
+    }, 400);
     return () => clearTimeout(timer);
-  }, [
-    searchTerm,
-    statusFilter,
-    priorityFilter,
-    projectFilter,
-    assigneeFilter,
-    deadlineStatusFilter,
-    sortOption,
-  ]);
+  }, [searchTerm, statusFilter, priorityFilter, projectFilter, assigneeFilter, deadlineStatusFilter, sortOption]);
 
   useEffect(() => {
     if (projects.length === 0 || teamMembers.length === 0) {
@@ -135,7 +113,6 @@ export default function TasksPageClient({
         method: "PATCH",
         body: JSON.stringify({ status: newStatus }),
       });
-
       if (res.success) {
         showToast("Status updated", "success");
         fetchTasks();
@@ -150,597 +127,330 @@ export default function TasksPageClient({
     try {
       setSelectedTask(task);
       setIsTaskModalOpen(true);
-
       const res = await apiFetch(`/tasks/${task._id}`);
-      if (res.success) {
-        setSelectedTask(res.data);
-      }
+      if (res.success) setSelectedTask(res.data);
     } catch (err: any) {
       showToast(err.message || "Failed to fetch task details", "error");
     }
   };
 
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("");
+    setPriorityFilter("");
+    setProjectFilter("");
+    setAssigneeFilter("");
+    setDeadlineStatusFilter("");
+  };
+
+  const filterSelectClass =
+    "p-2 px-3 rounded-md border border-border bg-background/50 text-foreground text-[0.85rem] font-medium cursor-pointer outline-none focus:border-primary transition-all duration-200";
+
   return (
     <>
-      <div style={{ animation: "fadeIn var(--transition-normal) forwards" }}>
-      {/* Header Section */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "20px",
-          marginBottom: "32px",
-        }}>
-        <div>
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "2rem",
-              fontWeight: 800,
-            }}>
-            Tasks Center
-          </h1>
-          <p style={{ color: "hsl(var(--text-secondary))", marginTop: "4px" }}>
-            Search task lists, filter parameters, and collaborate on
-            assignments.
-          </p>
+      <div className="animate-[fadeIn_var(--transition-normal)_forwards]">
+        {/* Header Section */}
+        <div className="flex justify-between items-center flex-wrap gap-5 mb-8">
+          <div>
+            <h1 className="font-display text-3xl font-extrabold text-foreground">
+              Tasks Center
+            </h1>
+            <p className="text-secondary mt-1 text-sm">
+              Search task lists, filter parameters, and collaborate on assignments.
+            </p>
+          </div>
+          {isManager && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="gradient-bg px-6 py-3 rounded-[10px] font-bold flex items-center gap-2 cursor-pointer border-none text-white shadow-[0_4px_12px_hsl(var(--primary)/0.25)] hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200"
+            >
+              <Plus size={18} />
+              <span>Create Task</span>
+            </button>
+          )}
         </div>
-        {isManager && (
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className='gradient-bg'
-            style={{
-              padding: "12px 24px",
-              borderRadius: "10px",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              boxShadow: "0 4px 12px hsl(var(--primary) / 0.25)",
-            }}>
-            <Plus size={18} />
-            <span>Create Task</span>
-          </button>
-        )}
-      </div>
 
-      {/* CONTROLS ROW */}
-      <div
-        className='glass-panel'
-        style={{
-          padding: isMobile ? "16px" : "24px",
-          marginBottom: "32px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-        }}>
-        {/* Row 1: Search & Sort */}
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: isMobile ? "flex-start" : "center", alignItems: "center", gap: "16px" }}>
-          {/* Search */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              padding: "0 16px",
-              height: "44px",
-              borderRadius: "10px",
-              border: `1px solid ${isSearchFocused ? "hsl(var(--primary))" : "hsl(var(--border-color))"}`,
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              flexGrow: 1,
-              maxWidth: "450px",
-              minWidth: "280px",
-              transition: "all var(--transition-normal)",
-              boxShadow: isSearchFocused
-                ? "0 0 0 4px hsl(var(--primary) / 0.1)"
-                : "none",
-            }}>
-            <Search
-              size={20}
-              style={{
-                color: isSearchFocused
-                  ? "hsl(var(--primary))"
-                  : "hsl(var(--text-muted))",
-                transition: "color var(--transition-normal)",
-                flexShrink: 0,
-              }}
-            />
-            <input
-              type='text'
-              placeholder='Search tasks by title or content...'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              style={{
-                flex: 1,
-                height: "100%",
-                border: "none",
-                backgroundColor: "transparent",
-                color: "hsl(var(--text-primary))",
-                outline: "none",
-                fontSize: "1rem",
-                boxShadow: "none",
-                padding: 0,
-                margin: 0,
-                minWidth: 0,
-                display: "block",
-              }}
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "hsl(var(--text-muted))",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "hsl(var(--danger))")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "hsl(var(--text-muted))")
-                }>
-                <X size={16} />
-              </button>
-            )}
+        {/* CONTROLS PANEL */}
+        <div className="glass-panel p-4 md:p-6 mb-8 flex flex-col gap-4">
+          {/* Row 1: Search & Sort */}
+          <div className="flex flex-wrap justify-start md:justify-center items-center gap-4">
+            {/* Search Box */}
+            <div
+              className={`flex items-center gap-3 px-4 h-11 rounded-[10px] border bg-background/50 grow max-w-112.5 min-w-60 transition-all duration-200 ${
+                isSearchFocused
+                  ? "border-primary ring-4 ring-primary/10"
+                  : "border-border"
+              }`}
+            >
+              <Search
+                size={20}
+                className={`shrink-0 transition-colors duration-200 ${
+                  isSearchFocused ? "text-primary" : "text-muted"
+                }`}
+              />
+              <input
+                type="text"
+                placeholder="Search tasks by title or content..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                className="flex-1 h-full border-none bg-transparent text-foreground outline-none text-base placeholder:text-muted min-w-0"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="bg-transparent border-none cursor-pointer p-1 flex items-center justify-center text-muted hover:text-danger transition-colors duration-200"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Sort */}
+            <div className="flex items-center gap-2.5">
+              <ArrowUpDown size={18} className="text-secondary" />
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className={filterSelectClass}
+              >
+                <option value="-createdAt" className="bg-secondary-bg">Newest Created</option>
+                <option value="created" className="bg-secondary-bg">Oldest Created</option>
+                <option value="deadline" className="bg-secondary-bg">Nearest Due Date</option>
+                <option value="-priority" className="bg-secondary-bg">Highest Priority</option>
+                <option value="updated" className="bg-secondary-bg">Latest Updated</option>
+              </select>
+            </div>
           </div>
 
-          {/* Sort */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <ArrowUpDown
-              size={18}
-              style={{ color: "hsl(var(--text-secondary))" }}
-            />
+          {/* Row 2: Advanced Filters */}
+          <div className="flex flex-wrap items-center justify-start md:justify-center gap-3 border-t border-border/50 pt-4">
+            <div className="flex items-center gap-2 text-secondary text-[0.85rem] font-semibold mr-1">
+              <Filter size={16} />
+              <span>Filter By:</span>
+            </div>
+
             <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              style={{
-                padding: "10px 16px",
-                borderRadius: "8px",
-                border: "1px solid hsl(var(--border-color))",
-                backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-                cursor: "pointer",
-                fontWeight: 500,
-              }}>
-              <option value='-createdAt'>Newest Created</option>
-              <option value='created'>Oldest Created</option>
-              <option value='deadline'>Nearest Due Date</option>
-              <option value='-priority'>Highest Priority</option>
-              <option value='updated'>Latest Updated</option>
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className={filterSelectClass}
+            >
+              <option value="" className="bg-secondary-bg">All Statuses</option>
+              <option value="Todo" className="bg-secondary-bg">Todo</option>
+              <option value="In Progress" className="bg-secondary-bg">In Progress</option>
+              <option value="Completed" className="bg-secondary-bg">Completed</option>
+            </select>
+
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className={filterSelectClass}
+            >
+              <option value="" className="bg-secondary-bg">All Priorities</option>
+              <option value="High" className="bg-secondary-bg">High Priority</option>
+              <option value="Medium" className="bg-secondary-bg">Medium Priority</option>
+              <option value="Low" className="bg-secondary-bg">Low Priority</option>
+            </select>
+
+            <select
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              className={`${filterSelectClass} max-w-45`}
+            >
+              <option value="" className="bg-secondary-bg">All Projects</option>
+              {projects.map((p) => (
+                <option key={p._id} value={p._id} className="bg-secondary-bg">
+                  {p.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={assigneeFilter}
+              onChange={(e) => setAssigneeFilter(e.target.value)}
+              className={`${filterSelectClass} max-w-45`}
+            >
+              <option value="" className="bg-secondary-bg">All Assignees</option>
+              {teamMembers.map((m) => (
+                <option key={m._id} value={m._id} className="bg-secondary-bg">
+                  {m.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={deadlineStatusFilter}
+              onChange={(e) => setDeadlineStatusFilter(e.target.value)}
+              className={`${filterSelectClass} ${
+                deadlineStatusFilter === "Overdue"
+                  ? "text-danger font-semibold"
+                  : ""
+              }`}
+            >
+              <option value="" className="bg-secondary-bg">All Deadlines</option>
+              <option value="Upcoming" className="bg-secondary-bg">Upcoming Only</option>
+              <option value="Overdue" className="bg-secondary-bg">Overdue Warnings ⚠️</option>
             </select>
           </div>
         </div>
 
-        {/* Row 2: Advanced Filters */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: isMobile ? "flex-start" : "center",
-            gap: "12px",
-            borderTop: "1px solid hsl(var(--border-color) / 0.5)",
-            paddingTop: "16px",
-          }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "hsl(var(--text-secondary))", fontSize: "0.85rem", fontWeight: 600, marginRight: "4px" }}>
-            <Filter size={16} />
-            <span>Filter By:</span>
+        {/* TASKS CONTENT */}
+        {loading ? (
+          <Loading text="Loading tasks..." />
+        ) : tasks.length === 0 ? (
+          /* Empty State */
+          <div className="glass-panel p-20 text-center flex flex-col items-center gap-5">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+              <ClipboardList size={40} />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">No tasks found</h2>
+            <p className="text-secondary max-w-100 leading-relaxed">
+              We couldn&apos;t find any tasks matching your current filters. Try adjusting
+              your search or using different filters.
+            </p>
+            <button
+              onClick={resetFilters}
+              className="gradient-bg px-6 py-3 rounded-[10px] font-semibold cursor-pointer border-none text-white mt-2 hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-200"
+            >
+              Reset All Filters
+            </button>
           </div>
-
-          {/* Status */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              color: "hsl(var(--text-primary))",
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              cursor: "pointer",
-              outline: "none",
-            }}>
-            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Statuses</option>
-            <option value='Todo' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Todo</option>
-            <option value='In Progress' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>In Progress</option>
-            <option value='Completed' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Completed</option>
-          </select>
-
-          {/* Priority */}
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              color: "hsl(var(--text-primary))",
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              cursor: "pointer",
-              outline: "none",
-            }}>
-            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Priorities</option>
-            <option value='High' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>High Priority</option>
-            <option value='Medium' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Medium Priority</option>
-            <option value='Low' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Low Priority</option>
-          </select>
-
-          {/* Project */}
-          <select
-            value={projectFilter}
-            onChange={(e) => setProjectFilter(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              color: "hsl(var(--text-primary))",
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              cursor: "pointer",
-              outline: "none",
-              maxWidth: "180px",
-            }}>
-            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Projects</option>
-            {projects.map((p) => (
-              <option key={p._id} value={p._id} style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Assignee */}
-          <select
-            value={assigneeFilter}
-            onChange={(e) => setAssigneeFilter(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              color: "hsl(var(--text-primary))",
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              cursor: "pointer",
-              outline: "none",
-              maxWidth: "180px",
-            }}>
-            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Assignees</option>
-            {teamMembers.map((m) => (
-              <option key={m._id} value={m._id} style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Overdue Warning Filter */}
-          <select
-            value={deadlineStatusFilter}
-            onChange={(e) => setDeadlineStatusFilter(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid hsl(var(--border-color))",
-              backgroundColor: "hsl(var(--bg-primary) / 0.5)",
-              color:
-                deadlineStatusFilter === "Overdue"
-                  ? "hsl(var(--danger))"
-                  : "hsl(var(--text-primary))",
-              fontSize: "0.85rem",
-              fontWeight: deadlineStatusFilter === "Overdue" ? 600 : 500,
-              cursor: "pointer",
-              outline: "none",
-            }}>
-            <option value='' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>All Deadlines</option>
-            <option value='Upcoming' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Upcoming Only</option>
-            <option value='Overdue' style={{ backgroundColor: "hsl(var(--bg-secondary))", color: "hsl(var(--text-primary))" }}>Overdue Warnings ⚠️</option>
-          </select>
-        </div>
-      </div>
-
-      {/* TASKS TABLE GRID */}
-      {loading ? (
-        <Loading text='Loading tasks...' />
-      ) : tasks.length > 0 ? (
-        <div
-          className='glass-panel'
-          style={{
-            padding: "80px 24px",
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "20px",
-          }}>
-          <div
-            style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
-              backgroundColor: "hsl(var(--primary) / 0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "hsl(var(--primary))",
-              marginBottom: "12px",
-            }}>
-            <ClipboardList size={40} />
-          </div>
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
-            No tasks found
-          </h2>
-          <p
-            style={{
-              color: "hsl(var(--text-secondary))",
-              maxWidth: "400px",
-              lineHeight: 1.6,
-            }}>
-            We couldn't find any tasks matching your current filters. Try
-            adjusting your search or using different filters.
-          </p>
-          <button
-            onClick={() => {
-              setSearchTerm("");
-              setStatusFilter("");
-              setPriorityFilter("");
-              setProjectFilter("");
-              setAssigneeFilter("");
-              setDeadlineStatusFilter("");
-            }}
-            className='gradient-bg'
-            style={{
-              padding: "12px 24px",
-              borderRadius: "10px",
-              fontWeight: 600,
-              cursor: "pointer",
-              border: "none",
-              marginTop: "8px",
-            }}>
-            Reset All Filters
-          </button>
-        </div>
-      ) : (
-        <div className='glass-panel' style={{ overflow: "hidden" }}>
-          <div
-            className='responsive-table-container'
-            style={{ border: "none", overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                minWidth: isMobile ? "600px" : "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-              }}>
-              <thead>
-                <tr
-                  style={{
-                    borderBottom: "1px solid hsl(var(--border-color))",
-                    backgroundColor: "hsl(var(--bg-secondary) / 0.5)",
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    color: "hsl(var(--text-secondary))",
-                  }}>
-                  <th style={{ padding: "16px 20px" }}>Task Title</th>
-                  <th style={{ padding: "16px 20px" }}>Project</th>
-                  <th style={{ padding: "16px 20px" }}>Assignee</th>
-                  <th style={{ padding: "16px 20px" }}>Priority</th>
-                  <th style={{ padding: "16px 20px" }}>Due Date</th>
-                  <th style={{ padding: "16px 20px" }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task) => {
-                  const overdue =
-                    new Date(task.dueDate) < new Date() &&
-                    task.status !== "Completed";
-                  return (
-                    <tr
-                      key={task._id}
-                      onClick={() => handleOpenTask(task)}
-                      style={{
-                        borderBottom:
-                          "1px solid hsl(var(--border-color) / 0.4)",
-                        cursor: "pointer",
-                        fontSize: "0.875rem",
-                        transition: "background var(--transition-fast)",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "hsl(var(--primary) / 0.03)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }>
-                      <td style={{ padding: "16px 20px", fontWeight: 600 }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "2px",
-                          }}>
-                          <span>{task.title}</span>
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "10px",
-                              alignItems: "center",
-                              marginTop: "4px",
-                            }}>
-                            {task.comments?.length > 0 && (
-                              <span
-                                style={{
-                                  fontSize: "0.7rem",
-                                  color: "hsl(var(--text-muted))",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "2px",
-                                }}>
-                                <MessageSquare size={12} />{" "}
-                                {task.comments.length}
-                              </span>
-                            )}
-                            {task.attachments?.length > 0 && (
-                              <span
-                                style={{
-                                  fontSize: "0.7rem",
-                                  color: "hsl(var(--text-muted))",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "2px",
-                                }}>
-                                <Paperclip size={12} />{" "}
-                                {task.attachments.length}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td
-                        style={{
-                          padding: "16px 20px",
-                          color: "hsl(var(--text-secondary))",
-                        }}>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}>
-                          <Folder size={14} />{" "}
-                          {task.project?.name || "Workspace"}
-                        </span>
-                      </td>
-                      <td style={{ padding: "16px 20px" }}>
-                        {task.assignedMember ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}>
-                            <div
-                              className='gradient-bg'
-                              style={{
-                                width: "24px",
-                                height: "24px",
-                                borderRadius: "50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "#fff",
-                                fontSize: "0.65rem",
-                                fontWeight: 700,
-                              }}>
-                              {task.assignedMember.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                                .toUpperCase()
-                                .slice(0, 2)}
+        ) : (
+          /* Tasks Table */
+          <div className="glass-panel overflow-hidden">
+            <div className="overflow-x-auto border-none">
+              <table
+                className="w-full text-left"
+                style={{ minWidth: isMobile ? "600px" : "100%", borderCollapse: "collapse" }}
+              >
+                <thead>
+                  <tr className="border-b border-border bg-secondary-bg/50 text-xs font-bold text-secondary uppercase tracking-wider">
+                    <th className="p-4 px-5">Task Title</th>
+                    <th className="p-4 px-5">Project</th>
+                    <th className="p-4 px-5">Assignee</th>
+                    <th className="p-4 px-5">Priority</th>
+                    <th className="p-4 px-5">Due Date</th>
+                    <th className="p-4 px-5">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasks.map((task) => {
+                    const overdue =
+                      new Date(task.dueDate) < new Date() &&
+                      task.status !== "Completed";
+                    return (
+                      <tr
+                        key={task._id}
+                        onClick={() => handleOpenTask(task)}
+                        className="border-b border-border/40 cursor-pointer text-[0.875rem] transition-colors duration-150 hover:bg-primary/3"
+                      >
+                        {/* Title */}
+                        <td className="p-4 px-5 font-semibold text-foreground">
+                          <div className="flex flex-col gap-0.5">
+                            <span>{task.title}</span>
+                            <div className="flex gap-2.5 items-center mt-1">
+                              {task.comments?.length > 0 && (
+                                <span className="text-[0.7rem] text-muted flex items-center gap-0.5">
+                                  <MessageSquare size={12} /> {task.comments.length}
+                                </span>
+                              )}
+                              {task.attachments?.length > 0 && (
+                                <span className="text-[0.7rem] text-muted flex items-center gap-0.5">
+                                  <Paperclip size={12} /> {task.attachments.length}
+                                </span>
+                              )}
                             </div>
-                            <span
-                              style={{ fontSize: "0.8rem", fontWeight: 500 }}>
-                              {task.assignedMember.name}
-                            </span>
                           </div>
-                        ) : (
-                          <span
-                            style={{
-                              color: "hsl(var(--text-muted))",
-                              fontSize: "0.8rem",
-                            }}>
-                            Unassigned
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ padding: "16px 20px" }}>
-                        <span
-                          className={`badge badge-${task.priority.toLowerCase()}`}>
-                          {task.priority}
-                        </span>
-                      </td>
-                      <td
-                        style={{
-                          padding: "16px 20px",
-                          color: overdue
-                            ? "hsl(var(--danger))"
-                            : "hsl(var(--text-secondary))",
-                          fontWeight: overdue ? 700 : "inherit",
-                        }}>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}>
-                          <Calendar size={14} />
-                          {new Date(task.dueDate).toLocaleDateString([], {
-                            month: "short",
-                            day: "numeric",
-                          })}
-                          {overdue && " (Overdue)"}
-                        </span>
-                      </td>
-                      <td
-                        style={{ padding: "16px 20px" }}
-                        onClick={(e) => e.stopPropagation()}>
-                        <select
-                          disabled={
-                            !(
-                              isManager || task.assignedMember?._id === user?.id
-                            )
-                          }
-                          value={task.status}
-                          onChange={(e) =>
-                            handleQuickStatusUpdate(task._id, e.target.value)
-                          }
-                          style={{
-                            padding: "6px 10px",
-                            borderRadius: "6px",
-                            border: "1px solid hsl(var(--border-color))",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            backgroundColor:
-                              task.status === "Completed"
-                                ? "hsl(var(--success) / 0.1)"
-                                : task.status === "In Progress"
-                                  ? "hsl(var(--warning) / 0.1)"
-                                  : "hsl(var(--bg-secondary))",
-                            color:
-                              task.status === "Completed"
-                                ? "hsl(var(--success))"
-                                : task.status === "In Progress"
-                                  ? "hsl(var(--warning-text))"
-                                  : "inherit",
-                          }}>
-                          <option value='Todo'>Todo</option>
-                          <option value='In Progress'>In Progress</option>
-                          <option value='Completed'>Completed</option>
-                        </select>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+                        </td>
 
+                        {/* Project */}
+                        <td className="p-4 px-5 text-secondary">
+                          <span className="inline-flex items-center gap-1">
+                            <Folder size={14} /> {task.project?.name || "Workspace"}
+                          </span>
+                        </td>
+
+                        {/* Assignee */}
+                        <td className="p-4 px-5">
+                          {task.assignedMember ? (
+                            <div className="flex items-center gap-2">
+                              <div className="gradient-bg w-6 h-6 rounded-full flex items-center justify-center text-white text-[0.65rem] font-bold">
+                                {task.assignedMember.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .toUpperCase()
+                                  .slice(0, 2)}
+                              </div>
+                              <span className="text-[0.8rem] font-medium text-foreground">
+                                {task.assignedMember.name}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-muted text-[0.8rem]">Unassigned</span>
+                          )}
+                        </td>
+
+                        {/* Priority */}
+                        <td className="p-4 px-5">
+                          <span className={`badge badge-${task.priority.toLowerCase()}`}>
+                            {task.priority}
+                          </span>
+                        </td>
+
+                        {/* Due Date */}
+                        <td
+                          className={`p-4 px-5 ${
+                            overdue ? "text-danger font-bold" : "text-secondary"
+                          }`}
+                        >
+                          <span className="inline-flex items-center gap-1.5">
+                            <Calendar size={14} />
+                            {new Date(task.dueDate).toLocaleDateString([], {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                            {overdue && " (Overdue)"}
+                          </span>
+                        </td>
+
+                        {/* Status Quick-Select */}
+                        <td
+                          className="p-4 px-5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <select
+                            disabled={!(isManager || task.assignedMember?._id === user?.id)}
+                            value={task.status}
+                            onChange={(e) =>
+                              handleQuickStatusUpdate(task._id, e.target.value)
+                            }
+                            className={`p-1.5 px-2.5 rounded-md border border-border text-xs font-semibold outline-none transition-all duration-200 ${
+                              task.status === "Completed"
+                                ? "bg-success/10 text-success"
+                                : task.status === "In Progress"
+                                  ? "bg-warning/10 text-warning"
+                                  : "bg-secondary-bg text-foreground"
+                            } ${
+                              isManager || task.assignedMember?._id === user?.id
+                                ? "cursor-pointer"
+                                : "cursor-not-allowed opacity-60"
+                            }`}
+                          >
+                            <option value="Todo" className="bg-secondary-bg text-foreground">Todo</option>
+                            <option value="In Progress" className="bg-secondary-bg text-foreground">In Progress</option>
+                            <option value="Completed" className="bg-secondary-bg text-foreground">Completed</option>
+                          </select>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* TASK DETAILS MODAL */}
