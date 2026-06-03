@@ -13,9 +13,10 @@ import {
 
 interface SidebarProps {
   sidebarOpen: boolean;
+  onLinkClick?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, onLinkClick }) => {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -130,7 +131,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
           return (
             <button
               key={link.href}
-              onClick={() => router.push(link.href)}
+              onClick={() => {
+                router.push(link.href);
+                if (onLinkClick) onLinkClick();
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
