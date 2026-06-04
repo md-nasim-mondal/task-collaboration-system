@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
-import Loading from "../ui/Loading";
+import Loading from "@/components/ui/Loading";
 import {
   Bell,
   Sun,

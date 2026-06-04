@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "CollabSphere | Sign Up",
-  description: "Create an account on CollabSphere to join and manage project workspace dashboards and Kanban task boards.",
+  description: "Create an account on CollabSphere to join and manage project workspace dashboards and project task boards.",
 };
 
 export default function SignupPage() {
