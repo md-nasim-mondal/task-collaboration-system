@@ -1,6 +1,6 @@
-# 💻 Next.js 14 Client — CollabSphere Frontend Workspace
+# 💻 Next.js 16 Client — CollabSphere Frontend Workspace
 
-This is the interactive frontend application for **CollabSphere**, built with Next.js 14, React 18, and TypeScript. The application uses a customized glassmorphic theme designed strictly using premium HSL color tokens and fluid CSS transition models without styling framework overhead.
+This is the interactive frontend application for **CollabSphere**, built with Next.js 16, React 19, and TypeScript. The application uses a customized glassmorphic theme designed strictly using premium HSL color tokens and fluid CSS transition models without styling framework overhead.
 
 ---
 
@@ -22,10 +22,16 @@ client/
 │   │   └── page.tsx        # Landing portal page
 │   │
 │   ├── components/         # Reusable Component modules
-│   │   └── DashboardLayout.tsx # Collapsible sidebar menu and user notifications header
+│   │   ├── dashboard/      # Dashboard metrics & workload charts
+│   │   ├── projects/       # Projects lists, headers & Kanban columns
+│   │   ├── tasks/          # Task tables & filters
+│   │   ├── members/        # Team member workload cards
+│   │   ├── layout/         # Shells (DashboardLayout, Sidebar)
+│   │   ├── ui/             # Core widgets (Loading, Providers)
+│   │   └── pages/          # Refactored modular page clients
 │   │
 │   └── context/            # React Context State Providers
-│       ├── AuthContext.tsx # JWT session cookier, fetch helpers, and dynamic toasts
+│       ├── AuthContext.tsx # JWT session cookie, fetch helpers, and dynamic toasts
 │       └── ThemeContext.tsx# HSL Theme configuration and toggle methods
 │
 ├── package.json
