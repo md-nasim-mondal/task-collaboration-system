@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "CollabSphere | Project Workspace Detail",
-  description: "Manage project details, view Kanban task columns, assign priorities, invite workspace collaborators, and track milestones.",
+  description: "Manage project details, view project task columns, assign priorities, invite workspace collaborators, and track milestones.",
 };
 
 export const dynamic = "force-dynamic";

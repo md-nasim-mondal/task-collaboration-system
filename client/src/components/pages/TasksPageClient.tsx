@@ -2,23 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Search,
-  ArrowUpDown,
-  MessageSquare,
-  Paperclip,
-  Calendar,
-  Folder,
-  X,
-  Plus,
-  ClipboardList,
-  Filter,
-} from "lucide-react";
+import { Plus, ClipboardList } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Loading from "../ui/Loading";
+import Loading from "@/components/ui/Loading";
 import { Task, Member, Project } from "@/types";
 import TaskDetailsModal from "../tasks/TaskDetailsModal";
 import CreateTaskModal from "../tasks/CreateTaskModal";
+import { TasksFilters } from "../tasks/TasksFilters";
+import { TasksTable } from "../tasks/TasksTable";
 
 export default function TasksPageClient({
   initialTasks,
@@ -143,9 +134,6 @@ export default function TasksPageClient({
     setDeadlineStatusFilter("");
   };
 
-  const filterSelectClass =
-    "p-2 px-3 rounded-md border border-border bg-background/50 text-foreground text-[0.85rem] font-medium cursor-pointer outline-none focus:border-primary transition-all duration-200";
-
   return (
     <>
       <div className="animate-[fadeIn_var(--transition-normal)_forwards]">
@@ -171,129 +159,26 @@ export default function TasksPageClient({
         </div>
 
         {/* CONTROLS PANEL */}
-        <div className="glass-panel p-4 md:p-6 mb-8 flex flex-col gap-4">
-          {/* Row 1: Search & Sort */}
-          <div className="flex flex-wrap justify-start md:justify-center items-center gap-4">
-            {/* Search Box */}
-            <div
-              className={`flex items-center gap-3 px-4 h-11 rounded-[10px] border bg-background/50 grow max-w-112.5 min-w-60 transition-all duration-200 ${
-                isSearchFocused
-                  ? "border-primary ring-4 ring-primary/10"
-                  : "border-border"
-              }`}
-            >
-              <Search
-                size={20}
-                className={`shrink-0 transition-colors duration-200 ${
-                  isSearchFocused ? "text-primary" : "text-muted"
-                }`}
-              />
-              <input
-                type="text"
-                placeholder="Search tasks by title or content..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-                className="flex-1 h-full border-none bg-transparent text-foreground outline-none text-base placeholder:text-muted min-w-0"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="bg-transparent border-none cursor-pointer p-1 flex items-center justify-center text-muted hover:text-danger transition-colors duration-200"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-
-            {/* Sort */}
-            <div className="flex items-center gap-2.5">
-              <ArrowUpDown size={18} className="text-secondary" />
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className={filterSelectClass}
-              >
-                <option value="-createdAt" className="bg-secondary-bg">Newest Created</option>
-                <option value="created" className="bg-secondary-bg">Oldest Created</option>
-                <option value="deadline" className="bg-secondary-bg">Nearest Due Date</option>
-                <option value="-priority" className="bg-secondary-bg">Highest Priority</option>
-                <option value="updated" className="bg-secondary-bg">Latest Updated</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Row 2: Advanced Filters */}
-          <div className="flex flex-wrap items-center justify-start md:justify-center gap-3 border-t border-border/50 pt-4">
-            <div className="flex items-center gap-2 text-secondary text-[0.85rem] font-semibold mr-1">
-              <Filter size={16} />
-              <span>Filter By:</span>
-            </div>
-
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className={filterSelectClass}
-            >
-              <option value="" className="bg-secondary-bg">All Statuses</option>
-              <option value="Todo" className="bg-secondary-bg">Todo</option>
-              <option value="In Progress" className="bg-secondary-bg">In Progress</option>
-              <option value="Completed" className="bg-secondary-bg">Completed</option>
-            </select>
-
-            <select
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className={filterSelectClass}
-            >
-              <option value="" className="bg-secondary-bg">All Priorities</option>
-              <option value="High" className="bg-secondary-bg">High Priority</option>
-              <option value="Medium" className="bg-secondary-bg">Medium Priority</option>
-              <option value="Low" className="bg-secondary-bg">Low Priority</option>
-            </select>
-
-            <select
-              value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
-              className={`${filterSelectClass} max-w-45`}
-            >
-              <option value="" className="bg-secondary-bg">All Projects</option>
-              {projects.map((p) => (
-                <option key={p._id} value={p._id} className="bg-secondary-bg">
-                  {p.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={assigneeFilter}
-              onChange={(e) => setAssigneeFilter(e.target.value)}
-              className={`${filterSelectClass} max-w-45`}
-            >
-              <option value="" className="bg-secondary-bg">All Assignees</option>
-              {teamMembers.map((m) => (
-                <option key={m._id} value={m._id} className="bg-secondary-bg">
-                  {m.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={deadlineStatusFilter}
-              onChange={(e) => setDeadlineStatusFilter(e.target.value)}
-              className={`${filterSelectClass} ${
-                deadlineStatusFilter === "Overdue"
-                  ? "text-danger font-semibold"
-                  : ""
-              }`}
-            >
-              <option value="" className="bg-secondary-bg">All Deadlines</option>
-              <option value="Upcoming" className="bg-secondary-bg">Upcoming Only</option>
-              <option value="Overdue" className="bg-secondary-bg">Overdue Warnings ⚠️</option>
-            </select>
-          </div>
-        </div>
+        <TasksFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          isSearchFocused={isSearchFocused}
+          setIsSearchFocused={setIsSearchFocused}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          priorityFilter={priorityFilter}
+          setPriorityFilter={setPriorityFilter}
+          projectFilter={projectFilter}
+          setProjectFilter={setProjectFilter}
+          assigneeFilter={assigneeFilter}
+          setAssigneeFilter={setAssigneeFilter}
+          deadlineStatusFilter={deadlineStatusFilter}
+          setDeadlineStatusFilter={setDeadlineStatusFilter}
+          projects={projects}
+          teamMembers={teamMembers}
+        />
 
         {/* TASKS CONTENT */}
         {loading ? (
@@ -318,138 +203,14 @@ export default function TasksPageClient({
           </div>
         ) : (
           /* Tasks Table */
-          <div className="glass-panel overflow-hidden">
-            <div className="overflow-x-auto border-none">
-              <table
-                className="w-full text-left"
-                style={{ minWidth: isMobile ? "600px" : "100%", borderCollapse: "collapse" }}
-              >
-                <thead>
-                  <tr className="border-b border-border bg-secondary-bg/50 text-xs font-bold text-secondary uppercase tracking-wider">
-                    <th className="p-4 px-5">Task Title</th>
-                    <th className="p-4 px-5">Project</th>
-                    <th className="p-4 px-5">Assignee</th>
-                    <th className="p-4 px-5">Priority</th>
-                    <th className="p-4 px-5">Due Date</th>
-                    <th className="p-4 px-5">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.map((task) => {
-                    const overdue =
-                      new Date(task.dueDate) < new Date() &&
-                      task.status !== "Completed";
-                    return (
-                      <tr
-                        key={task._id}
-                        onClick={() => handleOpenTask(task)}
-                        className="border-b border-border/40 cursor-pointer text-[0.875rem] transition-colors duration-150 hover:bg-primary/3"
-                      >
-                        {/* Title */}
-                        <td className="p-4 px-5 font-semibold text-foreground">
-                          <div className="flex flex-col gap-0.5">
-                            <span>{task.title}</span>
-                            <div className="flex gap-2.5 items-center mt-1">
-                              {task.comments?.length > 0 && (
-                                <span className="text-[0.7rem] text-muted flex items-center gap-0.5">
-                                  <MessageSquare size={12} /> {task.comments.length}
-                                </span>
-                              )}
-                              {task.attachments?.length > 0 && (
-                                <span className="text-[0.7rem] text-muted flex items-center gap-0.5">
-                                  <Paperclip size={12} /> {task.attachments.length}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Project */}
-                        <td className="p-4 px-5 text-secondary">
-                          <span className="inline-flex items-center gap-1">
-                            <Folder size={14} /> {task.project?.name || "Workspace"}
-                          </span>
-                        </td>
-
-                        {/* Assignee */}
-                        <td className="p-4 px-5">
-                          {task.assignedMember ? (
-                            <div className="flex items-center gap-2">
-                              <div className="gradient-bg w-6 h-6 rounded-full flex items-center justify-center text-white text-[0.65rem] font-bold">
-                                {task.assignedMember.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .toUpperCase()
-                                  .slice(0, 2)}
-                              </div>
-                              <span className="text-[0.8rem] font-medium text-foreground">
-                                {task.assignedMember.name}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-muted text-[0.8rem]">Unassigned</span>
-                          )}
-                        </td>
-
-                        {/* Priority */}
-                        <td className="p-4 px-5">
-                          <span className={`badge badge-${task.priority.toLowerCase()}`}>
-                            {task.priority}
-                          </span>
-                        </td>
-
-                        {/* Due Date */}
-                        <td
-                          className={`p-4 px-5 ${
-                            overdue ? "text-danger font-bold" : "text-secondary"
-                          }`}
-                        >
-                          <span className="inline-flex items-center gap-1.5">
-                            <Calendar size={14} />
-                            {new Date(task.dueDate).toLocaleDateString([], {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                            {overdue && " (Overdue)"}
-                          </span>
-                        </td>
-
-                        {/* Status Quick-Select */}
-                        <td
-                          className="p-4 px-5"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <select
-                            disabled={!(isManager || task.assignedMember?._id === user?.id)}
-                            value={task.status}
-                            onChange={(e) =>
-                              handleQuickStatusUpdate(task._id, e.target.value)
-                            }
-                            className={`p-1.5 px-2.5 rounded-md border border-border text-xs font-semibold outline-none transition-all duration-200 ${
-                              task.status === "Completed"
-                                ? "bg-success/10 text-success"
-                                : task.status === "In Progress"
-                                  ? "bg-warning/10 text-warning"
-                                  : "bg-secondary-bg text-foreground"
-                            } ${
-                              isManager || task.assignedMember?._id === user?.id
-                                ? "cursor-pointer"
-                                : "cursor-not-allowed opacity-60"
-                            }`}
-                          >
-                            <option value="Todo" className="bg-secondary-bg text-foreground">Todo</option>
-                            <option value="In Progress" className="bg-secondary-bg text-foreground">In Progress</option>
-                            <option value="Completed" className="bg-secondary-bg text-foreground">Completed</option>
-                          </select>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <TasksTable
+            tasks={tasks}
+            isMobile={isMobile}
+            isManager={isManager}
+            userId={user?.id}
+            onOpenTask={handleOpenTask}
+            onQuickStatusUpdate={handleQuickStatusUpdate}
+          />
         )}
       </div>
 
