@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
@@ -62,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const router = useRouter();
+  const refreshPromiseRef = useRef<Promise<string> | null>(null);
 
   // Toast Helpers
   const showToast = (
@@ -102,13 +103,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [token]);
 
-  // Standard API request wrapper integrating access tokens
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const activeToken = token || localStorage.getItem("token");
+  const handleSessionExpiration = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Clear cookie
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+    setToken(null);
+    setUser(null);
+    setNotifications([]);
+    setUnreadCount(0);
+    showToast("Session expired. Please log in again.", "error");
+    router.push("/login");
+
+    // Clear refresh token cookies on backend
+    fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).catch((err) => {
+      console.warn("Backend logout failed during session expiration:", err);
+    });
+  };
+
+  const performTokenRefresh = async (): Promise<string> => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to refresh token");
+      }
+
+      const data = await res.json();
+      if (data.success && data.data && data.data.accessToken) {
+        const newAccessToken = data.data.accessToken;
+
+        localStorage.setItem("token", newAccessToken);
+        document.cookie = `accessToken=${newAccessToken}; path=/; max-age=604800; SameSite=Lax`;
+        setToken(newAccessToken);
+
+        return newAccessToken;
+      } else {
+        throw new Error("Invalid token refresh response");
+      }
+    } catch (err) {
+      handleSessionExpiration();
+      throw err;
+    } finally {
+      refreshPromiseRef.current = null;
+    }
+  };
+
+  const makeRequest = async (endpoint: string, options: RequestInit, currentToken: string | null) => {
     const headers = new Headers(options.headers || {});
 
-    if (activeToken) {
-      headers.set("Authorization", `Bearer ${activeToken}`);
+    if (currentToken) {
+      headers.set("Authorization", `Bearer ${currentToken}`);
     }
     if (!(options.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
@@ -117,6 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
+      credentials: "include",
     });
 
     let data;
@@ -134,22 +192,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     if (!res.ok) {
-      // Handle the case where the message might be the error string itself
       let errorMessage =
         typeof data === "string"
           ? data
           : data.message || data.error || "Something went wrong";
 
-      // If it's a Zod Error, try to extract more details
       if (data.message === "Zod Error" && Array.isArray(data.errorSources)) {
         errorMessage = data.errorSources
           .map((err: any) => `${err.path}: ${err.message}`)
           .join(", ");
       }
 
-      throw new Error(errorMessage);
+      const errorObj = new Error(errorMessage) as any;
+      errorObj.status = res.status;
+      throw errorObj;
     }
     return data;
+  };
+
+  // Standard API request wrapper integrating access tokens
+  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+    // 1. If refreshing is currently in progress, wait for the new token
+    if (refreshPromiseRef.current) {
+      try {
+        const newToken = await refreshPromiseRef.current;
+        return await makeRequest(endpoint, options, newToken);
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    // 2. Make the initial request
+    const activeToken = token || localStorage.getItem("token");
+    try {
+      return await makeRequest(endpoint, options, activeToken);
+    } catch (err: any) {
+      // 3. If unauthorized (expired token), trigger refresh and retry
+      if (
+        err.status === 401 ||
+        err.message === "Invalid or expired token" ||
+        err.message === "No token provided"
+      ) {
+        // Skip refreshing if this request IS the refresh-token endpoint itself to prevent infinite loop
+        if (endpoint === "/auth/refresh-token") {
+          throw err;
+        }
+
+        // Check if the token was already refreshed by another concurrent request in the meantime
+        const latestToken = token || localStorage.getItem("token");
+        if (latestToken && latestToken !== activeToken) {
+          return await makeRequest(endpoint, options, latestToken);
+        }
+
+        if (!refreshPromiseRef.current) {
+          refreshPromiseRef.current = performTokenRefresh();
+        }
+
+        try {
+          const newToken = await refreshPromiseRef.current;
+          return await makeRequest(endpoint, options, newToken);
+        } catch (refreshErr) {
+          throw refreshErr;
+        }
+      }
+      throw err;
+    }
   };
 
   const fetchNotifications = async () => {
@@ -284,6 +391,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUnreadCount(0);
     showToast("Logged out successfully", "info");
     router.push("/login");
+
+    // Clear refresh token cookies on backend
+    fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).catch((err) => {
+      console.warn("Backend logout failed:", err);
+    });
   };
 
   return (
