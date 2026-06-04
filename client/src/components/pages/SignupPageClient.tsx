@@ -71,6 +71,7 @@ export default function SignupPageClient() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 className="w-full h-full py-3 bg-transparent border-none outline-none text-foreground"
+                suppressHydrationWarning={true}
               />
             </div>
           </div>
@@ -88,6 +89,7 @@ export default function SignupPageClient() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="w-full h-full py-3 bg-transparent border-none outline-none text-foreground"
+                suppressHydrationWarning={true}
               />
             </div>
           </div>
@@ -104,6 +106,7 @@ export default function SignupPageClient() {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 (555) 000-0000"
                 className="w-full h-full py-3 bg-transparent border-none outline-none text-foreground"
+                suppressHydrationWarning={true}
               />
             </div>
           </div>
@@ -121,6 +124,7 @@ export default function SignupPageClient() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full h-full py-3 bg-transparent border-none outline-none text-foreground"
+                suppressHydrationWarning={true}
               />
               <button
                 type="button"
