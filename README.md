@@ -1,21 +1,28 @@
 # 🚀 CollabSphere — Smart Project & Task Collaboration Workspace
 
-CollabSphere is a premium, feature-rich full-stack team collaboration workspace. It is built using **Next.js App Router** with a customized glassmorphic design system on the frontend, and a modular **Node.js, Express, and MongoDB (Mongoose)** backend. The workspace includes strict real-time business validation rules, custom JWT session cookie routing, interactive Kanban boards, activity streams, and workloads analytics charts.
+CollabSphere is a premium, feature-rich full-stack team collaboration workspace. It is built using **Next.js 16 App Router** with a customized glassmorphic design system on the frontend, and a modular **Node.js, Express, and MongoDB (Mongoose)** backend. The workspace includes strict real-time business validation rules, custom JWT session cookie routing, interactive Kanban boards, activity streams, and workloads analytics charts.
 
 ---
 
 ## ✨ System Architecture
 
 The workspace is organized as a unified monorepo containing two distinct modules:
--   **`/client`**: Built on Next.js 14 (App Router) + TypeScript + Vanilla Tailwind-free CSS variables. Exposes collapsible layouts, polling notifications, drag-style dashboards, and sliding collaborative modal panels.
+-   **`/client`**: Built on Next.js 16 (App Router) + TypeScript + Vanilla Tailwind-free CSS variables. Exposes collapsible layouts, polling notifications, drag-style dashboards, and sliding collaborative modal panels.
 -   **`/server`**: Built on Express + TypeScript + Mongoose. Follows modular domain patterns and handles custom JWT token-based authentication, project status changes, activity logging, and workload aggregates.
 
 ```text
 task-collaboration-system/
-├── client/                 # Next.js 14 React Frontend Application
+├── client/                 # Next.js 16 React Frontend Application
 │   ├── src/
-│   │   ├── app/            # Next.js Pages (Dashboard, Kanban, Tasks Center)
-│   │   ├── components/     # UI Core Panels (Sidebars, Dialogs)
+│   │   ├── app/            # Next.js Pages (Dashboard, Projects, Tasks Center)
+│   │   ├── components/     # UI Core Panels
+│   │   │   ├── dashboard/  # Modular Dashboard charts & summaries
+│   │   │   ├── projects/   # Project creation & card templates
+│   │   │   ├── tasks/      # Task tables & filter elements
+│   │   │   ├── members/    # Member workload grid cards
+│   │   │   ├── layout/     # Layout shells (DashboardLayout, Sidebar)
+│   │   │   ├── ui/         # Core indicators (Loading, Providers)
+│   │   │   └── pages/      # Page-level monolithic entry refactors
 │   │   └── context/        # React Global State Providers (Auth, Theme)
 │   └── package.json
 │
@@ -37,7 +44,7 @@ task-collaboration-system/
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend Core** | Next.js 14 (App Router), React 18, TypeScript, Lucide Icons |
+| **Frontend Core** | Next.js 16 (App Router), React 19, TypeScript, Lucide Icons |
 | **Frontend Styling** | Vanilla CSS custom variables, Premium HSL Theme systems |
 | **Backend Core** | Node.js, Express, TypeScript |
 | **Database** | MongoDB, Mongoose ODM |
